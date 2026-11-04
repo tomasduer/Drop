@@ -40,7 +40,7 @@ export function PasaporteView() {
         <div className="p-5 pt-3">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
               Acceso VIP · Primeros 150
             </p>
             <h2 className="text-xl font-black">Listening Party</h2>
@@ -57,7 +57,7 @@ export function PasaporteView() {
             <p className="text-sm font-bold leading-tight">
               Acceso bloqueado
             </p>
-            <p className="text-[11px] leading-snug text-muted-foreground">
+            <p className="text-xs leading-snug text-muted-foreground">
               Se desbloqueará si sos parte de los primeros 150 en completar los
               retos del drop.
             </p>
@@ -103,7 +103,7 @@ export function PasaporteView() {
                 )}
               </div>
               <div className="p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
                   {r.day}
                 </p>
                 <p className="truncate text-xs font-semibold">{r.label}</p>
@@ -116,7 +116,7 @@ export function PasaporteView() {
       {/* Souvenir teaser */}
       <div className="mt-5 rounded-2xl border border-dashed border-border bg-card/50 p-4 text-center">
         <p className="text-xs font-semibold">🏆 Souvenir "Estuve el Día 1"</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">
+        <p className="mt-1 text-xs text-muted-foreground">
           Se activa cuando se desbloquee tu acceso al evento.
         </p>
       </div>

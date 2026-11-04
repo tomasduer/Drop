@@ -138,7 +138,7 @@ function ScanSim({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
       {scanning && <div className="absolute inset-x-8 top-8 h-0.5 animate-[scan_1.8s_ease-in-out_infinite] bg-primary shadow-[0_0_12px_var(--primary)]" />}
       <p className="absolute inset-x-0 bottom-2 text-center text-xs font-bold text-white">{done ? '¡Encontraste los 3 afiches!' : scanning ? 'Buscando código…' : 'Apuntá al QR del afiche'}</p>
     </div>
-    <div className="space-y-2">{spots.map((s, i) => <div key={s} className="flex items-center gap-2 text-sm"><span className={`grid h-6 w-6 place-items-center rounded-full border text-[10px] ${i < found ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground'}`}>{i < found ? <Check className="h-3 w-3" /> : i + 1}</span><span className={i < found ? 'font-bold' : 'text-muted-foreground'}>{s}</span></div>)}</div>
+    <div className="space-y-2">{spots.map((s, i) => <div key={s} className="flex items-center gap-2 text-sm"><span className={`grid h-6 w-6 place-items-center rounded-full border text-[11px] ${i < found ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground'}`}>{i < found ? <Check className="h-3 w-3" /> : i + 1}</span><span className={i < found ? 'font-bold' : 'text-muted-foreground'}>{s}</span></div>)}</div>
     {done
       ? <Button className="w-full" disabled={busy} onClick={onDone}>Sumar mis puntos</Button>
       : <Button className="w-full" disabled={scanning} onClick={scan}><ScanLine /> {scanning ? 'Escaneando…' : `Escanear afiche ${found + 1}`}</Button>}

@@ -106,7 +106,7 @@ export function TopBar({
           >
             <Bell className="h-4 w-4" />
             {unread > 0 && (
-              <span className="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] font-black text-primary-foreground">
+              <span className="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[11px] font-black text-primary-foreground">
                 {unread}
               </span>
             )}
@@ -146,7 +146,7 @@ export function TopBar({
                       {!isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
                     </span>
                     <span className="mt-0.5 block text-xs text-muted-foreground">{n.body}</span>
-                    <span className="mt-1 block text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <span className="mt-1 block text-[11px] uppercase tracking-wider text-muted-foreground">
                       {n.time}
                     </span>
                   </span>

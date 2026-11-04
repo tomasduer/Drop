@@ -21,7 +21,7 @@ export function DropSelector() {
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-black">{drop.artist}</h3>
           <p className="mt-1 text-xs leading-snug text-muted-foreground">{drop.album}</p>
-          <p className="mt-1 text-[10px] text-primary">{drop.available ? "Disponible" : "Próximamente"}</p>
+          <p className="mt-1 text-[11px] text-primary">{drop.available ? "Disponible" : "Próximamente"}</p>
           {drop.available ? <Button asChild size="sm" className="mt-2 w-full"><Link to="/drop" onClick={() => { void saveProfile({ active_drop: "lali" }); window.scrollTo(0, 0); }}>Entrar al drop <ArrowRight /></Link></Button> : <Button variant="outline" size="sm" className="mt-2 w-full" onClick={() => toast(`El drop de ${drop.artist} abre muy pronto`)}>Entrar al drop <ArrowRight /></Button>}
         </div>
       </article>)}

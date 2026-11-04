@@ -30,7 +30,7 @@ export function GuestEntry() {
     <div className="mx-auto w-full max-w-[440px]">
       <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-44 object-contain" />
       <h1 className="mt-6 text-3xl font-black">Tu DROP sin cuenta.</h1>
-      <p className="mt-3 text-sm text-muted-foreground">Tu perfil temporal desaparece al recargar o salir. No se guardan datos ni puntos.</p>
+      <p className="mt-3 text-sm text-muted-foreground">Tu perfil de invitado queda en este navegador hasta que salgas. Para sumar puntos al ranking, creá una cuenta.</p>
       <form className="mt-7 space-y-5" onSubmit={event => {
         event.preventDefault();
         if (!name.trim()) { setError("Elegí un nombre temporal."); return; }

@@ -145,7 +145,7 @@ export function ComunidadView() {
       </section>
 
       {/* Groups */}
-      <h2 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <h2 className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
         Grupos
       </h2>
       <div className="mb-6 flex gap-3 overflow-x-auto pb-2">
@@ -170,8 +170,8 @@ export function ComunidadView() {
                 className="mb-2 h-10 w-10 rounded-xl object-cover"
               />
               <p className="text-sm font-semibold">{g.name}</p>
-              <p className="text-[11px] text-muted-foreground">{g.members} fans</p>
-              <p className="mt-1 text-[10px] font-bold text-primary">
+              <p className="text-xs text-muted-foreground">{g.members} fans</p>
+              <p className="mt-1 text-[11px] font-bold text-primary">
                 {isIn ? "Unido ✓" : "Unirme"}
               </p>
             </button>
@@ -180,7 +180,7 @@ export function ComunidadView() {
       </div>
 
       {/* Feed */}
-      <h2 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <h2 className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
         Actividad
       </h2>
       <div className="space-y-3">
@@ -203,7 +203,7 @@ export function ComunidadView() {
                     <span className="ml-1 font-bold text-primary">+{p.pts} pts</span>
                   )}
                 </p>
-                <p className="text-[10px] text-muted-foreground">{p.time}</p>
+                <p className="text-[11px] text-muted-foreground">{p.time}</p>
               </div>
             </div>
           ) : (
@@ -221,7 +221,7 @@ export function ComunidadView() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold">@{p.user}</p>
-                    <p className="text-[10px] text-muted-foreground">{p.time}</p>
+                    <p className="text-[11px] text-muted-foreground">{p.time}</p>
                   </div>
                 </header>
                 <p className="text-sm leading-relaxed">{p.text}</p>
@@ -256,7 +256,7 @@ export function ComunidadView() {
                     <MessageCircle className="h-4 w-4" /> {p.comments}
                   </button>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] font-semibold">
+                <div className="flex items-center gap-2 text-[11px] font-semibold">
                   {["X", "TikTok", "IG"].map((net) => (
                     <button
                       key={net}

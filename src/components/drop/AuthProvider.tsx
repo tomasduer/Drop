@@ -19,6 +19,7 @@ const guestProfile: Profile = {
   general_points: 0, active_drop: "lali", ranking_points: {}, created_at: "2026-01-01T00:00:00Z",
   username: null, bio: null,
 };
+const GUEST_KEY = "drop-invitado";
 const EDITABLE = ["display_name", "avatar_url", "favorite_artists", "active_drop", "username", "bio"] as const;
 
 type Ctx = {
@@ -82,8 +83,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const apply = (u: User | null, dedupe = false) => {
       if (guestActive.current) return;
       setUser(u);
-      if (u) { setMode("user"); void loadProfile(u, dedupe); }
-      else setMode((m) => (m === "guest" ? "guest" : "signed_out"));
+      if (u) { setMode("user"); void loadProfile(u, dedupe); try { localStorage.removeItem(GUEST_KEY); } catch { /* sin almacenamiento */ } }
+      else {
+        let saved: { name?: string; avatar?: string | null } | null = null;
+        try { saved = JSON.parse(localStorage.getItem(GUEST_KEY) ?? "null"); } catch { saved = null; }
+        if (saved?.name) { guestActive.current = true; setProfile({ ...guestProfile, display_name: saved.name, avatar_url: saved.avatar ?? null }); setMode("guest"); return; }
+        setMode((m) => (m === "guest" ? "guest" : "signed_out"));
+      }
     };
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED" || event === "INITIAL_SESSION") apply(session?.user ?? null, event === "INITIAL_SESSION" || event === "SIGNED_IN");
@@ -135,10 +141,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     resetProfile(); setUser(null);
     setProfile({ ...guestProfile, display_name: details.name.trim(), avatar_url: details.avatar });
     setMode("guest");
+    // Recordar al invitado en este navegador para que recargar no borre su perfil.
+    try { localStorage.setItem(GUEST_KEY, JSON.stringify({ name: details.name.trim(), avatar: details.avatar && details.avatar.length < 900_000 ? details.avatar : null })); } catch { /* sin almacenamiento */ }
   }
   async function signOut() {
     if (!guestActive.current) await supabase.auth.signOut();
     guestActive.current = false;
+    try { localStorage.removeItem(GUEST_KEY); } catch { /* sin almacenamiento */ }
     resetProfile(); setUser(null); setMode("signed_out");
   }
 

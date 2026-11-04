@@ -50,7 +50,7 @@ export function ProfileView({ onClose, backControl }: { onClose?: () => void; ba
           <ArrowLeft />
         </Button>}
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Cuenta DROP</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Cuenta DROP</p>
           <h1 className="truncate text-xl font-black">{title}</h1>
         </div>
         <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-primary/50 bg-card">
@@ -59,7 +59,7 @@ export function ProfileView({ onClose, backControl }: { onClose?: () => void; ba
       </header>
 
       <div className="px-4 pt-4">
-        <div className="mb-4 flex items-center justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-bold">{profile?.display_name}</p><p className="text-[11px] text-muted-foreground">{mode === "user" ? "Cuenta guardada" : "Modo invitado · tus datos no se guardan"}</p></div><Button variant="ghost" onClick={async () => { await signOut(); void navigate({ to: "/auth", search: { mode: "login" }, replace: true }); }}>{mode === "user" ? "Cerrar sesión" : "Salir"}</Button></div>
+        <div className="mb-4 flex items-center justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-bold">{profile?.display_name}</p><p className="text-xs text-muted-foreground">{mode === "user" ? "Cuenta guardada" : "Modo invitado · tus datos no se guardan"}</p></div><Button variant="ghost" onClick={async () => { await signOut(); void navigate({ to: "/auth", search: { mode: "login" }, replace: true }); }}>{mode === "user" ? "Cerrar sesión" : "Salir"}</Button></div>
         <nav className="grid grid-cols-2 gap-1 rounded-2xl border border-border bg-card p-1" aria-label="Secciones de Mi DROP">
           <ProfileTab active={section === "perfil"} icon={UserRound} label="Perfil" onClick={() => setSection("perfil")} />
           <ProfileTab active={section === "albumes"} icon={Disc3} label="Álbumes" onClick={() => setSection("albumes")} />
@@ -87,7 +87,7 @@ function ProfileTab({ active, icon: Icon, label, onClick }: { active: boolean; i
     <Button
       variant={active ? "default" : "ghost"}
       onClick={onClick}
-      className="h-12 flex-col gap-0.5 rounded-xl px-2 text-[10px]"
+      className="h-12 flex-col gap-0.5 rounded-xl px-2 text-[11px]"
     >
       <Icon className="h-4 w-4" />
       {label}
@@ -120,7 +120,7 @@ function ProfileHome({
         <div className="p-5" style={{ backgroundImage: "var(--gradient-drop-soft)" }}>
           <div className="mb-8 flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Puntos generales</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Puntos generales</p>
               <p className="mt-1 text-4xl font-black tabular-nums">{generalPoints.toLocaleString("es-AR")}</p>
               <p className="text-xs text-muted-foreground">Disponibles para recompensas</p>
             </div>
@@ -151,10 +151,10 @@ function ProfileHome({
       <section>
         <div className="mb-3 flex items-end justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Tus fandoms</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Tus fandoms</p>
             <h2 className="text-lg font-black">Puntaje de campaña</h2>
           </div>
-          <span className="text-[10px] text-muted-foreground">3 artistas</span>
+          <span className="text-[11px] text-muted-foreground">3 artistas</span>
         </div>
         <div className="space-y-2">
           {artistPoints.map((artist) => (
@@ -162,7 +162,7 @@ function ProfileHome({
               <img loading="lazy" decoding="async" src={artist.photo} alt={`Foto de ${artist.name}`} className="h-10 w-10 shrink-0 rounded-full object-cover" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold">{artist.name}</p>
-                <p className="text-[10px] text-muted-foreground">Participación en DROP</p>
+                <p className="text-[11px] text-muted-foreground">Participación en DROP</p>
               </div>
               <p className="text-sm font-black tabular-nums">{((state.balances.find((b) => b.campaign_id === artist.id)?.score ?? 0)).toLocaleString("es-AR")} pts</p>
             </div>
@@ -173,7 +173,7 @@ function ProfileHome({
       <section>
         <h2 className="mb-3 text-lg font-black">Tus drops anteriores</h2><p className="mb-2 text-xs text-muted-foreground">Experiencias de muestra · no representan actividad de tu cuenta.</p>
         <div className="space-y-2">
-          {[{ artist: "LALI", title: "LALI · 2023", points: "2.480", image: coverLali.url }, { artist: "María Becerra", title: "La Nena de Argentina", points: "860", image: coverNena.url }, { artist: "TINI", title: "Un mechón de pelo", points: "540", image: coverMechon.url }].map((drop) => <article key={drop.artist} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"><img loading="lazy" decoding="async" src={drop.image} alt={`Portada de ${drop.title}`} className="h-14 w-14 shrink-0 rounded-md object-cover" /><div className="min-w-0 flex-1"><p className="text-sm font-bold">{drop.artist}</p><p className="text-xs text-muted-foreground">{drop.title}</p><p className="mt-1 text-[10px] text-primary">Completado</p></div><span className="text-xs font-bold">{drop.points} pts</span></article>)}
+          {[{ artist: "LALI", title: "LALI · 2023", points: "2.480", image: coverLali.url }, { artist: "María Becerra", title: "La Nena de Argentina", points: "860", image: coverNena.url }, { artist: "TINI", title: "Un mechón de pelo", points: "540", image: coverMechon.url }].map((drop) => <article key={drop.artist} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"><img loading="lazy" decoding="async" src={drop.image} alt={`Portada de ${drop.title}`} className="h-14 w-14 shrink-0 rounded-md object-cover" /><div className="min-w-0 flex-1"><p className="text-sm font-bold">{drop.artist}</p><p className="text-xs text-muted-foreground">{drop.title}</p><p className="mt-1 text-[11px] text-primary">Completado</p></div><span className="text-xs font-bold">{drop.points} pts</span></article>)}
         </div>
       </section>
 
@@ -181,7 +181,7 @@ function ProfileHome({
       {Object.keys(rankingPoints).length > 0 && <section><h2 className="text-sm font-bold">Saldos históricos por artista</h2>{Object.entries(rankingPoints).map(([artist, pts]) => <p key={artist} className="text-xs">{artist}: {pts} pts · histórico, no participación verificada</p>)}</section>}
 
       <section>
-        <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Actividad reciente</p>
+        <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Actividad reciente</p>
         <div className="space-y-3 border-l border-border pl-4">
           {state.movements.length === 0 && <p className="text-xs text-muted-foreground">Todavía no hay movimientos registrados.</p>}
           {state.movements.map((m) => <Activity key={m.id} title={m.reason === "mission_reward" ? "Misión validada" : m.reason === "reward_redeem" ? "Canje de recompensa" : m.reason === "album_listened" ? "Álbum marcado manualmente" : m.reason === "album_unlistened" ? "Álbum desmarcado" : "Movimiento histórico"} detail={`${m.amount > 0 ? "+" : ""}${m.amount} generales · ${m.campaign_delta} campaña · ${m.evidence_type === "legacy" ? "histórico" : m.evidence_type === "drop_verified" ? "validación DROP" : "declaración manual"}`} />)}
@@ -192,9 +192,9 @@ function ProfileHome({
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
-  return <div className="rounded-xl border border-border bg-background/35 p-3"><p className="text-lg font-black">{value}</p><p className="text-[9px] uppercase text-muted-foreground">{label}</p></div>;
+  return <div className="rounded-xl border border-border bg-background/35 p-3"><p className="text-lg font-black">{value}</p><p className="text-[11px] uppercase text-muted-foreground">{label}</p></div>;
 }
 
 function Activity({ title, detail }: { title: string; detail: string }) {
-  return <div className="relative"><span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-primary" /><p className="text-xs font-bold">{title}</p><p className="text-[10px] text-muted-foreground">{detail}</p></div>;
+  return <div className="relative"><span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-primary" /><p className="text-xs font-bold">{title}</p><p className="text-[11px] text-muted-foreground">{detail}</p></div>;
 }

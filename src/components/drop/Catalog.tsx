@@ -80,7 +80,7 @@ export function CatalogResults({ query }: { query: string }) {
                   {s.image_url && <img loading="lazy" src={s.image_url} alt="" className="h-12 w-16 shrink-0 rounded-lg object-cover" />}
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold">{s.title}</span>
-                    <span className="block truncate text-[11px] text-muted-foreground">{s.event_date ? new Date(s.event_date).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" }) : "Fecha a confirmar"} · {s.venue}{s.city ? `, ${s.city}` : ""}</span>
+                    <span className="block truncate text-xs text-muted-foreground">{s.event_date ? new Date(s.event_date).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" }) : "Fecha a confirmar"} · {s.venue}{s.city ? `, ${s.city}` : ""}</span>
                   </span>
                   <ExternalLink className="h-4 w-4 shrink-0 text-primary" />
                 </a>
@@ -109,7 +109,7 @@ function AlbumCard({ album, onOpen }: { album: CatalogAlbum; onOpen: () => void 
     <button onClick={onOpen} className="w-32 shrink-0 text-left">
       <img loading="lazy" src={album.cover} alt={album.title} className="aspect-square w-full rounded-xl object-cover" />
       <p className="mt-1.5 truncate text-sm font-bold">{album.title}</p>
-      <p className="truncate text-[11px] text-muted-foreground">{album.artist}{album.year ? ` · ${album.year}` : ""}</p>
+      <p className="truncate text-xs text-muted-foreground">{album.artist}{album.year ? ` · ${album.year}` : ""}</p>
     </button>
   );
 }
@@ -126,9 +126,9 @@ export function TrackList({ tracks, showCover }: { tracks: CatalogTrack[]; showC
               {showCover && t.cover ? <img loading="lazy" src={t.cover} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" /> : <span className="w-6 shrink-0 text-center text-xs text-muted-foreground">{i + 1}</span>}
               <span className="min-w-0 flex-1">
                 <span className={`block truncate text-sm font-semibold ${active ? "text-primary" : ""}`}>{t.title}</span>
-                <span className="block truncate text-[11px] text-muted-foreground">{t.artist}{showCover && t.album ? ` · ${t.album}` : ""}</span>
+                <span className="block truncate text-xs text-muted-foreground">{t.artist}{showCover && t.album ? ` · ${t.album}` : ""}</span>
               </span>
-              <span className="text-[11px] text-muted-foreground">{fmt(t.duration)}</span>
+              <span className="text-xs text-muted-foreground">{fmt(t.duration)}</span>
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border">
                 {active && playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
               </span>
@@ -166,7 +166,7 @@ export function AlbumSheet({ id, onClose, onArtist }: { id: number | null; onClo
               <div className="flex gap-4">
                 <img src={album.cover} alt={album.title} className="h-28 w-28 shrink-0 rounded-xl object-cover shadow-lg" />
                 <div className="min-w-0 text-left">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary">{album.type === "single" ? "Single" : album.type === "ep" ? "EP" : "Álbum"}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary">{album.type === "single" ? "Single" : album.type === "ep" ? "EP" : "Álbum"}</p>
                   <DrawerTitle className="text-xl font-black leading-tight">{album.title}</DrawerTitle>
                   <button className="mt-1 text-sm font-semibold text-muted-foreground underline-offset-2 hover:underline" onClick={() => onArtist?.(album.artistId)}>{album.artist}</button>
                   <DrawerDescription className="text-xs">{[album.year, `${album.trackList.length} canciones`, album.label].filter(Boolean).join(" · ")}</DrawerDescription>
@@ -184,7 +184,7 @@ export function AlbumSheet({ id, onClose, onArtist }: { id: number | null; onClo
             </div>
             <TrackList tracks={album.trackList} />
             <a href={spotifySearch(`${album.artist} ${album.title}`)} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 text-xs font-bold text-primary"><ExternalLink className="h-3.5 w-3.5" /> Escuchar completo en Spotify</a>
-            <p className="mt-2 text-center text-[10px] text-muted-foreground">Vistas previas de 30 segundos · catálogo de Deezer</p>
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">Vistas previas de 30 segundos · catálogo de Deezer</p>
           </div>
         )}
       </DrawerContent>

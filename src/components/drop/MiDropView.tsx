@@ -112,8 +112,8 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
           </div>
         </div>
         {profile.bio && <p className="mt-3 text-sm leading-relaxed">{profile.bio}</p>}
-        {memberSince && <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground"><CalendarDays className="h-3 w-3" />En DROP desde {memberSince}</p>}
-        {mode === "guest" && <p className="mt-2 text-[11px] text-primary">Modo invitado · tus datos no se guardan</p>}
+        {memberSince && <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground"><CalendarDays className="h-3 w-3" />En DROP desde {memberSince}</p>}
+        {mode === "guest" && <p className="mt-2 text-xs text-primary">Modo invitado · tus datos no se guardan</p>}
         <div className="mt-3 grid grid-cols-3 gap-2">
           <Button variant="outline" size="sm" onClick={() => setEditing(true)}><Pencil className="h-3.5 w-3.5" />Editar</Button>
           <Button variant="outline" size="sm" onClick={shareProfile}><Share2 className="h-3.5 w-3.5" />Compartir</Button>
@@ -133,7 +133,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
       <section className="mt-7">
         <div className="mb-3 flex items-end justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Tu colección</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Tu colección</p>
             <h2 className="text-xl font-black">Mis DROPS</h2>
           </div>
           <Link to="/explorar" className="text-xs font-bold text-primary">Descubrir</Link>
@@ -141,7 +141,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
         {extras.savedDrops.length > 0 && (
           <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
             {(["todos", "guardado", "en_curso", "completado", "finalizado"] as const).map((f) => (
-              <Button key={f} variant={dropFilter === f ? "default" : "outline"} size="sm" className="shrink-0 text-[10px]" onClick={() => setDropFilter(f)}>
+              <Button key={f} variant={dropFilter === f ? "default" : "outline"} size="sm" className="shrink-0 text-[11px]" onClick={() => setDropFilter(f)}>
                 {f === "todos" ? "Todos" : STATUS_LABEL[f]}
               </Button>
             ))}
@@ -161,13 +161,13 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
               <article key={drop.campaign_id} className="w-36 shrink-0">
                 <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border bg-muted">
                   <img decoding="async" src={COVERS[drop.campaign_id] ?? laliCover.url} alt={`Portada de ${drop.title}`} loading="lazy" className="h-full w-full object-cover" />
-                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide ${drop.status === "en_curso" ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
+                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide ${drop.status === "en_curso" ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
                     {STATUS_LABEL[drop.status]}
                   </span>
                 </div>
                 <p className="mt-2 truncate text-sm font-bold">{drop.title}</p>
                 <p className="truncate text-xs text-muted-foreground">{drop.artist}</p>
-                {drop.campaign_id === "lali" && <Button asChild size="sm" variant="outline" className="mt-2 w-full text-[10px]"><Link to="/drop">Continuar</Link></Button>}
+                {drop.campaign_id === "lali" && <Button asChild size="sm" variant="outline" className="mt-2 w-full text-[11px]"><Link to="/drop">Continuar</Link></Button>}
               </article>
             ))}
           </div>
@@ -181,7 +181,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
       {/* Pestañas */}
       <nav className="mt-7 flex gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1" aria-label="Secciones de Mi DROP">
         {TABS.map((t) => (
-          <Button key={t.id} variant={tab === t.id ? "default" : "ghost"} size="sm" onClick={() => setTab(t.id)} className="shrink-0 flex-1 text-[11px]">{t.label}</Button>
+          <Button key={t.id} variant={tab === t.id ? "default" : "ghost"} size="sm" onClick={() => setTab(t.id)} className="shrink-0 flex-1 text-xs">{t.label}</Button>
         ))}
       </nav>
 
@@ -197,10 +197,10 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
               <img loading="lazy" decoding="async" src={show.image_url ?? eventCrowd} alt={`Imagen de ${show.title}`} className="h-14 w-14 shrink-0 rounded-xl object-cover" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{show.title}</p>
-                <p className="text-[11px] text-muted-foreground">{show.artist}</p>
-                <p className="flex items-center gap-1 text-[10px] text-muted-foreground"><MapPin className="h-3 w-3" />{show.venue}{show.city ? ` · ${show.city}` : ""}</p>
+                <p className="text-xs text-muted-foreground">{show.artist}</p>
+                <p className="flex items-center gap-1 text-[11px] text-muted-foreground"><MapPin className="h-3 w-3" />{show.venue}{show.city ? ` · ${show.city}` : ""}</p>
               </div>
-              <p className="text-[10px] text-muted-foreground">{show.event_date ? new Date(show.event_date).toLocaleDateString("es-AR") : "A confirmar"}</p>
+              <p className="text-[11px] text-muted-foreground">{show.event_date ? new Date(show.event_date).toLocaleDateString("es-AR") : "A confirmar"}</p>
             </article>
           ))}
         </section>
@@ -219,10 +219,10 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
               {(ALBUMS.find((a) => a.id === r.subject_id)?.cover ?? r.subject_image) && <img loading="lazy" decoding="async" src={ALBUMS.find((a) => a.id === r.subject_id)?.cover ?? r.subject_image ?? undefined} alt={`Imagen de ${r.subject_title}`} className="h-14 w-14 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{r.subject_title}</p>
-                <p className="text-[11px] text-muted-foreground">{r.subject_artist}</p>
+                <p className="text-xs text-muted-foreground">{r.subject_artist}</p>
                 <p className="mt-1 flex items-center gap-1 text-xs font-bold text-primary"><Star className="h-3 w-3 fill-current" />{r.rating}/5</p>
                 {r.text && <p className="mt-1 line-clamp-3 break-words text-xs text-muted-foreground">{r.text}</p>}
-                <p className="mt-1 text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("es-AR")}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("es-AR")}</p>
               </div>
             </article>
           ))}
@@ -242,7 +242,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
                 <div key={m.id} className="relative">
                   <span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-primary" />
                   <p className="text-xs font-bold">{m.reason === "mission_reward" ? "Misión validada" : m.reason === "reward_redeem" ? "Canje de recompensa" : m.reason === "album_listened" ? "Álbum marcado manualmente" : m.reason === "album_unlistened" ? "Álbum desmarcado" : "Movimiento histórico"}</p>
-                  <p className="text-[10px] text-muted-foreground">{m.amount > 0 ? "+" : ""}{m.amount} generales · {m.campaign_delta} campaña · {new Date(m.created_at).toLocaleDateString("es-AR")}</p>
+                  <p className="text-[11px] text-muted-foreground">{m.amount > 0 ? "+" : ""}{m.amount} generales · {m.campaign_delta} campaña · {new Date(m.created_at).toLocaleDateString("es-AR")}</p>
                 </div>
               ))}
             </div>
@@ -266,16 +266,16 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
               <div className="mt-3 space-y-2">
                 {monthlyActivity.map(([month, count]) => (
                   <div key={month} className="flex items-center gap-2">
-                    <span className="w-14 shrink-0 text-[10px] uppercase text-muted-foreground">{month}</span>
+                    <span className="w-14 shrink-0 text-[11px] uppercase text-muted-foreground">{month}</span>
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                       <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, count * 20)}%` }} />
                     </div>
-                    <span className="w-6 text-right text-[10px] font-bold">{count}</span>
+                    <span className="w-6 text-right text-[11px] font-bold">{count}</span>
                   </div>
                 ))}
               </div>
             )}
-            <p className="mt-3 text-[10px] text-muted-foreground">Las estadísticas se calculan solo con tu actividad registrada en DROP; no inventamos reproducciones.</p>
+            <p className="mt-3 text-[11px] text-muted-foreground">Las estadísticas se calculan solo con tu actividad registrada en DROP; no inventamos reproducciones.</p>
           </div>
           <RewardsRedeem />
         </section>
@@ -305,11 +305,11 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
-  return <div className="rounded-2xl border border-border bg-card p-3 text-center"><p className="text-lg font-black tabular-nums">{value}</p><p className="text-[9px] uppercase tracking-wide text-muted-foreground">{label}</p></div>;
+  return <div className="rounded-2xl border border-border bg-card p-3 text-center"><p className="text-lg font-black tabular-nums">{value}</p><p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p></div>;
 }
 
 function StatCard({ value, label }: { value: string; label: string }) {
-  return <div className="rounded-2xl border border-border bg-card p-4"><p className="text-2xl font-black tabular-nums">{value}</p><p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p></div>;
+  return <div className="rounded-2xl border border-border bg-card p-4"><p className="text-2xl font-black tabular-nums">{value}</p><p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p></div>;
 }
 
 function EditProfileDialog({ onClose, onSave }: { onClose: () => void; onSave: (patch: { display_name?: string; username?: string; bio?: string }) => Promise<void> }) {

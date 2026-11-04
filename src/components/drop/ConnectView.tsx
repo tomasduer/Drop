@@ -81,7 +81,7 @@ export function ConnectView() {
       </form>
       <div className="mt-5 text-center"><p className="text-xs text-muted-foreground">{mode === "login" ? "¿Todavía no tenés cuenta?" : "¿Ya tenés una cuenta?"}</p><Button disabled={busy} variant="link" onClick={() => switchMode(mode === "login" ? "signup" : "login")}>{mode === "login" ? "Crear una cuenta nueva" : "Iniciar sesión"}</Button></div>
       {mode === "login" && <Button disabled={busy} variant="outline" className="mt-4 h-12 w-full" onClick={() => { void navigate({ to: "/invitado" }); }}>Ingresar sin cuenta <ArrowRight /></Button>}
-      {mode === "login" && <p className="mt-2 text-center text-[11px] text-muted-foreground">En modo invitado tus puntos no se guardan.</p>}
+      {mode === "login" && <p className="mt-2 text-center text-xs text-muted-foreground">En modo invitado tus puntos no se guardan.</p>}
     </div>
   </div>;
 }

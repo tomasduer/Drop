@@ -122,7 +122,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
           alt="Tapa del álbum 'No vayas a atender cuando el demonio llama'"
           className="absolute -right-5 -top-5 h-32 w-32 rotate-12 rounded-2xl border border-border object-cover shadow-2xl"
         />
-        <div className="relative mb-3 inline-flex items-center gap-1 rounded-full bg-primary/25 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-foreground backdrop-blur">
+        <div className="relative mb-3 inline-flex items-center gap-1 rounded-full bg-primary/25 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-foreground backdrop-blur">
           <Sparkles className="h-3 w-3" /> DROP #01 · LALI
         </div>
         <h1 className="relative text-2xl font-black leading-tight">
@@ -142,7 +142,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
             <PhoneCall className="h-6 w-6" />
           </span>
           <span>
-            <span className="block text-[10px] uppercase tracking-widest text-muted-foreground">
+            <span className="block text-[11px] uppercase tracking-widest text-muted-foreground">
               Llamada entrante
             </span>
             <span className="block text-sm font-bold">Número desconocido · tocá para atender</span>
@@ -238,7 +238,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
                     <Phone className="h-4 w-4" />
                   )}
                 </span>
-                <span className="mt-1 whitespace-nowrap rounded-full bg-background/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide backdrop-blur">
+                <span className="mt-1 whitespace-nowrap rounded-full bg-background/80 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide backdrop-blur">
                   {d.date}
                 </span>
               </div>
@@ -256,7 +256,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
           className="h-32 w-full object-cover"
         />
         <div className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">
             Llamada activa
           </p>
           <h3 className="mt-1 text-lg font-bold">QR en Palermo</h3>
@@ -279,7 +279,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
           {node && (
             <>
               <DrawerHeader className="text-left">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
                   {node.status === "done"
                     ? "Demostración"
                     : node.status === "active"
@@ -292,13 +292,13 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
               <div className="space-y-4 px-4 pb-8">
                 <div className="grid grid-cols-2 gap-2">
                   <div className="rounded-2xl border border-border bg-card p-3">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                       Puntos de muestra
                     </p>
                     <p className="text-lg font-black text-primary">+{node.pts}</p>
                   </div>
                   <div className="rounded-2xl border border-border bg-card p-3">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                       Recompensa
                     </p>
                     <p className="text-xs font-semibold leading-snug">{node.reward}</p>
@@ -418,7 +418,7 @@ function IncomingCall({
           {answered ? (
             <>
               <div className="w-full rounded-2xl border border-border bg-card p-4 text-sm leading-relaxed">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
                   Transcripción
                 </p>
                 <p className="mt-2 italic text-muted-foreground">

@@ -191,7 +191,7 @@ export function MisionesView() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest opacity-80">
+            <p className="text-[11px] font-semibold uppercase tracking-widest opacity-80">
               Puntos de misiones
             </p>
             <p className="text-2xl font-black">{total} generales</p>
@@ -292,7 +292,7 @@ function MissionCard({
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
             {m.verified ? m.tag : "Próximamente"}
           </p>
           <p className="truncate text-sm font-bold">{m.title}</p>
@@ -300,7 +300,7 @@ function MissionCard({
         </div>
         <div className="text-right">
           <p className="text-sm font-black text-primary">+{m.pts}</p>
-          <p className="text-[9px] uppercase text-muted-foreground">pts</p>
+          <p className="text-[11px] uppercase text-muted-foreground">pts</p>
         </div>
       </div>
       {typeof m.progress === "number" && (
@@ -370,7 +370,7 @@ function MissionDetail({
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
                     {mission.verified ? mission.tag : "Próximamente"}
                   </p>
                   <DrawerTitle className="text-lg font-black leading-tight">
@@ -379,7 +379,7 @@ function MissionDetail({
                 </div>
                 <div className="text-right">
                   <p className="text-base font-black text-primary">+{mission.pts}</p>
-                  <p className="text-[9px] uppercase text-muted-foreground">pts</p>
+                  <p className="text-[11px] uppercase text-muted-foreground">pts</p>
                 </div>
               </div>
               {mode === "detail" && (
@@ -444,7 +444,7 @@ function MissionDetail({
                 <>
                   {typeof mission.progress === "number" && (
                     <div>
-                      <div className="mb-1 flex justify-between text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <div className="mb-1 flex justify-between text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         <span>Tu progreso</span>
                         <span className="text-primary">{mission.progress}%</span>
                       </div>
@@ -473,7 +473,7 @@ function MissionDetail({
                       {mission.detail.steps.map((s, i) => (
                         <li key={s} className="flex gap-3 text-sm">
                           <span
-                            className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-black text-primary-foreground"
+                            className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-black text-primary-foreground"
                             style={{ backgroundImage: "var(--gradient-drop)" }}
                           >
                             {i + 1}
@@ -533,7 +533,7 @@ function InfoTile({
     <div className="rounded-2xl border border-border bg-card p-3">
       <div className="flex items-center gap-1.5 text-muted-foreground">
         <Icon className="h-3.5 w-3.5" />
-        <p className="text-[9px] font-bold uppercase tracking-wider">{label}</p>
+        <p className="text-[11px] font-bold uppercase tracking-wider">{label}</p>
       </div>
       <p className="mt-1 text-xs font-semibold leading-snug">{value}</p>
     </div>

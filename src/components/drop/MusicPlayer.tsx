@@ -84,7 +84,7 @@ function MiniPlayer() {
           {current.cover && <img src={current.cover} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold">{current.title}</p>
-            <p className="truncate text-[11px] text-muted-foreground">{current.artist} · vista previa</p>
+            <p className="truncate text-xs text-muted-foreground">{current.artist} · vista previa</p>
           </div>
           <button aria-label={playing ? "Pausar" : "Reproducir"} onClick={toggle} className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">
             {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}

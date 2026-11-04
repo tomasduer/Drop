@@ -32,7 +32,7 @@ export function ActividadView() {
 
       {mode !== "user" && (
         <p className="mt-4 rounded-2xl border border-primary/40 bg-primary/5 p-4 text-xs text-muted-foreground">
-          En modo invitado la actividad no se guarda: al recargar o salir se borra.
+          En modo invitado la actividad no se guarda. Creá una cuenta para sumar puntos.
         </p>
       )}
 
@@ -54,7 +54,7 @@ export function ActividadView() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold">{movementTitle(m.reason)}</p>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-[11px] text-muted-foreground">
                       {m.evidence_type === "drop_verified" ? "Validación DROP" : m.evidence_type === "legacy" ? "Histórico" : "Declaración manual"} · {new Date(m.created_at).toLocaleDateString("es-AR")}
                     </p>
                   </div>
@@ -79,7 +79,7 @@ export function ActividadView() {
                 <TicketCheck className="h-4 w-4 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold">{r.title}</p>
-                  <p className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("es-AR")}</p>
+                  <p className="text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("es-AR")}</p>
                 </div>
                 <p className="text-xs font-bold text-muted-foreground">-{r.cost} pts</p>
               </article>

@@ -120,7 +120,7 @@ function DemoRanking() {
               )}
             </div>
             <p className="max-w-[90px] truncate text-xs font-semibold">@{p.fan.name}</p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground">
               {p.fan.pts.toLocaleString("es")} pts
             </p>
             <div
@@ -137,7 +137,7 @@ function DemoRanking() {
       {/* Cut line */}
       {scope === "Global" && (
         <div className="mb-3 flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2">
-          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-[10px] font-black text-primary-foreground">
+          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-[11px] font-black text-primary-foreground">
             50
           </span>
           <p className="flex-1 text-xs font-medium">
@@ -172,7 +172,7 @@ function DemoRanking() {
               <p className="truncate text-sm font-semibold">
                 @{u.name}{" "}
                 {u.you && (
-                  <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[9px] uppercase text-primary-foreground">
+                  <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[11px] uppercase text-primary-foreground">
                     Vos
                   </span>
                 )}
@@ -196,7 +196,7 @@ function DemoRanking() {
           </span>
           <span className="flex-1">
             <span className="block text-sm font-bold">Tu posición</span>
-            <span className="block text-[11px] text-muted-foreground">
+            <span className="block text-xs text-muted-foreground">
               {me.pts.toLocaleString("es")} pts · racha de {me.streak} días
             </span>
           </span>
@@ -259,7 +259,7 @@ function FanSheet({
               </div>
 
               <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
                   Insignia
                 </p>
                 <p className="mt-1 text-sm font-bold">{fan.badge}</p>
@@ -316,7 +316,7 @@ function Stat({
     <div className="rounded-2xl border border-border bg-card p-3">
       <Icon className="mx-auto h-4 w-4 text-primary" />
       <p className="mt-1 text-base font-black">{value}</p>
-      <p className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</p>
     </div>
   );
 }

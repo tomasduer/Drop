@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/drop/MobileShell";
 import { TopBar } from "@/components/drop/TopBar";
-import { BottomNav, type Tab } from "@/components/drop/BottomNav";
+import { type Tab } from "@/components/drop/BottomNav";
+import { GlobalNav } from "@/components/drop/GlobalNav";
 import { MapaView } from "@/components/drop/MapaView";
 import { MisionesView } from "@/components/drop/MisionesView";
 import { RankingView } from "@/components/drop/RankingView";
@@ -36,6 +38,8 @@ function Index() {
   const [tab, setTab] = useState<Tab>(searchTab ?? "mapa");
   const [dashboard, setDashboard] = useState(false);
   const [profile, setProfile] = useState(false);
+  const navigate = useNavigate();
+  const goTab = (t: Tab) => { setTab(t); void navigate({ to: "/drop", search: { tab: t } }); };
 
   useEffect(() => {
     if (searchTab) setTab(searchTab);
@@ -54,7 +58,7 @@ function Index() {
   }
 
   const titles: Record<Tab, string> = {
-    mapa: "El Mapa",
+    mapa: "Mapa",
     misiones: "Misiones",
     ranking: "Ranking",
     pasaporte: "Pasaporte",
@@ -72,12 +76,23 @@ function Index() {
           setProfile(true);
         }}
       />
+      {!dashboard && (tab === "mapa" || tab === "ranking" || tab === "pasaporte") && (
+        <div className="sticky top-[76px] z-20 mx-5 mb-1 flex gap-1 rounded-2xl border border-border bg-card/90 p-1 backdrop-blur-xl">
+          {(["mapa", "ranking", "pasaporte"] as const).map((t) => (
+            <Link key={t} to="/drop" search={{ tab: t }} onClick={() => setTab(t)}
+              className={`flex-1 rounded-xl py-2 text-center text-xs font-bold transition-colors ${tab === t ? "text-primary-foreground" : "text-muted-foreground"}`}
+              style={tab === t ? { backgroundImage: "var(--gradient-drop)" } : undefined}>
+              {titles[t]}
+            </Link>
+          ))}
+        </div>
+      )}
       <main className="pt-2">
         {dashboard ? (
           <DashboardView />
         ) : (
           <>
-            {tab === "mapa" && <MapaView onGoMisiones={() => setTab("misiones")} />}
+            {tab === "mapa" && <MapaView onGoMisiones={() => goTab("misiones")} />}
             {tab === "misiones" && <MisionesView />}
             {tab === "ranking" && <RankingView />}
             {tab === "pasaporte" && <PasaporteView />}
@@ -85,7 +100,7 @@ function Index() {
           </>
         )}
       </main>
-      {!dashboard && <BottomNav active={tab} onChange={setTab} />}
+      {!dashboard && <GlobalNav />}
     </MobileShell>
   );
 }

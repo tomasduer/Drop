@@ -69,10 +69,10 @@ export function AlbumsSection() {
       <section className="rounded-2xl border border-primary/35 bg-primary/10 p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Biblioteca DROP</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Biblioteca DROP</p>
             <h2 className="text-xl font-black">{listened.length} de {albumsCount} escuchados</h2>
           </div>
-          <p className="text-right text-lg font-black">{points.toLocaleString("es-AR")}<span className="block text-[9px] uppercase text-muted-foreground">pts generales</span></p>
+          <p className="text-right text-lg font-black">{points.toLocaleString("es-AR")}<span className="block text-[11px] uppercase text-muted-foreground">pts generales</span></p>
         </div>
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
           <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(listened.length / albumsCount) * 100}%` }} />
@@ -105,12 +105,12 @@ export function AlbumsSection() {
                 </div>
                 <div className="p-3">
                   <h3 className="truncate text-sm font-black">{album.title}</h3>
-                  <p className="text-[10px] text-muted-foreground">{album.artist} · {album.year}</p>
-                  <Button variant={done ? "secondary" : "default"} size="sm" onClick={() => onToggle(album.id)} className="mt-3 w-full rounded-lg px-2 text-[10px]">
+                  <p className="text-[11px] text-muted-foreground">{album.artist} · {album.year}</p>
+                  <Button variant={done ? "secondary" : "default"} size="sm" onClick={() => onToggle(album.id)} className="mt-3 w-full rounded-lg px-2 text-[11px]">
                     {done ? "Escuchado" : album.id.startsWith("custom-") ? "Marcar · sesión" : "Marcar · +120"}
                   </Button>
                   {reviews[album.id] && <div className="mt-3 space-y-1"><p className="flex items-center gap-1 text-xs font-bold text-primary"><Star className="h-3 w-3 fill-current" />{reviews[album.id].rating}/5</p>{reviews[album.id].text && <p className="line-clamp-3 break-words text-xs text-muted-foreground">{reviews[album.id].text}</p>}</div>}
-                  <Button variant="outline" size="sm" className="mt-2 w-full px-2 text-[10px]" disabled={preparingReview} onClick={async () => {
+                  <Button variant="outline" size="sm" className="mt-2 w-full px-2 text-[11px]" disabled={preparingReview} onClick={async () => {
                     if (!done) {
                       setPreparingReview(true);
                       const saved = await onToggle(album.id);

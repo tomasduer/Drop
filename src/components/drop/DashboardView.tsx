@@ -41,7 +41,7 @@ export function DashboardView() {
   return (
     <div className="space-y-6 px-5 pb-6">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
           Sello & Management
         </p>
         <h1 className="text-3xl font-black">Dashboard analítico</h1>
@@ -63,10 +63,10 @@ export function DashboardView() {
                 >
                   <Icon className="h-4 w-4" />
                 </span>
-                <span className="text-[10px] font-bold text-primary">{k.delta}</span>
+                <span className="text-[11px] font-bold text-primary">{k.delta}</span>
               </div>
               <p className="text-xl font-black">{k.value}</p>
-              <p className="text-[11px] text-muted-foreground">{k.label}</p>
+              <p className="text-xs text-muted-foreground">{k.label}</p>
             </div>
           );
         })}
@@ -83,7 +83,7 @@ export function DashboardView() {
         <div className="space-y-2">
           {heatmap.map((h) => (
             <div key={h.zone}>
-              <div className="mb-1 flex justify-between text-[11px]">
+              <div className="mb-1 flex justify-between text-xs">
                 <span>{h.zone}</span>
                 <span className="font-bold text-primary">{h.pct}%</span>
               </div>
@@ -116,7 +116,7 @@ export function DashboardView() {
                   backgroundImage: "var(--gradient-drop)",
                 }}
               />
-              <span className="text-[9px] font-bold">{m.finish}%</span>
+              <span className="text-[11px] font-bold">{m.finish}%</span>
             </div>
           ))}
         </div>
@@ -139,12 +139,12 @@ export function DashboardView() {
           {superfans.map((s, i) => (
             <div key={s.user} className="flex items-center gap-3 text-xs">
               <span className="w-4 text-center font-bold text-muted-foreground">{i + 1}</span>
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-muted text-[11px] font-bold">
+              <div className="grid h-8 w-8 place-items-center rounded-full bg-muted text-xs font-bold">
                 {s.user[0].toUpperCase()}
               </div>
               <div className="flex-1">
                 <p className="font-semibold">@{s.user}</p>
-                <p className="text-[10px] text-muted-foreground">{s.city}</p>
+                <p className="text-[11px] text-muted-foreground">{s.city}</p>
               </div>
               <p className="font-black text-primary">{s.pts.toLocaleString("es")}</p>
             </div>
@@ -164,12 +164,12 @@ export function DashboardView() {
           <div className="grid grid-cols-3 gap-2">
             {social.map((s) => (
               <div key={s.tag} className="rounded-xl border border-border p-2 text-center">
-                <p className="text-[10px] text-muted-foreground">{s.tag}</p>
+                <p className="text-[11px] text-muted-foreground">{s.tag}</p>
                 <p className="text-sm font-black">{s.posts}</p>
               </div>
             ))}
           </div>
-          <p className="mt-3 text-[11px] text-muted-foreground">
+          <p className="mt-3 text-xs text-muted-foreground">
             Alcance estimado: <span className="font-bold text-foreground">4.2M</span> · UGC:{" "}
             <span className="font-bold text-foreground">18.9k piezas</span>
           </p>
@@ -185,15 +185,15 @@ export function DashboardView() {
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
               <p className="text-lg font-black">62.3k</p>
-              <p className="text-[10px] text-muted-foreground">Pre-saves</p>
+              <p className="text-[11px] text-muted-foreground">Pre-saves</p>
             </div>
             <div>
               <p className="text-lg font-black">1.4M</p>
-              <p className="text-[10px] text-muted-foreground">Streams verif.</p>
+              <p className="text-[11px] text-muted-foreground">Streams verif.</p>
             </div>
             <div>
               <p className="text-lg font-black">+38%</p>
-              <p className="text-[10px] text-muted-foreground">Oyentes mensuales</p>
+              <p className="text-[11px] text-muted-foreground">Oyentes mensuales</p>
             </div>
           </div>
         </div>

@@ -29,7 +29,7 @@ export function BottomNav({
               key={it.id}
               onClick={() => onChange(it.id)}
               className={cn(
-                "relative flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-[10px] font-medium transition-colors",
+                "relative flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-[11px] font-medium transition-colors",
                 isActive ? "text-foreground" : "text-muted-foreground"
               )}
             >

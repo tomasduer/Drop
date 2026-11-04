@@ -152,7 +152,7 @@ export function ExplorarView() {
               <article key={drop.id} className="w-40 shrink-0">
                 <button onClick={() => onEnterDrop(drop)} className="relative block aspect-square w-full overflow-hidden rounded-2xl border border-border bg-muted">
                   <img decoding="async" src={drop.cover} alt={`Portada de ${drop.title}`} loading="lazy" className="h-full w-full object-cover" />
-                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide ${drop.status === "active" ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
+                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide ${drop.status === "active" ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
                     {drop.status === "active" ? "Drop activo" : drop.status === "finished" ? "Finalizado" : "Nuevo"}
                   </span>
                 </button>
@@ -187,7 +187,7 @@ export function ExplorarView() {
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
             <p className="text-sm font-bold">Todavía no hay reseñas de la comunidad</p>
             <p className="mt-1 text-xs text-muted-foreground">Las opiniones publicadas por fans aparecen acá: álbumes, artistas y shows.</p>
-            {mode !== "user" && <p className="mt-2 text-[11px] text-primary">Creá una cuenta para publicar y leer reseñas.</p>}
+            {mode !== "user" && <p className="mt-2 text-xs text-primary">Creá una cuenta para publicar y leer reseñas.</p>}
           </div>
         ) : (
           <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
@@ -195,10 +195,10 @@ export function ExplorarView() {
               <article key={r.id} className="w-44 shrink-0 rounded-2xl border border-border bg-card p-3">
                 {reviewImage(r) && <img decoding="async" src={reviewImage(r) ?? undefined} alt={`Imagen de ${r.subject_title}`} loading="lazy" className="mb-2 aspect-square w-full rounded-xl object-cover" />}
                 <p className="truncate text-sm font-bold">{r.subject_title}</p>
-                <p className="truncate text-[11px] text-muted-foreground">{r.subject_artist || r.subject_type}</p>
+                <p className="truncate text-xs text-muted-foreground">{r.subject_artist || r.subject_type}</p>
                 <div className="mt-1.5"><Stars value={r.rating} /></div>
-                <p className="mt-1 text-[11px] text-muted-foreground">por {r.author_name || "fan de DROP"}</p>
-                {r.text && <Button variant="link" size="sm" className="mt-1 h-auto px-0 text-[11px]" onClick={() => setReading(r)}>Leer reseña</Button>}
+                <p className="mt-1 text-xs text-muted-foreground">por {r.author_name || "fan de DROP"}</p>
+                {r.text && <Button variant="link" size="sm" className="mt-1 h-auto px-0 text-xs" onClick={() => setReading(r)}>Leer reseña</Button>}
               </article>
             ))}
           </div>
@@ -211,7 +211,7 @@ export function ExplorarView() {
           <h2 className="text-xl font-black">Shows cerca tuyo</h2>
           <span className="text-xs font-bold text-primary">Ver todo</span>
         </div>
-        <p className="mb-3 text-[11px] text-muted-foreground">Próximas fechas de tus artistas.</p>
+        <p className="mb-3 text-xs text-muted-foreground">Próximas fechas de tus artistas.</p>
         {visibleShows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
             <p className="text-sm font-bold">La agenda se está armando</p>
@@ -226,13 +226,13 @@ export function ExplorarView() {
                   <img decoding="async" src={show.image_url ?? SHOW_IMAGES[show.artist] ?? eventCrowd} alt={`Imagen de ${show.title}`} loading="lazy" className="h-28 w-full object-cover" />
                   <div className="p-3">
                     <p className="truncate text-sm font-bold">{show.title}</p>
-                    <p className="text-[11px] text-muted-foreground">{show.artist}</p>
-                    <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground"><CalendarDays className="h-3 w-3" />{show.event_date ? new Date(show.event_date).toLocaleDateString("es-AR") : "Fecha a confirmar"}</p>
-                    <p className="flex items-center gap-1 text-[11px] text-muted-foreground"><MapPin className="h-3 w-3" />{show.venue}{show.city ? ` · ${show.city}` : ""}</p>
-                    {show.url ? <Button asChild variant="outline" size="sm" className="mt-2 w-full text-[11px]"><a href={show.url} target="_blank" rel="noreferrer">Ver entradas</a></Button> : <Button
+                    <p className="text-xs text-muted-foreground">{show.artist}</p>
+                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><CalendarDays className="h-3 w-3" />{show.event_date ? new Date(show.event_date).toLocaleDateString("es-AR") : "Fecha a confirmar"}</p>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{show.venue}{show.city ? ` · ${show.city}` : ""}</p>
+                    {show.url ? <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={show.url} target="_blank" rel="noreferrer">Ver entradas</a></Button> : <Button
                       variant={attended ? "secondary" : "outline"}
                       size="sm"
-                      className="mt-2 w-full text-[11px]"
+                      className="mt-2 w-full text-xs"
                       onClick={async () => {
                         if (mode !== "user") { toast.message("Creá una cuenta para registrar tus shows."); return; }
                         try {
@@ -264,7 +264,7 @@ export function ExplorarView() {
               <span className="absolute inset-0" style={{ backgroundImage: "var(--gradient-drop-soft)" }} />
               <span className="absolute bottom-2 left-3 right-3">
                 <span className="block text-sm font-black">{genre.name}</span>
-                <span className="block truncate text-[10px] text-muted-foreground">{genre.detail}</span>
+                <span className="block truncate text-[11px] text-muted-foreground">{genre.detail}</span>
               </span>
             </button>
           ))}
@@ -274,7 +274,7 @@ export function ExplorarView() {
       {/* Artistas para descubrir */}
       <section className="mt-7">
         <h2 className="mb-1 text-xl font-black">Artistas para descubrir</h2>
-        <p className="mb-3 text-[11px] text-muted-foreground">Tocá un nombre para escuchar sus canciones.</p>
+        <p className="mb-3 text-xs text-muted-foreground">Tocá un nombre para escuchar sus canciones.</p>
         <div className="flex flex-wrap gap-2">
           {DISCOVER.map((name) => (
             <Button key={name} variant="outline" size="sm" className="rounded-full" onClick={() => { setQuery(name); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
@@ -294,7 +294,7 @@ export function ExplorarView() {
             </DialogHeader>
             <Stars value={reading.rating} />
             <p className="text-sm leading-relaxed">{reading.text}</p>
-            <p className="text-[11px] text-muted-foreground">{new Date(reading.created_at).toLocaleDateString("es-AR")}</p>
+            <p className="text-xs text-muted-foreground">{new Date(reading.created_at).toLocaleDateString("es-AR")}</p>
           </DialogContent>
         </Dialog>
       )}

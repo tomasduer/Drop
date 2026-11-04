@@ -90,7 +90,7 @@
   --gradient-glow: radial-gradient(circle at 100% 0%, oklch(0.64 0.21 40 / 0.16), transparent 45%), radial-gradient(circle at 0% 60%, oklch(0.3 0.11 355 / 0.22), transparent 50%);
   --shadow-glow: 0 10px 30px -10px oklch(0.64 0.21 40 / 0.5);
   --font-body: "Inter", system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-display: "Outfit", "Inter", system-ui, sans-serif;
   --display-transform: none;
 
   --chart-1: oklch(0.646 0.222 41.116);

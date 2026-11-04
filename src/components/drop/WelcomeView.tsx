@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Disc3, Map, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoViolet from "@/assets/drop-logo-violeta.webp";
+import logoViolet from "@/assets/drop-logo-oficial.webp";
 const logo = { url: logoViolet };
 const steps = [
   { icon: Map, title: "Elegí los drops de tus artistas" },
@@ -12,7 +12,7 @@ const steps = [
 export function WelcomeView() {
   return <div className="min-h-screen bg-background px-7 py-8 text-foreground">
     <div className="mx-auto max-w-[440px]">
-      <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-44 object-contain drop-shadow-[0_0_14px_var(--primary)]" />
+      <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-44 object-contain" />
       <p className="mt-5 text-xs font-bold uppercase text-primary">Bienvenid@ a DROP</p>
       <h1 className="mt-2 text-3xl font-black leading-tight">La música se vive.<br />Y también suma.</h1>
       <ul className="mt-6 space-y-3">

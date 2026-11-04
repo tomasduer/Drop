@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import logoViolet from "@/assets/drop-logo-violeta.webp";
+import logoViolet from "@/assets/drop-logo-oficial.webp";
 const logo = { url: logoViolet };
 import { Bell, BarChart3, X, PhoneCall, Trophy, Gift, Users, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -90,7 +90,7 @@ export function TopBar({
           <img decoding="async"
             src={logo.url}
             alt="DROP"
-            className="h-12 w-28 shrink-0 object-contain drop-shadow-[0_0_8px_var(--primary)]"
+            className="h-12 w-28 shrink-0 object-contain"
           />
           {title && (
             <span className="ml-2 text-sm font-medium text-muted-foreground">/ {title}</span>

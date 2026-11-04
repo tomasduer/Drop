@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Archive, Compass, Gift, MapPin, QrCode, Sparkles, Target, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoViolet from "@/assets/drop-logo-violeta.webp";
+import logoViolet from "@/assets/drop-logo-oficial.webp";
 const logo = { url: logoViolet };
 import crowd from "@/assets/onboarding-1.webp";
 import phone from "@/assets/onboarding-2.webp";
@@ -35,11 +35,11 @@ export function Onboarding() {
           <>
             <img decoding="async" src={s.image} alt="" className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
-            <img decoding="async" src={logo.url} alt="DROP" className="absolute left-5 top-[max(1rem,env(safe-area-inset-top))] h-9 w-24 object-contain object-left drop-shadow-[0_0_8px_var(--primary)]" />
+            <img decoding="async" src={logo.url} alt="DROP" className="absolute left-5 top-[max(1rem,env(safe-area-inset-top))] h-9 w-24 object-contain object-left" />
           </>
         ) : (
           <div className="grid h-full place-items-center" style={{ backgroundImage: "radial-gradient(circle at 50% 45%, oklch(0.62 0.24 25 / 0.45), transparent 65%)" }}>
-            <img decoding="async" src={logo.url} alt="DROP" className="w-64 object-contain drop-shadow-[0_0_24px_var(--primary)]" />
+            <img decoding="async" src={logo.url} alt="DROP" className="w-64 object-contain" />
           </div>
         )}
         <button onClick={close} className="absolute right-4 top-[max(1rem,env(safe-area-inset-top))] rounded-full bg-background/70 px-3 py-1.5 text-xs font-bold backdrop-blur">Saltear</button>

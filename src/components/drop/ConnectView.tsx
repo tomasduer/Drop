@@ -3,7 +3,7 @@ import { Eye, EyeOff, Loader2, Mail, ArrowRight } from "lucide-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import logoViolet from "@/assets/drop-logo-violeta.webp";
+import logoViolet from "@/assets/drop-logo-oficial.webp";
 const logo = { url: logoViolet };
 import { supabase } from "@/integrations/supabase/client";
 import { useDropAuth } from "./AuthProvider";
@@ -67,11 +67,11 @@ export function ConnectView() {
 
   return <div className="min-h-screen w-full bg-background px-7 pb-10 pt-8 text-foreground">
     <div className="mx-auto flex w-full max-w-[440px] flex-col">
-      <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-full max-w-[320px] object-contain drop-shadow-[0_0_14px_var(--primary)]" />
+      <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-full max-w-[320px] object-contain" />
       <h1 className="mt-5 text-3xl font-black leading-tight">{mode === "signup" ? "Creá tu cuenta." : mode === "forgot" ? "Recuperá tu acceso." : "Tu música. Tu DROP."}</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mode === "signup" ? "Guardá tus puntos, álbumes y drops en todos tus dispositivos." : mode === "forgot" ? "Te enviamos un enlace para elegir una nueva contraseña." : "Entrá a tu cuenta y seguí viviendo la música."}</p>
       {mode !== "forgot" && <>
-        <Button type="button" disabled={busy} onClick={google} className="mt-7 h-12 w-full gap-3 bg-white font-bold text-neutral-900 hover:bg-white/90"><GoogleIcon />Continuar con Google</Button>
+        <Button type="button" disabled={busy} onClick={google} className="mt-7 h-12 w-full gap-3 border border-border bg-white font-bold text-neutral-900 shadow-sm hover:bg-white/90"><GoogleIcon />Continuar con Google</Button>
         <p className="mt-2 text-center text-xs text-muted-foreground">Es lo más rápido: un toque y entrás.</p>
         <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />o con tu email<span className="h-px flex-1 bg-border" /></div>
       </>}

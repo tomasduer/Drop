@@ -3,7 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Camera, UserRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDropAuth } from "./AuthProvider";
-import logoViolet from "@/assets/drop-logo-violeta.webp";
+import logoViolet from "@/assets/drop-logo-oficial.webp";
 const logo = { url: logoViolet };
 
 export function GuestEntry() {

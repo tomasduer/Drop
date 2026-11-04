@@ -11,8 +11,7 @@ import albumCover from "@/assets/album-cover.png.asset.json";
 import { toast } from "sonner";
 import { guestQuestions, guestPracticeResult } from "@/lib/guest-practice";
 import { PHOTOS } from "@/lib/fan-avatars";
-import logoViolet from "@/assets/drop-logo-violeta.webp";
-const logo = { url: logoViolet };
+import logo from "@/assets/drop-logo-2026.webp.asset.json";
 import stencilWall from "@/assets/stencil-wall.png.asset.json";
 
 export type GameKind = "trivia" | "order" | "stream" | "scan" | "ar" | "clue";
@@ -152,7 +151,7 @@ function ArSim({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
   return <div className="space-y-4">
     <div className="relative mx-auto aspect-[3/4] w-full max-w-[260px] overflow-hidden rounded-2xl bg-black">
       <img decoding="async" src={PHOTOS.rain} alt="Vista de la cámara" className={`h-full w-full object-cover transition-opacity ${stage === 'idle' ? 'opacity-40' : 'opacity-90'}`} />
-      {(stage === 'hologram' || stage === 'captured') && <img decoding="async" src={logo.url} alt="Holograma del drop" className="absolute left-1/2 top-[18%] w-2/3 -translate-x-1/2 animate-pulse drop-shadow-[0_0_24px_var(--primary)]" />}
+      {(stage === 'hologram' || stage === 'captured') && <img decoding="async" src={logo.url} alt="Holograma del drop" className="absolute left-1/2 top-[18%] w-2/3 -translate-x-1/2 animate-pulse" />}
       {stage === 'captured' && <div className="absolute inset-0 animate-[flash_0.5s_ease-out] bg-white/0" />}
       <p className="absolute inset-x-0 bottom-2 text-center text-xs font-bold text-white">{stage === 'idle' ? 'Obelisco · 20:30 hs' : stage === 'camera' ? 'Apuntá al cielo…' : stage === 'hologram' ? '¡Apareció el holograma!' : 'Captura guardada en tu Pasaporte'}</p>
     </div>

@@ -1,4 +1,4 @@
--- Drop nuevo (tipo show): Ricardo Arjona · Seco Tour, 12 fechas en el Movistar Arena.
+-- Drop nuevo (tipo show): Ricardo Arjona · Seco Tour, 16 fechas en el Movistar Arena (mayo y julio 2027).
 -- Premios: top 60 del ranking ganan dos entradas; top 10, además, un meet & greet.
 INSERT INTO public.campaigns(id,artist,title,status) VALUES ('arjona-seco','Ricardo Arjona','Seco Tour en el Movistar Arena','active')
 ON CONFLICT (id) DO UPDATE SET status='active', title=EXCLUDED.title, artist=EXCLUDED.artist;
@@ -22,7 +22,7 @@ INSERT INTO public.mission_validation_rules(mission_id,rules) VALUES
   {"q":"¿Qué aparece de fondo en las fotos de la era Seco?","options":["Partituras","Letras escritas a mano, como cartas","Un mapa"],"correct":1}
  ]}'::jsonb),
  ('arjona-tour','{"questions":[
-  {"q":"¿Cuántas fechas hace Arjona en el Movistar Arena?","options":["6","12","20"],"correct":1},
+  {"q":"¿Cuántas fechas hace Arjona en el Movistar Arena?","options":["12","16","20"],"correct":1},
   {"q":"¿Cómo se llama la gira?","options":["Seco Tour","Circo Soledad Tour","Blanco y Negro Tour"],"correct":0},
   {"q":"¿Qué ganan los primeros 60 del ranking de este drop?","options":["Un vinilo firmado","Dos entradas","Una remera"],"correct":1},
   {"q":"¿Y qué se suma para los primeros 10?","options":["Un meet & greet con Arjona","Una guitarra","Un viaje a Guatemala"],"correct":0},
@@ -54,3 +54,9 @@ BEGIN
     END IF;
   END LOOP;
 END $$;
+
+-- Fechas (Tomi, Nov 4): 1, 2, 3, 7, 8, 11, 12, 17, 18, 19, 23, 24 y 25 de mayo y 1, 2 y 5 de julio de 2027, 21 h.
+INSERT INTO public.shows(id,title,artist,event_date,city,venue,image_url)
+SELECT 'arjona-seco-'||to_char(d,'MMDD'), 'Seco Tour', 'Ricardo Arjona', (d + time '21:00') AT TIME ZONE 'America/Argentina/Buenos_Aires', 'Buenos Aires', 'Movistar Arena', NULL
+FROM unnest(array['2027-05-01','2027-05-02','2027-05-03','2027-05-07','2027-05-08','2027-05-11','2027-05-12','2027-05-17','2027-05-18','2027-05-19','2027-05-23','2027-05-24','2027-05-25','2027-07-01','2027-07-02','2027-07-05']::date[]) d
+ON CONFLICT (id) DO NOTHING;

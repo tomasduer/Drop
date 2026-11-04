@@ -108,6 +108,17 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
         </section>
       )}
 
+      {/* Fechas del show */}
+      {drop.showDates && (
+        <section>
+          <h2 className="text-xl font-black">Fechas</h2>
+          <p className="mb-3 text-sm text-muted-foreground">{drop.showDates.dates.length} funciones · {drop.showDates.label}</p>
+          <div className="flex flex-wrap gap-2">
+            {drop.showDates.dates.map((d) => <span key={d} className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold">{d}</span>)}
+          </div>
+        </section>
+      )}
+
       {/* Premios por puesto en el ranking */}
       {drop.prizes?.length && drop.status !== "upcoming" ? (
         <section>

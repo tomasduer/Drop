@@ -1,0 +1,16 @@
+{
+  "name": "DROP · La experiencia musical interactiva",
+  "short_name": "DROP",
+  "description": "Misiones, ranking, comunidad y música del drop de tu artista favorito.",
+  "start_url": "/drop",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0a08",
+  "theme_color": "#1a0a08",
+  "lang": "es-AR",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

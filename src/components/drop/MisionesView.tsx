@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Camera, Headphones, MapPin, Puzzle, Sparkles, Music, Clock, Trophy, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useDropAuth } from "./AuthProvider";
@@ -172,6 +172,7 @@ export function MisionesView() {
   const daily=[...missions.slice(0,3),...extra]; const phygital=missions.slice(3);
   const earned: Record<string,number>={};
   for(const m of [...daily,...phygital]) { const a=state.attempts.find(a=>a.mission_id===m.id && a.status==='completed' && (state.missions.find(x=>x.id===m.id)?.repeat_period!=='daily'||a.period_key===new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires'}).format(new Date()))); if(a) earned[m.title]=a.general_award; }
+  const streak = computeStreak(state.attempts.filter((a) => a.status === 'completed').map((a) => a.period_key));
   const total=state.movements.filter(m=>m.evidence_type==='drop_verified').reduce((sum,m)=>sum+m.amount,0);
 
   return (
@@ -194,22 +195,29 @@ export function MisionesView() {
             <p className="text-[11px] font-semibold uppercase tracking-widest opacity-80">
               Puntos de misiones
             </p>
-            <p className="text-2xl font-black">{total} generales</p>
+            <p className="text-2xl font-black"><CountUp to={total} /> generales</p>
           </div>
-          <div className="flex gap-1">
-            {[1, 2, 3, 4, 5, 6, 7].map((d) => (
-              <span
-                key={d}
-                className="h-6 w-2 rounded-full bg-background/25"
-                style={{ opacity: 0.3 + d * 0.1 }}
-              />
-            ))}
+          <div className="text-right">
+            <p className="text-[11px] font-semibold uppercase tracking-widest opacity-80">Racha</p>
+            <p className="text-2xl font-black">🔥 {streak.count} {streak.count === 1 ? "día" : "días"}</p>
           </div>
         </div>
+        <div className="mt-3 flex gap-1.5">
+          {streak.week.map((d) => (
+            <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
+              <span className={`h-2 w-full rounded-full ${d.done ? "bg-background" : "bg-background/25"}`} />
+              <span className="text-[11px] font-semibold opacity-80">{d.label}</span>
+            </div>
+          ))}
+        </div>
         <p className="mt-2 text-xs opacity-90">
-          {total > 0
-            ? `Ganaste ${total} puntos en misiones verificadas.`
-            : "Completá una misión verificable para sumar."}
+          {mode !== "user"
+            ? "Con tu cuenta, cada día que completás una misión suma a tu racha."
+            : streak.today
+              ? "¡Racha al día! Volvé mañana para que no se corte."
+              : streak.count > 0
+                ? "Completá una misión hoy para mantener la racha."
+                : "Completá una misión hoy para empezar tu racha."}
         </p>
       </section>
 
@@ -412,8 +420,8 @@ function MissionDetail({
                   >
                     <Trophy className="h-9 w-9" />
                   </div>
-                  <p className="text-2xl font-black">
-                    {result > 0 ? `+${result} pts` : "Sin puntos"}
+                  <p className="text-2xl font-black animate-[pop_0.5s_ease-out]">
+                    {result > 0 ? <>+<CountUp to={result} /> pts</> : "Sin puntos"}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {result >= mission.pts
@@ -538,4 +546,36 @@ function InfoTile({
       <p className="mt-1 text-xs font-semibold leading-snug">{value}</p>
     </div>
   );
+}
+
+const BA_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" });
+const DAY_LABELS = ["D", "L", "M", "M", "J", "V", "S"];
+
+function computeStreak(keys: string[]) {
+  const days = new Set(keys.filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k)));
+  const keyAt = (offset: number) => BA_DAY.format(new Date(Date.now() - offset * 86400000));
+  const today = days.has(keyAt(0));
+  let count = 0;
+  for (let i = today ? 0 : 1; days.has(keyAt(i)); i++) count++;
+  const week = Array.from({ length: 7 }, (_, i) => {
+    const key = keyAt(6 - i);
+    return { key, done: days.has(key), label: DAY_LABELS[new Date(`${key}T12:00:00`).getDay()] };
+  });
+  return { count, today, week };
+}
+
+function CountUp({ to }: { to: number }) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let frame = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / 900);
+      setValue(Math.round(to * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [to]);
+  return <>{value}</>;
 }

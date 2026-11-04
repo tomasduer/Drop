@@ -159,3 +159,9 @@
   0% { background-color: rgb(255 255 255 / 0.9); }
   100% { background-color: rgb(255 255 255 / 0); }
 }
+
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}

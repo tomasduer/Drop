@@ -17,6 +17,7 @@ import { Route as DropRouteImport } from './routes/drop'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as InvitadoRouteImport } from './routes/invitado'
 import { Route as MiDropRouteImport } from './routes/mi-drop'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const MiDropRoute = MiDropRouteImport.update({
   path: '/mi-drop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/explorar': typeof ExplorarRoute
   '/invitado': typeof InvitadoRoute
   '/mi-drop': typeof MiDropRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/explorar': typeof ExplorarRoute
   '/invitado': typeof InvitadoRoute
   '/mi-drop': typeof MiDropRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/explorar': typeof ExplorarRoute
   '/invitado': typeof InvitadoRoute
   '/mi-drop': typeof MiDropRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/invitado'
     | '/mi-drop'
+    | '/privacidad'
     | '/reset-password'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/invitado'
     | '/mi-drop'
+    | '/privacidad'
     | '/reset-password'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/invitado'
     | '/mi-drop'
+    | '/privacidad'
     | '/reset-password'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   ExplorarRoute: typeof ExplorarRoute
   InvitadoRoute: typeof InvitadoRoute
   MiDropRoute: typeof MiDropRoute
+  PrivacidadRoute: typeof PrivacidadRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MiDropRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExplorarRoute: ExplorarRoute,
   InvitadoRoute: InvitadoRoute,
   MiDropRoute: MiDropRoute,
+  PrivacidadRoute: PrivacidadRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport

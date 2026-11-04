@@ -69,7 +69,11 @@ export function ConnectView() {
       <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-full max-w-[320px] object-contain drop-shadow-[0_0_14px_var(--primary)]" />
       <h1 className="mt-5 text-3xl font-black leading-tight">{mode === "signup" ? "Creá tu cuenta." : mode === "forgot" ? "Recuperá tu acceso." : "Tu música. Tu DROP."}</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mode === "signup" ? "Guardá tus puntos, álbumes y drops en todos tus dispositivos." : mode === "forgot" ? "Te enviamos un enlace para elegir una nueva contraseña." : "Entrá a tu cuenta y seguí viviendo la música."}</p>
-      {mode !== "forgot" && <Button type="button" variant="outline" disabled={busy} onClick={google} className="mt-7 h-12 w-full font-bold">Continuar con Google</Button>}
+      {mode !== "forgot" && <>
+        <Button type="button" disabled={busy} onClick={google} className="mt-7 h-12 w-full gap-3 bg-white font-bold text-neutral-900 hover:bg-white/90"><GoogleIcon />Continuar con Google</Button>
+        <p className="mt-2 text-center text-xs text-muted-foreground">Es lo más rápido: un toque y entrás.</p>
+        <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />o con tu email<span className="h-px flex-1 bg-border" /></div>
+      </>}
       <form noValidate onSubmit={submit} className="mt-5 space-y-4">
         {mode === "signup" && <label className="block text-xs font-semibold">Tu nombre<input maxLength={80} value={name} onChange={(e) => setName(e.target.value)} className={`mt-2 ${input}`} placeholder="¿Cómo te llamás?" /></label>}
         <label className="block text-xs font-semibold">Email<div className="relative mt-2"><Mail className="absolute left-4 top-4 h-4 w-4 text-muted-foreground" /><input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={`${input} pl-11`} placeholder="vos@ejemplo.com" /></div></label>
@@ -77,11 +81,16 @@ export function ConnectView() {
         {mode === "login" && <Button type="button" variant="link" className="h-auto px-0 text-xs" onClick={() => switchMode("forgot")}>Olvidé mi contraseña</Button>}
         {error && <p role="alert" className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm">{error}</p>}
         {notice && <p role="status" className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm leading-relaxed">{notice}</p>}
-        <Button type="submit" disabled={busy} className="h-12 w-full font-bold">{busy ? <Loader2 className="animate-spin" /> : <ArrowRight />}{mode === "signup" ? "Crear cuenta" : mode === "forgot" ? "Enviar enlace" : "Iniciar sesión"}</Button>
+        <Button type="submit" disabled={busy} variant={mode === "forgot" ? "default" : "outline"} className="h-12 w-full font-bold">{busy ? <Loader2 className="animate-spin" /> : <ArrowRight />}{mode === "signup" ? "Crear cuenta" : mode === "forgot" ? "Enviar enlace" : "Iniciar sesión"}</Button>
       </form>
       <div className="mt-5 text-center"><p className="text-xs text-muted-foreground">{mode === "login" ? "¿Todavía no tenés cuenta?" : "¿Ya tenés una cuenta?"}</p><Button disabled={busy} variant="link" onClick={() => switchMode(mode === "login" ? "signup" : "login")}>{mode === "login" ? "Crear una cuenta nueva" : "Iniciar sesión"}</Button></div>
       {mode === "login" && <Button disabled={busy} variant="outline" className="mt-4 h-12 w-full" onClick={() => { void navigate({ to: "/invitado" }); }}>Ingresar sin cuenta <ArrowRight /></Button>}
       {mode === "login" && <p className="mt-2 text-center text-xs text-muted-foreground">En modo invitado tus puntos no se guardan.</p>}
+      <a href="/privacidad" className="mt-6 text-center text-xs text-muted-foreground underline">Política de privacidad</a>
     </div>
   </div>;
+}
+
+function GoogleIcon() {
+  return <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>;
 }

@@ -20,6 +20,7 @@ type DropNode = {
   title: string;
   date: string;
   status: "done" | "active" | "locked";
+  offset: number;
   x: number;
   y: number;
   desc: string;
@@ -27,11 +28,59 @@ type DropNode = {
   reward: string;
 };
 
+// Las fechas del recorrido se calculan desde hoy para que la demo siempre esté "en curso".
+function dayLabel(offset: number) {
+  return new Date(Date.now() + offset * 86400000).toLocaleDateString("es-AR", { day: "2-digit", month: "short" }).replace(".", "").replace("-", " ");
+}
+function unlockAt(offset: number) {
+  const d = new Date(Date.now() + offset * 86400000);
+  d.setHours(20, 30, 0, 0);
+  return d.getTime();
+}
+function useCountdown(target: number | null) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!target) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [target]);
+  if (!target) return "";
+  const left = Math.max(0, target - now);
+  const d = Math.floor(left / 86400000), h = Math.floor((left % 86400000) / 3600000), m = Math.floor((left % 3600000) / 60000), sec = Math.floor((left % 60000) / 1000);
+  return d > 0 ? `${d}d ${h}h ${m}m` : `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+
+// Ringtone sintetizado con WebAudio (no necesita archivos de audio) + vibración en celulares.
+function useRingtone(active: boolean) {
+  useEffect(() => {
+    if (!active || typeof window === "undefined") return;
+    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    let ctx: AudioContext | null = null;
+    try { ctx = AC ? new AC() : null; } catch { ctx = null; }
+    const ring = () => {
+      try { navigator.vibrate?.([400, 200, 400]); } catch { /* sin vibración */ }
+      if (!ctx) return;
+      const t0 = ctx.currentTime;
+      for (const [start, freq] of [[0, 440], [0, 480], [0.5, 440], [0.5, 480]] as const) {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.frequency.value = freq; o.type = "sine";
+        g.gain.setValueAtTime(0, t0 + start); g.gain.linearRampToValueAtTime(0.08, t0 + start + 0.02);
+        g.gain.setValueAtTime(0.08, t0 + start + 0.38); g.gain.linearRampToValueAtTime(0, t0 + start + 0.42);
+        o.connect(g).connect(ctx.destination); o.start(t0 + start); o.stop(t0 + start + 0.45);
+      }
+    };
+    ring();
+    const t = setInterval(ring, 2500);
+    return () => { clearInterval(t); try { navigator.vibrate?.(0); } catch { /* */ } void ctx?.close(); };
+  }, [active]);
+}
+
 const drops: DropNode[] = [
   {
     id: 1,
     title: "Llamada #1 · Fragmentos",
-    date: "10 Mar",
+    date: dayLabel(-14),
+    offset: -14,
     status: "done",
     x: 18,
     y: 12,
@@ -42,7 +91,8 @@ const drops: DropNode[] = [
   {
     id: 2,
     title: "Pre-save del álbum",
-    date: "14 Mar",
+    date: dayLabel(-10),
+    offset: -10,
     status: "done",
     x: 62,
     y: 22,
@@ -53,7 +103,8 @@ const drops: DropNode[] = [
   {
     id: 3,
     title: "Llamada #2 · Mensaje oculto",
-    date: "18 Mar",
+    date: dayLabel(-6),
+    offset: -6,
     status: "done",
     x: 28,
     y: 38,
@@ -65,6 +116,7 @@ const drops: DropNode[] = [
     id: 4,
     title: "QR en Palermo",
     date: "Hoy",
+    offset: 0,
     status: "active",
     x: 72,
     y: 52,
@@ -75,7 +127,8 @@ const drops: DropNode[] = [
   {
     id: 5,
     title: "Llamada #3 · Número perdido",
-    date: "26 Mar",
+    date: dayLabel(2),
+    offset: 2,
     status: "locked",
     x: 30,
     y: 68,
@@ -86,7 +139,8 @@ const drops: DropNode[] = [
   {
     id: 6,
     title: "Listening Party",
-    date: "02 Abr",
+    date: dayLabel(9),
+    offset: 9,
     status: "locked",
     x: 68,
     y: 84,
@@ -239,7 +293,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
                   )}
                 </span>
                 <span className="mt-1 whitespace-nowrap rounded-full bg-background/80 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide backdrop-blur">
-                  {d.date}
+                  {locked ? `en ${Math.max(1, d.offset)}d` : d.date}
                 </span>
               </div>
             </button>
@@ -325,6 +379,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
                   </button>
                 )}
 
+                {node.status === "locked" && <LockedCountdown offset={node.offset} />}
                 {node.status === "locked" && (
                   <button
                     onClick={() => {
@@ -378,6 +433,7 @@ function IncomingCall({
   onGoMisiones: () => void;
 }) {
   const [secs, setSecs] = useState(0);
+  useRingtone(open && !answered);
 
   useEffect(() => {
     if (!answered) {
@@ -471,5 +527,15 @@ function IncomingCall({
         </div>
       </DrawerContent>
     </Drawer>
+  );
+}
+
+function LockedCountdown({ offset }: { offset: number }) {
+  const left = useCountdown(unlockAt(offset));
+  return (
+    <div className="rounded-2xl border border-border bg-card p-3 text-center">
+      <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Se desbloquea en</p>
+      <p className="mt-1 font-mono text-2xl font-black tabular-nums">{left}</p>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { CalendarDays, Disc3, MapPin, Pencil, Settings, Share2, Star, UserRound } from "lucide-react";
+import { CalendarDays, Disc3, Image as ImageIcon, MapPin, Pencil, Settings, Share2, Star, UserPlus, UserRound } from "lucide-react";
+import { inviteFriends, shareStory } from "@/lib/share-card";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -118,6 +119,10 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
           <Button variant="outline" size="sm" onClick={() => setEditing(true)}><Pencil className="h-3.5 w-3.5" />Editar</Button>
           <Button variant="outline" size="sm" onClick={shareProfile}><Share2 className="h-3.5 w-3.5" />Compartir</Button>
           <Button variant="outline" size="sm" onClick={() => setSettings(true)}><Settings className="h-3.5 w-3.5" />Ajustes</Button>
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <Button size="sm" onClick={() => void shareStory({ name: profile.display_name, username, points: generalPoints, campaignPoints, missions: state.attempts.filter((a) => a.status === "completed").length, avatarUrl: profile.avatar_url })}><ImageIcon className="h-3.5 w-3.5" />Compartir en historias</Button>
+          <Button variant="secondary" size="sm" onClick={() => void inviteFriends(username)}><UserPlus className="h-3.5 w-3.5" />Invitar amigos</Button>
         </div>
       </header>
 
@@ -297,6 +302,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
             <Button variant="outline" onClick={async () => { await signOut(); void navigate({ to: "/auth", search: { mode: "login" }, replace: true }); }}>
               {mode === "user" ? "Cerrar sesión" : "Salir del modo invitado"}
             </Button>
+            <a href="/privacidad" className="text-center text-xs text-muted-foreground underline">Política de privacidad</a>
           </DialogContent>
         </Dialog>
       )}

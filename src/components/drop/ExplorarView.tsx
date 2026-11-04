@@ -20,6 +20,14 @@ import fanMaria from "@/assets/drop-photo-31.png.asset.json";
 import fanTini from "@/assets/drop-photo-32.png.asset.json";
 import fanLali from "@/assets/drop-photo-33.png.asset.json";
 import eventCrowd from "@/assets/event-crowd.jpg";
+import generoPop from "@/assets/genero-pop.webp";
+import generoUrbano from "@/assets/genero-urbano.webp";
+import generoRock from "@/assets/genero-rock.webp";
+import generoIndie from "@/assets/genero-indie.webp";
+import generoElectronica from "@/assets/genero-electronica.webp";
+import generoHiphop from "@/assets/genero-hiphop.webp";
+import generoRnb from "@/assets/genero-rnb.webp";
+import generoPoppunk from "@/assets/genero-poppunk.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { ALBUMS } from "@/lib/albums";
 import type { ShowEvent } from "@/lib/explore-data";
@@ -38,14 +46,14 @@ const FALLBACK_DROPS: DropCard[] = [
 const DISCOVER = ["LALI", "María Becerra", "TINI", "Dillom", "Emilia", "Nicki Nicole", "Milo J", "Trueno", "Bizarrap", "Duki"];
 
 const GENRES = [
-  { name: "Pop", detail: "LALI · María Becerra · TINI", image: fanLali.url },
-  { name: "Urbano", detail: "Dillom", image: dillomCover.url },
-  { name: "Rock", detail: "Tocá para escuchar", image: fanMaria.url },
-  { name: "Indie", detail: "Tocá para escuchar", image: fanTini.url },
-  { name: "Electrónica", detail: "Tocá para escuchar", image: eventCrowd },
-  { name: "Hip-hop", detail: "Tocá para escuchar", image: dillomCover.url },
-  { name: "R&B", detail: "Tocá para escuchar", image: fanMaria.url },
-  { name: "Pop punk", detail: "Tocá para escuchar", image: fanTini.url },
+  { name: "Pop", detail: "LALI · María Becerra · TINI", image: generoPop },
+  { name: "Urbano", detail: "Tocá para escuchar", image: generoUrbano },
+  { name: "Rock", detail: "Tocá para escuchar", image: generoRock },
+  { name: "Indie", detail: "Tocá para escuchar", image: generoIndie },
+  { name: "Electrónica", detail: "Tocá para escuchar", image: generoElectronica },
+  { name: "Hip-hop", detail: "Dillom", image: generoHiphop },
+  { name: "R&B", detail: "Tocá para escuchar", image: generoRnb },
+  { name: "Pop punk", detail: "Tocá para escuchar", image: generoPoppunk },
 ];
 
 function Stars({ value }: { value: number }) {
@@ -304,8 +312,8 @@ export function ExplorarView() {
         <div className="grid grid-cols-2 gap-3">
           {visibleGenres.map((genre) => (
             <button key={genre.name} onClick={() => { setQuery(genre.name); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="relative h-24 overflow-hidden rounded-2xl border border-border text-left">
-              <img decoding="async" src={genre.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
-              <span className="absolute inset-0" style={{ backgroundImage: "var(--gradient-drop-soft)" }} />
+              <img decoding="async" src={genre.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+              <span className="absolute inset-0" style={{ backgroundImage: "linear-gradient(180deg, transparent 30%, oklch(0 0 0 / 0.75)), var(--gradient-drop-soft)" }} />
               <span className="absolute bottom-2 left-3 right-3">
                 <span className="block text-sm font-black">{genre.name}</span>
                 <span className="block truncate text-[11px] text-muted-foreground">{genre.detail}</span>

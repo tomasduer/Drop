@@ -5,7 +5,7 @@ import logo from "@/assets/drop-logo-2026.webp.asset.json";
 import crowd from "@/assets/onboarding-1.webp";
 import phone from "@/assets/onboarding-2.webp";
 import street from "@/assets/onboarding-3.webp";
-import stage from "@/assets/stage-lights.jpg";
+import stage from "@/assets/onboarding-4.webp";
 
 const KEY = "drop-onboarding-visto";
 

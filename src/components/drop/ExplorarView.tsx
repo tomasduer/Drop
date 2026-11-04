@@ -47,13 +47,13 @@ const DISCOVER = ["LALI", "María Becerra", "TINI", "Dillom", "Emilia", "Nicki N
 
 const GENRES = [
   { name: "Pop", detail: "LALI · María Becerra · TINI", image: generoPop },
-  { name: "Urbano", detail: "Tocá para escuchar", image: generoUrbano },
-  { name: "Rock", detail: "Tocá para escuchar", image: generoRock },
-  { name: "Indie", detail: "Tocá para escuchar", image: generoIndie },
-  { name: "Electrónica", detail: "Tocá para escuchar", image: generoElectronica },
-  { name: "Hip-hop", detail: "Dillom", image: generoHiphop },
-  { name: "R&B", detail: "Tocá para escuchar", image: generoRnb },
-  { name: "Pop punk", detail: "Tocá para escuchar", image: generoPoppunk },
+  { name: "Urbano", detail: "Duki · Lit Killah · Tiago PZK · Rusherking", image: generoUrbano },
+  { name: "Rock", detail: "Airbag · Ciro y Los Persas", image: generoRock },
+  { name: "Indie", detail: "Silvestre y la Naranja · El Zar · Conociendo Rusia", image: generoIndie },
+  { name: "Electrónica", detail: "Hernán Cattáneo · Nick Warren", image: generoElectronica },
+  { name: "Hip-hop", detail: "Trueno · Wos · Milo J", image: generoHiphop },
+  { name: "R&B", detail: "Nathy Peluso · NAFTA", image: generoRnb },
+  { name: "Pop punk", detail: "Simple Plan · Eruca Sativa", image: generoPoppunk },
 ];
 
 function Stars({ value }: { value: number }) {

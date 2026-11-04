@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { useDropAuth } from "@/components/drop/AuthProvider";
 import laliCover from "@/assets/album-cover.png.asset.json";
-import laliHero from "@/assets/lali-phones.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import mariaHero from "@/assets/drop-photo-31.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
 import dillomIcon from "@/assets/dillom-icon.webp";
+import laliIcon from "@/assets/lali-icon.webp";
+import tiniIcon from "@/assets/tini-icon.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
-import tiniHero from "@/assets/drop-photo-32.png.asset.json";
 
 // Estado de cada experiencia: activo (suma puntos), próximamente o archivo (finalizado, solo para revisitar).
 export type DropStatus = "active" | "upcoming" | "archived";
@@ -34,7 +34,7 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "lali", artist: "LALI", title: "No vayas a atender cuando el demonio llama",
     tagline: "Atendé la llamada. Resolvé el misterio.",
     description: "Una búsqueda del tesoro alrededor del nuevo álbum: llamadas misteriosas, fragmentos inéditos, afiches con QR en la calle y un listening party para los primeros 150.",
-    cover: laliHero.url, hero: laliCover.url, album: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
+    cover: laliIcon, hero: laliCover.url, album: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
   },
   {
     id: "dillom", artist: "Dillom", title: "Por cesárea",
@@ -46,7 +46,7 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "tini", artist: "TINI", title: "Nueva era",
     tagline: "Algo nuevo se viene.",
     description: "TINI prepara una nueva etapa. Activá el aviso y enterate primero cuando abra el drop.",
-    cover: tiniHero.url, hero: tiniCover.url, album: tiniCover.url, dates: "Próximamente", status: "upcoming", fandom: "Tinistas",
+    cover: tiniIcon, hero: tiniCover.url, album: tiniCover.url, dates: "Próximamente", status: "upcoming", fandom: "Tinistas",
   },
   {
     id: "maria", artist: "María Becerra", title: "Quimera",

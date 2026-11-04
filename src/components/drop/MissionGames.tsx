@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { searchCatalog } from "@/lib/music.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Headphones, ScanLine, Sparkles, ArrowUp, ArrowDown, Play, Pause, Check, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,18 @@ function StreamSim({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
   const [plays, setPlays] = useState(0);
   const [progress, setProgress] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const search = useServerFn(searchCatalog);
+  const audio = useRef<HTMLAudioElement | null>(null);
+  // Vista previa real de "Fanático" mientras dura la simulación.
+  useEffect(() => {
+    search({ data: { q: 'LALI Fanático' } }).then((r) => { const t = r.tracks.find((x) => /fan[aá]tico/i.test(x.title)) ?? r.tracks[0]; if (t?.preview) audio.current = new Audio(t.preview); }).catch(() => {});
+    return () => { audio.current?.pause(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    const el = audio.current;
+    if (el) { if (playing) { el.currentTime = 0; void el.play().catch(() => {}); } else el.pause(); }
+  }, [playing]);
   useEffect(() => {
     if (!playing) return;
     const timer = setInterval(() => setProgress(p => {

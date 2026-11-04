@@ -79,8 +79,8 @@ export function AlbumsSection() {
         </div>
       </section>
 
-      <p className="text-xs text-muted-foreground">El marcado es una declaración manual, no una escucha verificada. Los álbumes agregados a mano duran solo esta sesión.</p>
-      <Button variant="outline" className="w-full rounded-xl" onClick={() => setAdding(true)}><Plus className="h-4 w-4" />Agregar álbum manualmente</Button>
+      <p className="text-xs text-muted-foreground">Sumá cualquier álbum del catálogo y marcalo como escuchado para ganar 120 puntos.</p>
+      <Button variant="outline" className="w-full rounded-xl" onClick={() => setAdding(true)}><Plus className="h-4 w-4" />Buscar y agregar álbum</Button>
 
       <label className="flex items-center gap-2 rounded-xl border border-input bg-card px-3 py-2.5">
         <Search className="h-4 w-4 text-muted-foreground" />

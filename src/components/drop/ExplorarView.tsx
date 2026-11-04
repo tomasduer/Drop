@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { getExploreData, saveDropAction, showAttendanceAction } from "@/lib/explore.functions";
 import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData } from "@/lib/explore-data";
 import { useDropAuth } from "./AuthProvider";
+import { CatalogResults } from "./Catalog";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
@@ -30,15 +31,17 @@ const FALLBACK_DROPS: DropCard[] = [
   { id: "dillom", artist: "Dillom", title: "por cesárea", cover: dillomCover.url, status: "upcoming" },
 ];
 
+const DISCOVER = ["LALI", "María Becerra", "TINI", "Dillom", "Emilia", "Nicki Nicole", "Milo J", "Trueno", "Bizarrap", "Duki"];
+
 const GENRES = [
   { name: "Pop", detail: "LALI · María Becerra · TINI", image: fanLali.url },
   { name: "Urbano", detail: "Dillom", image: dillomCover.url },
-  { name: "Rock", detail: "Próximamente", image: fanMaria.url },
-  { name: "Indie", detail: "Próximamente", image: fanTini.url },
-  { name: "Electrónica", detail: "Próximamente", image: eventCrowd },
-  { name: "Hip-hop", detail: "Próximamente", image: dillomCover.url },
-  { name: "R&B", detail: "Próximamente", image: fanMaria.url },
-  { name: "Pop punk", detail: "Próximamente", image: fanTini.url },
+  { name: "Rock", detail: "Tocá para escuchar", image: fanMaria.url },
+  { name: "Indie", detail: "Tocá para escuchar", image: fanTini.url },
+  { name: "Electrónica", detail: "Tocá para escuchar", image: eventCrowd },
+  { name: "Hip-hop", detail: "Tocá para escuchar", image: dillomCover.url },
+  { name: "R&B", detail: "Tocá para escuchar", image: fanMaria.url },
+  { name: "Pop punk", detail: "Tocá para escuchar", image: fanTini.url },
 ];
 
 function Stars({ value }: { value: number }) {
@@ -127,6 +130,8 @@ export function ExplorarView() {
           />
         </label>
       </header>
+
+      <CatalogResults query={query} />
 
       {/* Drops de la semana */}
       <section className="mt-7">
@@ -248,7 +253,7 @@ export function ExplorarView() {
         <h2 className="mb-3 text-xl font-black">Explorar por género</h2>
         <div className="grid grid-cols-2 gap-3">
           {visibleGenres.map((genre) => (
-            <button key={genre.name} onClick={() => setQuery(genre.name === "Pop" || genre.name === "Urbano" ? "" : genre.name)} className="relative h-24 overflow-hidden rounded-2xl border border-border text-left">
+            <button key={genre.name} onClick={() => { setQuery(genre.name); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="relative h-24 overflow-hidden rounded-2xl border border-border text-left">
               <img decoding="async" src={genre.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
               <span className="absolute inset-0" style={{ backgroundImage: "var(--gradient-drop-soft)" }} />
               <span className="absolute bottom-2 left-3 right-3">
@@ -260,13 +265,16 @@ export function ExplorarView() {
         </div>
       </section>
 
-      {/* Artistas emergentes */}
+      {/* Artistas para descubrir */}
       <section className="mt-7">
-        <h2 className="mb-3 text-xl font-black">Artistas emergentes</h2>
-        <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
-          <TrendingUp className="mx-auto mb-2 h-5 w-5 text-primary" />
-          <p className="text-sm font-bold">Recomendaciones en construcción</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Vamos a recomendarte artistas nuevos según tu actividad real: los drops que guardás, los artistas que seguís y las reseñas que publicás. Sin datos inventados.</p>
+        <h2 className="mb-1 text-xl font-black">Artistas para descubrir</h2>
+        <p className="mb-3 text-[11px] text-muted-foreground">Tocá un nombre para escuchar sus canciones.</p>
+        <div className="flex flex-wrap gap-2">
+          {DISCOVER.map((name) => (
+            <Button key={name} variant="outline" size="sm" className="rounded-full" onClick={() => { setQuery(name); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+              <TrendingUp className="h-3.5 w-3.5 text-primary" />{name}
+            </Button>
+          ))}
         </div>
       </section>
 

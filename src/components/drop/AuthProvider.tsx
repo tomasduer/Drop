@@ -29,7 +29,7 @@ type Ctx = {
   enterGuest: (details: { name: string; avatar: string | null }) => void; signOut: () => Promise<void>; resetProfile: () => void;
   reviews: Record<string, AlbumReview>; saveReview: (id: string, review: AlbumReview | null) => void;
   mergeReviews: (map: Record<string, AlbumReview>) => void;
-  customAlbums: CustomAlbum[]; addAlbum: (album: CustomAlbum) => void;
+  customAlbums: CustomAlbum[]; addAlbum: (album: CustomAlbum) => Promise<boolean>;
 };
 const AuthContext = createContext<Ctx | null>(null);
 
@@ -61,7 +61,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (guestActive.current) return;
       if (!data.profile || data.profile.id !== u.id) { toast.error('Tu cuenta necesita revisión: falta el perfil.'); setMode('signed_out'); return; }
       setState(data); setProfile(p => ({ ...data.profile as Profile, listened_albums: [...data.profile?.listened_albums ?? [], ...p.listened_albums.filter(id=>id.startsWith("custom-"))] })); setRevision((r) => r + 1);
+      // Álbumes del catálogo que el usuario sumó a su biblioteca.
+      const { data: saved } = await (supabase as unknown as { from: (t: string) => { select: (c: string) => { order: (c: string, o: { ascending: boolean }) => Promise<{ data: { album_id: string; title: string; artist: string; year: string; cover: string | null }[] | null }> } } })
+        .from("user_albums").select("album_id,title,artist,year,cover").order("created_at", { ascending: false });
+      if (saved) setCustomAlbums((prev) => [...saved.map((a) => ({ id: a.album_id, title: a.title, artist: a.artist, year: a.year, cover: a.cover ?? "" })), ...prev.filter((a) => a.id.startsWith("custom-"))]);
     } catch { toast.error('No pudimos cargar tus datos guardados.'); }
+  }
+  async function addAlbum(a: CustomAlbum) {
+    if (a.id.startsWith("dz-") && mode === "user" && user) {
+      const { error } = await (supabase as unknown as { from: (t: string) => { upsert: (v: unknown, o: { onConflict: string; ignoreDuplicates: boolean }) => Promise<{ error: unknown }> } })
+        .from("user_albums").upsert({ user_id: user.id, album_id: a.id, title: a.title.slice(0, 200), artist: a.artist.slice(0, 200), year: a.year.slice(0, 4), cover: a.cover || null }, { onConflict: "user_id,album_id", ignoreDuplicates: true });
+      if (error) { toast.error("No pudimos guardar el álbum en tu biblioteca."); return false; }
+    }
+    setCustomAlbums((prev) => (prev.some((x) => x.id === a.id) ? prev : [a, ...prev]));
+    return true;
   }
   async function refresh() { if (user && mode === 'user') await loadProfile(user); }
 
@@ -131,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // El valor solo cambia cuando cambia el estado, así las pantallas no se re-renderizan de más.
   const value = useMemo<Ctx>(
-    () => ({ state, refresh, revision, mode, user, profile, saveProfile, movePoints, enterGuest, signOut, resetProfile, reviews, saveReview, mergeReviews, customAlbums, addAlbum: (a) => setCustomAlbums((prev) => [a, ...prev]) }),
+    () => ({ state, refresh, revision, mode, user, profile, saveProfile, movePoints, enterGuest, signOut, resetProfile, reviews, saveReview, mergeReviews, customAlbums, addAlbum }),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- las funciones solo leen estos valores
     [state, revision, mode, user, profile, reviews, customAlbums, fetchState, operatePoints],
   );

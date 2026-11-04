@@ -12,6 +12,7 @@ import type { ErrorComponentProps } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/components/drop/AuthProvider";
+import { MusicPlayerProvider } from "@/components/drop/MusicPlayer";
 
 function NotFoundComponent() {
   return (
@@ -118,7 +119,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider><Outlet /></AuthProvider>
+      <AuthProvider><MusicPlayerProvider><Outlet /></MusicPlayerProvider></AuthProvider>
       <Toaster position="top-center" />
     </QueryClientProvider>
   );

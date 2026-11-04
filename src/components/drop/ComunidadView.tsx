@@ -13,6 +13,12 @@ import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
 import { PHOTOS, avatarFor } from "@/lib/fan-avatars";import airbagBanda from "@/assets/airbag-banda.webp";
 import airbagVivo from "@/assets/airbag-vivo.webp";
 import lnvGira from "@/assets/lnv-gira.webp";
+import adelaLengua from "@/assets/adela-lengua.webp";
+import adelaEstrellas from "@/assets/adela-estrellas.webp";
+import adelaGlitter from "@/assets/adela-glitter.webp";
+import adelaAuto from "@/assets/adela-auto.webp";
+import adelaEscenario from "@/assets/adela-escenario.webp";
+import adelaGrito from "@/assets/adela-grito.webp";
 import pcLaboratorio from "@/assets/pc-laboratorio.webp";
 import pcCaras from "@/assets/pc-caras.webp";
 import pcGlobosSilla from "@/assets/pc-globos-silla.webp";
@@ -104,6 +110,12 @@ const stickers = [
 
 // Feed de cada fandom (LALI tiene el suyo más arriba).
 const OTHER_FEEDS: Record<string, Post[]> = {
+  "adela-prima": [
+    { kind: "achievement", user: "prima.sofi", time: "hace 5 min", achievement: "completó la trivia de PRIMA 5/5", pts: 200 },
+    { kind: "post", user: "cande.fucsia", time: "hace 25 min", text: "Ya me teñí de fucsia para el Vorterix 💗 ¿quién más?", likes: 641, comments: 103, image: adelaLengua },
+    { kind: "post", user: "juanma.lolla", time: "hace 1 h", text: "Sideshow de Lolla con PRIMA entero en vivo. No lo puedo creer ⭐", likes: 422, comments: 58, image: adelaEstrellas },
+    { kind: "post", user: "ro.glitter", time: "hace 3 h", text: "Tutorial de la estrella de glitter para ir al show, lo subo hoy 🌟", likes: 318, comments: 77, image: adelaGlitter },
+  ],
   "dillom-lnv": [
     { kind: "achievement", user: "rocio.violenta", time: "hace 8 min", achievement: "completó la trivia de La nueva violencia 5/5", pts: 200 },
     { kind: "post", user: "tomas.dllm", time: "hace 30 min", text: "La nueva violencia de punta a punta sin saltear nada. Dillom no erra 🩷🖤", likes: 534, comments: 87 },
@@ -133,6 +145,11 @@ const OTHER_FEEDS: Record<string, Post[]> = {
   ],
 };
 const OTHER_GROUPS: Record<string, typeof groups> = {
+  "adela-prima": [
+    { name: "Primas", members: 7340, img: adelaAuto },
+    { name: "Fila Vorterix", members: 1980, img: adelaEscenario },
+    { name: "Glitter y estrellas", members: 2760, img: adelaGrito },
+  ],
   dillom: [
     { name: "Comunidad Dillom", members: 9870, img: pcGlobosSilla },
     { name: "Los globos", members: 4310, img: pcGlobosVuelo },

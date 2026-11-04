@@ -229,6 +229,33 @@ html[data-drop="airbag"] {
   --display-transform: uppercase;
   --texture-opacity: 0.16;
 }
+/* Adela · PRIMA: pared blanca, pelo fucsia, glitter y marcador negro escrito a mano. Tema claro. */
+html[data-drop="adela-prima"] {
+  --background: oklch(0.97 0.006 350);
+  --foreground: oklch(0.17 0.01 350);
+  --card: oklch(0.995 0.003 350);
+  --card-foreground: oklch(0.17 0.01 350);
+  --popover: oklch(0.995 0.003 350);
+  --popover-foreground: oklch(0.17 0.01 350);
+  --muted: oklch(0.93 0.02 350);
+  --muted-foreground: oklch(0.45 0.04 350);
+  --border: oklch(0.87 0.04 350);
+  --input: oklch(0.9 0.03 350);
+  --primary: oklch(0.58 0.25 357);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.92 0.05 355);
+  --secondary-foreground: oklch(0.3 0.1 355);
+  --ring: oklch(0.58 0.25 357);
+  --accent: oklch(0.17 0.01 350);
+  --accent-foreground: oklch(0.99 0 0);
+  --gradient-drop: linear-gradient(105deg, oklch(0.5 0.24 357), oklch(0.66 0.25 355) 60%, oklch(0.78 0.16 345));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.66 0.25 355 / 0.16), oklch(0.97 0.006 350 / 0.1));
+  --gradient-glow: radial-gradient(circle at 85% 0%, oklch(0.8 0.15 355 / 0.35), transparent 50%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.58 0.25 357 / 0.45);
+  --font-display: "Permanent Marker", "Comic Sans MS", cursive;
+  --display-transform: uppercase;
+  --texture-opacity: 0.05;
+}
 /* Dillom · La nueva violencia: negro de afiche, rosa chicle, amarillo de gira y letras slab en 3D. */
 html[data-drop="dillom-lnv"] {
   --background: oklch(0.13 0.008 350);

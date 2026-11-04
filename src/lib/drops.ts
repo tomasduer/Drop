@@ -11,6 +11,9 @@ import tiniIcon from "@/assets/tini-icon.webp";
 import airbagCover from "@/assets/airbag-portada.webp";
 import lnvCover from "@/assets/lnv-portada.webp";
 import lnvIcon from "@/assets/lnv-icon.webp";
+import adelaCover from "@/assets/adela-portada.webp";
+import adelaHero from "@/assets/adela-hero.webp";
+import adelaIcon from "@/assets/adela-icon.webp";
 import airbagIcon from "@/assets/airbag-icon.webp";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
@@ -65,6 +68,12 @@ export const DROP_CATALOG: DropInfo[] = [
     tagline: "Primera regla: no le cuentes a nadie.",
     description: "Entrá al club. Trivias de los 7 temas, acertijos y desafíos alrededor de El Club de la Pelea I. Sumá puntos y peleá el ranking con los fans de Airbag.",
     cover: airbagIcon, hero: airbagBanda, album: airbagCover, dates: "En curso", status: "active", fandom: "El Club",
+  },
+  {
+    id: "adela-prima", kind: "show", artist: "Adela", title: "PRIMA en el Teatro Vorterix",
+    tagline: "Sideshow de Lollapalooza. Una sola noche.",
+    description: "Adela presenta su nuevo álbum PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix. Jugá las misiones, subí en el ranking y acercate a la primera fila.",
+    cover: adelaIcon, hero: adelaHero, album: adelaCover, dates: "Sideshow de Lollapalooza · Teatro Vorterix", status: "active", fandom: "Primas",
   },
   {
     id: "tini", artist: "TINI", title: "Nueva era",

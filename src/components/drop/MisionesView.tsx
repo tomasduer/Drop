@@ -170,14 +170,22 @@ export function MisionesView() {
     const configured=state.missions.find(x=>x.id===ids[i]);
     const verified=configured ? configured.status==='verified' : mode==='guest';
     const guestPractice = mode === 'guest' && m.game === 'trivia';
-    return {...m,id:ids[i],title:configured?.title ?? m.title,verified,campaignPts:configured?.campaign_reward ?? 0,pts:verified ? configured?.general_reward ?? m.pts : 0,progress:undefined,cta:guestPractice ? 'Jugar de práctica' : verified ? 'Jugar ahora' : 'Ver experiencia',detail:verified && m.game !== 'trivia' ? {...m.detail,reward:configured ? `${configured.general_reward} generales + ${configured.campaign_reward} de campaña` : m.detail.reward} : {...m.detail,intro:guestPractice ? 'Trivia de práctica para invitados. Sin puntos ni participación en el ranking.' : verified ? 'Respondé preguntas propias de DROP. Cada respuesta se valida y el intento queda guardado en tu cuenta.' : 'Experiencia demostrativa o pendiente. No verifica actividades ni acredita puntos.',steps:guestPractice ? ['Respondé las preguntas de práctica','Tu resultado es temporal y no acredita puntos'] : verified ? ['Respondé las preguntas','Un intento por día; 20 segundos por pregunta','Tu resultado se guarda al finalizar'] : ['Explorá la experiencia sin acreditación de puntos'],duration:guestPractice ? 'Práctica libre' : verified ? '1 intento por día · horario de Buenos Aires' : 'Pendiente de validación',players:verified ? 'Participación registrada en tu cuenta' : 'Demostración',reward:verified ? `Hasta ${configured?.general_reward} generales y ${configured?.campaign_reward} de campaña` : 'Sin recompensas acreditables',tip:verified ? 'El canje de puntos generales no modifica tu ranking.' : 'La validación real todavía no está disponible.'}};
+    return {...m,id:ids[i],title:configured?.title ?? m.title,verified,campaignPts:configured?.campaign_reward ?? 0,pts:verified ? configured?.general_reward ?? m.pts : 0,progress:undefined,cta:guestPractice ? 'Jugar de práctica' : verified ? 'Jugar ahora' : 'Ver experiencia',detail:verified && m.game !== 'trivia' ? {...m.detail,reward:configured ? `${configured.campaign_reward} pts de ${drop.artist} + ${configured.general_reward} puntos generales DROP` : m.detail.reward} : {...m.detail,intro:guestPractice ? 'Trivia de práctica para invitados. Sin puntos ni participación en el ranking.' : verified ? 'Respondé preguntas propias de DROP. Cada respuesta se valida y el intento queda guardado en tu cuenta.' : 'Experiencia demostrativa o pendiente. No verifica actividades ni acredita puntos.',steps:guestPractice ? ['Respondé las preguntas de práctica','Tu resultado es temporal y no acredita puntos'] : verified ? ['Respondé las preguntas','Un intento por día; 20 segundos por pregunta','Tu resultado se guarda al finalizar'] : ['Explorá la experiencia sin acreditación de puntos'],duration:guestPractice ? 'Práctica libre' : verified ? '1 intento por día · horario de Buenos Aires' : 'Pendiente de validación',players:verified ? 'Participación registrada en tu cuenta' : 'Demostración',reward:verified ? `Hasta ${configured?.campaign_reward} pts de ${drop.artist} + ${configured?.general_reward} puntos generales DROP` : 'Sin recompensas acreditables',tip:verified ? 'El canje de puntos generales no modifica tu ranking.' : 'La validación real todavía no está disponible.'}};
   });
-  const extra = state.missions.filter(m=>!ids.includes(m.id) && m.campaign_id===drop.id).map(m=>({...dailyTemplates[1],cover:isLali?dailyTemplates[1].cover:drop.cover,tag:m.kind==='clue'?'Acertijo':m.kind==='trivia'?'Trivia':dailyTemplates[1].tag,desc:m.repeat_period==='daily'?'Nueva ronda todos los días':'Una sola vez por fan',id:m.id,title:m.title,game:m.kind as GameKind,verified:m.status==='verified',pts:m.general_reward,campaignPts:m.campaign_reward,progress:undefined,cta:m.status==='verified'?'Jugar ahora':'Ver experiencia',detail:{...dailyTemplates[1].detail,intro:'Actividad propia de DROP.',reward:`${m.general_reward} generales · ${m.campaign_reward} de campaña`,players:'Participación real',tip:'El resultado se valida en tu cuenta.'}}));
+  const extra = state.missions.filter(m=>!ids.includes(m.id) && m.campaign_id===drop.id).map(m=>({...dailyTemplates[1],cover:isLali?dailyTemplates[1].cover:drop.cover,tag:m.kind==='clue'?'Acertijo':m.kind==='trivia'?'Trivia':dailyTemplates[1].tag,desc:m.repeat_period==='daily'?'Nueva ronda todos los días':'Una sola vez por fan',id:m.id,title:m.title,game:m.kind as GameKind,verified:m.status==='verified',pts:m.general_reward,campaignPts:m.campaign_reward,progress:undefined,cta:m.status==='verified'?'Jugar ahora':'Ver experiencia',detail:{...dailyTemplates[1].detail,intro:'Actividad propia de DROP.',reward:`${m.campaign_reward} pts de ${drop.artist} + ${m.general_reward} puntos generales DROP`,players:'Participación real',tip:'El resultado se valida en tu cuenta.'}}));
   const daily=isLali?[...missions.slice(0,3),...extra]:extra; const phygital=isLali?missions.slice(3):[];
   const earned: Record<string,number>={};
   for(const m of [...daily,...phygital]) { const a=state.attempts.find(a=>a.mission_id===m.id && a.status==='completed' && (state.missions.find(x=>x.id===m.id)?.repeat_period!=='daily'||a.period_key===new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires'}).format(new Date()))); if(a) earned[m.title]=a.general_award; }
   const streak = computeStreak(state.attempts.filter((a) => a.status === 'completed').map((a) => a.period_key));
-  const total=state.movements.filter(m=>m.evidence_type==='drop_verified' && m.campaign_id===drop.id).reduce((sum,m)=>sum+m.amount,0);
+  const total=state.movements.filter(m=>m.evidence_type==='drop_verified' && m.campaign_id===drop.id).reduce((sum,m)=>sum+(m.campaign_delta ?? 0),0);
+  const all=[...daily,...phygital];
+  const playing=new Set(state.attempts.filter(a=>a.status!=='completed').map(a=>a.mission_id));
+  const statusOf=(m:Mission):MissionStatus=>archived?'finalizada':m.title in earned?'completada':m.id&&playing.has(m.id)?'en_progreso':'disponible';
+  const featured=!archived&&drop.status!=='upcoming'?all.find(m=>statusOf(m)!=='completada'&&m.game!=='scan'&&m.game!=='ar'):undefined;
+  const rest=all.filter(m=>m!==featured);
+  const games=rest.filter(m=>m.game==='trivia'||m.game==='order'||m.game==='clue');
+  const music=rest.filter(m=>m.game==='stream');
+  const world=rest.filter(m=>m.game==='scan'||m.game==='ar');
 
   return (
     <div className="space-y-6 px-5">
@@ -199,9 +207,9 @@ export function MisionesView() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest opacity-80">
-              Puntos de misiones
+              Puntos de {drop.artist}
             </p>
-            <p className="text-2xl font-black"><CountUp to={total} /> generales</p>
+            <p className="text-2xl font-black"><CountUp to={total} /> pts</p>
           </div>
           <div className="text-right">
             <p className="text-[11px] font-semibold uppercase tracking-widest opacity-80">Racha</p>
@@ -227,46 +235,82 @@ export function MisionesView() {
         </p>
       </section>
 
-      {/* Digital */}
-      <section>
-        <div className="mb-2 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Desafíos digitales
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {daily.length === 0 && <p className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">Las misiones de este drop se anuncian pronto.</p>}
-          {daily.map((m) => (
-            <MissionCard
-              key={m.title}
-              m={m}
-              done={m.title in earned}
-              onOpen={() => setSelected(m)}
-            />
-          ))}
-        </div>
-      </section>
+      {all.length === 0 && <p className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">Las misiones de este drop se anuncian pronto.</p>}
 
-      {/* Phygital */}
-      {phygital.length > 0 && <section>
-        <div className="mb-2 flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-primary" />
-          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Phygital · Mundo real
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {phygital.map((m) => (
-            <MissionCard
-              key={m.title}
-              m={m}
-              done={m.title in earned}
-              onOpen={() => setSelected(m)}
-            />
-          ))}
-        </div>
-      </section>}
+      {/* Misión destacada */}
+      {featured && (
+        <section>
+          <SectionTitle icon={Sparkles} title="Misión destacada" hint="Empezá por acá" />
+          <button onClick={() => setSelected(featured)} className="relative block w-full overflow-hidden rounded-3xl border border-primary/50 text-left shadow-[0_16px_40px_-18px_rgba(220,38,38,0.8)]">
+            <img decoding="async" src={featured.cover ?? drop.cover} alt="" className="h-56 w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+            <div className="absolute inset-x-4 bottom-4">
+              <StatusChip status={statusOf(featured)} />
+              <p className="mt-2 text-[11px] font-black uppercase tracking-widest text-primary">{featured.tag}</p>
+              <p className="text-2xl font-black leading-tight">{featured.title}</p>
+              <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{featured.desc}</p>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-sm font-black text-primary">+{featured.campaignPts || featured.pts} pts</span>
+                <span className="rounded-xl px-4 py-2 text-sm font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>{statusOf(featured) === "en_progreso" ? "Continuar" : featured.cta}</span>
+              </div>
+            </div>
+          </button>
+        </section>
+      )}
+
+      {/* Juegos */}
+      {games.length > 0 && (
+        <section>
+          <SectionTitle icon={Puzzle} title="Juegos" hint="Trivias, acertijos y rompecabezas" />
+          <div className="grid grid-cols-2 gap-3">
+            {games.map((m) => (
+              <button key={m.title} onClick={() => setSelected(m)} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
+                <div className="relative h-24">
+                  <img loading="lazy" decoding="async" src={m.cover ?? drop.cover} alt="" className="h-full w-full object-cover" />
+                  <span className="absolute left-2 top-2"><StatusChip status={statusOf(m)} small /></span>
+                </div>
+                <div className="p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary">{m.tag}</p>
+                  <p className="line-clamp-2 text-sm font-bold leading-snug">{m.title}</p>
+                  <p className="mt-1 text-xs font-black text-primary">+{m.campaignPts || m.pts} pts</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Desafíos musicales */}
+      {music.length > 0 && (
+        <section>
+          <SectionTitle icon={Headphones} title="Desafíos musicales" hint="Escuchá y sumá" />
+          <div className="space-y-3">
+            {music.map((m) => <MissionCard key={m.title} m={m} status={statusOf(m)} onOpen={() => setSelected(m)} />)}
+          </div>
+        </section>
+      )}
+
+      {/* Mundo real */}
+      {world.length > 0 && (
+        <section>
+          <SectionTitle icon={MapPin} title="En el mundo real" hint="Experiencias presenciales" />
+          <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
+            {world.map((m) => (
+              <button key={m.title} onClick={() => setSelected(m)} className="relative h-64 w-56 shrink-0 overflow-hidden rounded-3xl border border-border text-left">
+                <img loading="lazy" decoding="async" src={m.cover ?? drop.cover} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                <span className="absolute left-3 top-3"><StatusChip status={statusOf(m)} small /></span>
+                <div className="absolute inset-x-3 bottom-3">
+                  <p className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary"><MapPin className="h-3 w-3" />{m.tag}</p>
+                  <p className="text-lg font-black leading-tight">{m.title}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{m.desc}</p>
+                  <p className="mt-2 text-sm font-black text-primary">+{m.campaignPts || m.pts} pts</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       <MissionDetail
         mission={selected}
@@ -279,15 +323,33 @@ export function MisionesView() {
   );
 }
 
+type MissionStatus = "disponible" | "en_progreso" | "completada" | "finalizada";
+const STATUS_TEXT: Record<MissionStatus, string> = { disponible: "Disponible", en_progreso: "En progreso", completada: "✓ Completada", finalizada: "Finalizada" };
+
+function StatusChip({ status, small = false }: { status: MissionStatus; small?: boolean }) {
+  const cls = status === "completada" ? "bg-emerald-500/90 text-white" : status === "en_progreso" ? "bg-amber-400 text-black" : status === "finalizada" ? "bg-muted text-muted-foreground" : "bg-background/85 text-foreground";
+  return <span className={`inline-block rounded-full font-black uppercase tracking-wide ${small ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]"} ${cls}`}>{STATUS_TEXT[status]}</span>;
+}
+
+function SectionTitle({ icon: Icon, title, hint }: { icon: LucideIcon; title: string; hint: string }) {
+  return (
+    <div className="mb-3 flex items-end justify-between gap-2">
+      <h2 className="flex items-center gap-2 text-xl font-black"><Icon className="h-5 w-5 text-primary" />{title}</h2>
+      <span className="text-xs text-muted-foreground">{hint}</span>
+    </div>
+  );
+}
+
 function MissionCard({
   m,
-  done,
+  status,
   onOpen,
 }: {
   m: Mission;
-  done: boolean;
+  status: MissionStatus;
   onOpen: () => void;
 }) {
+  const done = status === "completada";
   const Icon = m.icon;
   return (
     <article className="rounded-2xl border border-border bg-card p-4">
@@ -308,14 +370,12 @@ function MissionCard({
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-            {m.verified ? m.tag : "Próximamente"}
-          </p>
+          <div className="flex items-center gap-2"><p className="text-[11px] font-semibold uppercase tracking-wider text-primary">{m.verified ? m.tag : "Próximamente"}</p><StatusChip status={status} small /></div>
           <p className="truncate text-sm font-bold">{m.title}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">{m.desc}</p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-black text-primary">+{m.pts}</p>
+          <p className="text-sm font-black text-primary">+{m.campaignPts || m.pts}</p>
           <p className="text-[11px] uppercase text-muted-foreground">pts</p>
         </div>
       </div>
@@ -335,7 +395,7 @@ function MissionCard({
             : "border-primary/40 text-primary hover:bg-primary/10 active:bg-primary/20"
         }`}
       >
-        {done ? "✓ Completada · ver detalle" : m.cta}
+        {done ? "Ver resultado" : status === "en_progreso" ? "Continuar" : status === "finalizada" ? "Ver misión" : m.cta}
       </button>
     </article>
   );
@@ -396,7 +456,7 @@ function MissionDetail({
                   </DrawerTitle>
                 </div>
                 <div className="text-right">
-                  <p className="text-base font-black text-primary">+{mission.pts}</p>
+                  <p className="text-base font-black text-primary">+{mission.campaignPts || mission.pts}</p>
                   <p className="text-[11px] uppercase text-muted-foreground">pts</p>
                 </div>
               </div>

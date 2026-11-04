@@ -17,6 +17,9 @@ import adelaCover from "@/assets/adela-portada.webp";
 import adelaHero from "@/assets/adela-hero.webp";
 import adelaIcon from "@/assets/adela-icon.webp";
 import airbagIcon from "@/assets/airbag-icon.webp";
+import arjonaCover from "@/assets/arjona-portada.webp";
+import arjonaHero from "@/assets/arjona-hero.webp";
+import arjonaIcon from "@/assets/arjona-icon.webp";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
 
@@ -45,6 +48,8 @@ export type DropInfo = {
   dates: string;
   status: DropStatus;
   fandom: string;
+  /** Premios por puesto en el ranking del drop (ej.: top 10, top 60). */
+  prizes?: { top: number; label: string }[];
 };
 
 // Contenido editorial de cada drop. El estado real sale de la tabla campaigns cuando está disponible.
@@ -72,6 +77,16 @@ export const DROP_CATALOG: DropInfo[] = [
     tagline: "Primera regla: no le cuentes a nadie.",
     description: "Entrá al club. Trivias de los 7 temas, acertijos y desafíos alrededor de El Club de la Pelea I. Sumá puntos y peleá el ranking con los fans de Airbag.",
     cover: airbagIcon, hero: airbagBanda, album: airbagCover, dates: "En curso", status: "active", fandom: "El Club",
+  },
+  {
+    id: "arjona-seco", kind: "show", artist: "Ricardo Arjona", title: "Seco Tour en el Movistar Arena",
+    tagline: "12 fechas en el Movistar Arena. Ganá entradas y un meet & greet.",
+    description: "Ricardo Arjona llega al Movistar Arena con 12 fechas del Seco Tour. Jugá las misiones y subí en el ranking: los primeros 60 se ganan dos entradas y los primeros 10, además, un meet & greet con Arjona.",
+    cover: arjonaIcon, hero: arjonaHero, album: arjonaCover, dates: "Seco Tour · 12 fechas en el Movistar Arena", status: "active", fandom: "Arjonistas",
+    prizes: [
+      { top: 10, label: "Meet & greet con Ricardo Arjona + dos entradas" },
+      { top: 60, label: "Dos entradas para el Seco Tour" },
+    ],
   },
   {
     id: "adela-prima", kind: "show", artist: "Adela", title: "PRIMA en el Teatro Vorterix",

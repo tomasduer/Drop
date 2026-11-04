@@ -27,6 +27,10 @@ import pcGlobosSilla from "@/assets/pc-globos-silla.webp";
 import pcGlobosVuelo from "@/assets/pc-globos-vuelo.webp";
 import lnvTraje from "@/assets/lnv-traje.webp";
 import lnvPoster from "@/assets/lnv-poster.webp";
+import arjonaPortada from "@/assets/arjona-portada.webp";
+import arjonaSeco from "@/assets/arjona-seco-no-dijo.webp";
+import arjonaRojo from "@/assets/arjona-rojo.webp";
+import arjonaRed from "@/assets/arjona-red.webp";
 
 
 type Post =
@@ -112,6 +116,13 @@ const stickers = [
 
 // Feed de cada fandom (LALI tiene el suyo más arriba).
 const OTHER_FEEDS: Record<string, Post[]> = {
+  "arjona-seco": [
+    { kind: "achievement", user: "vale.arjonista", time: "hace 6 min", achievement: "entró al TOP 60 y va por las entradas 🎟️", pts: 0 },
+    { kind: "post", user: "marce.seco", time: "hace 20 min", text: "12 fechas en el Movistar Arena y yo quiero estar en las 12 😭 ¿quién más va a varias?", likes: 734, comments: 0, image: arjonaRojo },
+    { kind: "post", user: "gabi.historias", time: "hace 1 h", text: "La tapa de Seco con la foto de chiquito es lo más lindo que hizo. Todo el disco suena a carta vieja ✉️", likes: 512, comments: 0, image: arjonaPortada },
+    { kind: "post", user: "lucho.trovador", time: "hace 3 h", text: "Voy por el meet & greet. Trivia diaria todos los días hasta el show 💪", likes: 289, comments: 0 },
+    { kind: "post", user: "sole.movistar", time: "hace 5 h", text: "Ya tengo armada la playlist para la previa del Seco Tour 🎶", likes: 198, comments: 0, image: arjonaRed },
+  ],
   "adela-prima": [
     { kind: "achievement", user: "prima.sofi", time: "hace 5 min", achievement: "completó la trivia de PRIMA 5/5", pts: 200 },
     { kind: "post", user: "cande.fucsia", time: "hace 25 min", text: "Ya me teñí de fucsia para el Vorterix 💗 ¿quién más?", likes: 641, comments: 103, image: adelaLengua },
@@ -147,6 +158,11 @@ const OTHER_FEEDS: Record<string, Post[]> = {
   ],
 };
 const OTHER_GROUPS: Record<string, typeof groups> = {
+  "arjona-seco": [
+    { name: "Arjonistas", members: 15230, img: arjonaRojo },
+    { name: "Fila del Movistar", members: 4870, img: arjonaSeco },
+    { name: "Cartas de Seco", members: 3120, img: arjonaRed },
+  ],
   "adela-prima": [
     { name: "Primas", members: 7340, img: adelaAuto },
     { name: "Fila Vorterix", members: 1980, img: adelaEscenario },

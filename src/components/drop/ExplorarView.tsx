@@ -32,15 +32,16 @@ import generoPoppunk from "@/assets/genero-poppunk.webp";
 import airbagCover from "@/assets/airbag-portada.webp";
 import lnvCover from "@/assets/lnv-portada.webp";
 import adelaCover from "@/assets/adela-portada.webp";
+import arjonaCover from "@/assets/arjona-portada.webp";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { ALBUMS } from "@/lib/albums";
 import type { ShowEvent } from "@/lib/explore-data";
 
-const SHOW_IMAGES: Record<string, string> = { LALI: fanLali.url, "María Becerra": fanMaria.url, Dillom: dillomCover.url, Airbag: airbagBanda };
+const SHOW_IMAGES: Record<string, string> = { LALI: fanLali.url, "María Becerra": fanMaria.url, Dillom: dillomCover.url, Airbag: airbagBanda, "Ricardo Arjona": arjonaCover };
 const reviewImage = (r: CommunityReview) => (r.subject_type === "album" ? ALBUMS.find((a) => a.id === r.subject_id)?.cover : null) ?? r.subject_image;
 
-const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url, airbag: airbagCover, "dillom-lnv": lnvCover, "adela-prima": adelaCover };
+const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url, airbag: airbagCover, "dillom-lnv": lnvCover, "adela-prima": adelaCover, "arjona-seco": arjonaCover };
 
 const FALLBACK_DROPS: DropCard[] = [
   { id: "lali", artist: "LALI", title: "No vayas a atender cuando el demonio llama", cover: laliCover.url, status: "active" },

@@ -108,11 +108,39 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
         </section>
       )}
 
+      {/* Premios por puesto en el ranking */}
+      {drop.prizes?.length && drop.status !== "upcoming" ? (
+        <section>
+          <h2 className="text-xl font-black">Premios del ranking</h2>
+          <p className="mb-3 text-sm text-muted-foreground">{drop.status === "archived" ? "Lo que se ganaron los primeros del ranking." : "Cuando cierre el drop, los primeros del ranking se llevan:"}</p>
+          <div className="space-y-2">
+            {drop.prizes.map((p, i) => {
+              const inside = rank !== null && rank <= p.top;
+              return (
+                <div key={p.top} className={`flex items-center gap-3 rounded-2xl border p-3 ${inside ? "border-primary/60 bg-primary/10" : "border-border bg-card"}`}>
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
+                    {i === 0 ? <Medal className="h-5 w-5" /> : <Gift className="h-5 w-5" />}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-primary">Top {p.top}</p>
+                    <p className="text-sm font-bold leading-snug">{p.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {rank === null ? `Los primeros ${p.top} del ranking` : inside ? `¡Estás adentro! Vas #${rank}` : `Vas #${rank}: te faltan ${rank - p.top} puestos`}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {active && <Button variant="outline" className="mt-3 w-full" onClick={() => onGo("ranking")}><Trophy /> Ver el ranking</Button>}
+        </section>
+      ) : null}
+
       {/* Recorrido (mapa) */}
       {drop.id === "lali" && <MapaView embedded onGoMisiones={() => onGo("misiones")} />}
 
       {/* Recompensas */}
-      {drop.id === "lali" ? <PasaporteView embedded /> : drop.status !== "upcoming" && (
+      {drop.id === "lali" ? <PasaporteView embedded /> : drop.status !== "upcoming" && !drop.prizes?.length && (
         <section>
           <h2 className="text-xl font-black">Recompensas</h2>
           <p className="mb-3 text-sm text-muted-foreground">{drop.status === "archived" ? "Lo que se podía ganar en este drop." : "Completá misiones para desbloquearlas."}</p>

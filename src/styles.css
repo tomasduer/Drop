@@ -229,6 +229,33 @@ html[data-drop="airbag"] {
   --display-transform: uppercase;
   --texture-opacity: 0.16;
 }
+/* Ricardo Arjona · Seco Tour: papel viejo color sepia, cartas manuscritas y el rojo de "SECO". */
+html[data-drop="arjona-seco"] {
+  --background: oklch(0.16 0.014 65);
+  --foreground: oklch(0.93 0.03 85);
+  --card: oklch(0.21 0.02 65);
+  --card-foreground: oklch(0.93 0.03 85);
+  --popover: oklch(0.21 0.02 65);
+  --popover-foreground: oklch(0.93 0.03 85);
+  --muted: oklch(0.27 0.025 65);
+  --muted-foreground: oklch(0.74 0.04 80);
+  --border: oklch(0.35 0.035 60);
+  --input: oklch(0.3 0.03 60);
+  --primary: oklch(0.58 0.19 29);
+  --primary-foreground: oklch(0.97 0.02 85);
+  --secondary: oklch(0.3 0.04 60);
+  --secondary-foreground: oklch(0.93 0.03 85);
+  --ring: oklch(0.58 0.19 29);
+  --accent: oklch(0.82 0.06 80);
+  --accent-foreground: oklch(0.16 0.014 65);
+  --gradient-drop: linear-gradient(105deg, oklch(0.45 0.16 28), oklch(0.6 0.2 30));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.58 0.19 29 / 0.18), oklch(0.82 0.06 80 / 0.05));
+  --gradient-glow: radial-gradient(circle at 85% 0%, oklch(0.58 0.19 29 / 0.22), transparent 50%), radial-gradient(circle at 0% 90%, oklch(0.75 0.07 75 / 0.12), transparent 50%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.58 0.19 29 / 0.5);
+  --font-display: "Bebas Neue", "Oswald", "Impact", sans-serif;
+  --display-transform: uppercase;
+  --texture-opacity: 0.2;
+}
 /* Adela · PRIMA: pared blanca, pelo fucsia, glitter y marcador negro escrito a mano. Tema claro. */
 html[data-drop="adela-prima"] {
   --background: oklch(0.97 0.006 350);

@@ -26,8 +26,9 @@ import eventCrowd from "@/assets/event-crowd.jpg";
 import airbagCover from "@/assets/airbag-portada.webp";
 import lnvCover from "@/assets/lnv-portada.webp";
 import adelaCover from "@/assets/adela-portada.webp";
+import arjonaCover from "@/assets/arjona-portada.webp";
 
-const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url, airbag: airbagCover, "dillom-lnv": lnvCover, "adela-prima": adelaCover };
+const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url, airbag: airbagCover, "dillom-lnv": lnvCover, "adela-prima": adelaCover, "arjona-seco": arjonaCover };
 
 const STATUS_LABEL: Record<SavedDropStatus, string> = {
   guardado: "Guardado",

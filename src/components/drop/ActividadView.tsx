@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useDropAuth } from "./AuthProvider";
 import { useDrops } from "@/lib/drops";
+import { ArtistLine } from "@/components/drop/ArtistLine";
 import { achievements, dropProgress, type DropProgress } from "@/lib/progress";
 
 function movementTitle(reason: string): string {
@@ -30,7 +31,7 @@ function DropRow({ p, cta }: { p: DropProgress; cta: string }) {
     <Link to="/drop" search={{ d: p.drop.id }} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
       <img loading="lazy" decoding="async" src={p.drop.status === "archived" ? p.drop.album : p.drop.cover} alt="" className={`h-14 w-14 shrink-0 rounded-xl object-cover ${p.drop.status === "archived" ? "sepia-[0.4]" : ""}`} />
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-primary">{p.drop.artist}</p>
+        <p className="text-xs font-bold text-primary"><ArtistLine drop={p.drop} /></p>
         <p className="truncate text-sm font-black">{p.drop.title}</p>
         {p.drop.status !== "upcoming" ? (
           <>

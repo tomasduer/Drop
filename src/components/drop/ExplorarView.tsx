@@ -9,6 +9,7 @@ import { getExploreData, saveDropAction, showAttendanceAction } from "@/lib/expl
 import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData } from "@/lib/explore-data";
 import { useDropAuth } from "./AuthProvider";
 import { useDrops, type DropInfo } from "@/lib/drops";
+import { ArtistLine } from "@/components/drop/ArtistLine";
 import logoViolet from "@/assets/drop-logo-negativo.webp";
 const logo = { url: logoViolet };
 import { CatalogResults } from "./Catalog";
@@ -170,7 +171,7 @@ export function ExplorarView() {
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-foreground" />Activo
                 </span>
                 <div className="absolute inset-x-4 bottom-4">
-                  <p className="text-sm font-bold text-primary">{drop.artist}</p>
+                  <p className="text-sm font-bold text-primary"><ArtistLine drop={drop} /></p>
                   <h3 className="text-2xl font-black leading-tight">{drop.title}</h3>
                   <p className="mt-0.5 text-xs text-muted-foreground">{drop.tagline}</p>
                   <div className="mt-3 flex items-center justify-between gap-2">
@@ -198,7 +199,7 @@ export function ExplorarView() {
                   <img decoding="async" src={drop.hero} alt={drop.artist} loading="lazy" className="h-full w-full object-cover opacity-70" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
                   <span className="absolute left-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-[11px] font-black uppercase">Próximamente</span>
-                  <span className="absolute inset-x-3 bottom-3"><span className="block text-xs font-bold text-primary">{drop.artist}</span><span className="block text-base font-black leading-tight">{drop.title}</span></span>
+                  <span className="absolute inset-x-3 bottom-3"><span className="block text-xs font-bold text-primary"><ArtistLine drop={drop} /></span><span className="block text-base font-black leading-tight">{drop.title}</span></span>
                 </div>
               </button>
             ))}
@@ -216,7 +217,7 @@ export function ExplorarView() {
               <button key={drop.id} onClick={() => onEnterDrop(drop)} className="flex w-full items-center gap-3 rounded-2xl border border-border bg-background/50 p-2 text-left">
                 <img decoding="async" src={drop.album} alt="" loading="lazy" className="h-16 w-16 shrink-0 rounded-xl object-cover sepia-[0.4]" />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-bold text-muted-foreground">{drop.artist} · {drop.dates}</span>
+                  <span className="block text-xs font-bold text-muted-foreground"><ArtistLine drop={drop} /> · {drop.dates}</span>
                   <span className="block truncate text-base font-black">{drop.title}</span>
                   <span className="block text-xs text-primary">{myScore(drop.id) > 0 ? `Participaste · ${myScore(drop.id).toLocaleString("es-AR")} pts` : "Ver cómo terminó"}</span>
                 </span>

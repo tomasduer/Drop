@@ -16,7 +16,14 @@ import tiniCover from "@/assets/drop-photo-29.png.asset.json";
 // Estado de cada experiencia: activo (suma puntos), próximamente o archivo (finalizado, solo para revisitar).
 export type DropStatus = "active" | "upcoming" | "archived";
 
+/** De qué se trata el drop: un álbum, un single, un show o una novedad del artista. */
+export type DropKind = "album" | "single" | "show" | "noticia";
+export const KIND_LABEL: Record<DropKind, string> = { album: "Nuevo álbum", single: "Nuevo single", show: "Show", noticia: "Novedad" };
+/** "LALI · Nuevo álbum" */
+export const artistLine = (d: { artist: string; kind?: DropKind }) => (d.kind ? `${d.artist} · ${KIND_LABEL[d.kind]}` : d.artist);
+
 export type DropInfo = {
+  kind?: DropKind;
   id: string;
   artist: string;
   title: string;
@@ -34,19 +41,19 @@ export type DropInfo = {
 // Contenido editorial de cada drop. El estado real sale de la tabla campaigns cuando está disponible.
 export const DROP_CATALOG: DropInfo[] = [
   {
-    id: "lali", artist: "LALI", title: "No vayas a atender cuando el demonio llama",
+    id: "lali", kind: "album", artist: "LALI", title: "No vayas a atender cuando el demonio llama",
     tagline: "Atendé la llamada. Resolvé el misterio.",
     description: "Una búsqueda del tesoro alrededor del nuevo álbum: llamadas misteriosas, fragmentos inéditos, afiches con QR en la calle y un listening party para los primeros 150.",
     cover: laliIcon, hero: laliCover.url, album: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
   },
   {
-    id: "dillom", artist: "Dillom", title: "Por cesárea",
+    id: "dillom", kind: "album", artist: "Dillom", title: "Por cesárea",
     tagline: "El universo más oscuro del rap argentino.",
     description: "Trivias, acertijos y desafíos diarios alrededor de Por cesárea. Sumá puntos y escalá el ranking de la comunidad de Dillom.",
     cover: dillomIcon, hero: dillomCover.url, album: dillomCover.url, dates: "En curso", status: "active", fandom: "Comunidad Dillom",
   },
   {
-    id: "airbag", artist: "Airbag", title: "El Club de la Pelea I",
+    id: "airbag", kind: "album", artist: "Airbag", title: "El Club de la Pelea I",
     tagline: "Primera regla: no le cuentes a nadie.",
     description: "Entrá al club. Trivias de los 7 temas, acertijos y desafíos alrededor de El Club de la Pelea I. Sumá puntos y peleá el ranking con los fans de Airbag.",
     cover: airbagIcon, hero: airbagBanda, album: airbagCover, dates: "En curso", status: "active", fandom: "El Club",
@@ -58,7 +65,7 @@ export const DROP_CATALOG: DropInfo[] = [
     cover: tiniIcon, hero: tiniCover.url, album: tiniCover.url, dates: "Próximamente", status: "upcoming", fandom: "Tinistas",
   },
   {
-    id: "maria", artist: "María Becerra", title: "Quimera",
+    id: "maria", kind: "album", artist: "María Becerra", title: "Quimera",
     tagline: "El drop que cerró a lo grande.",
     description: "La experiencia de Quimera ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
     cover: mariaHero.url, hero: mariaCover.url, album: mariaCover.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",

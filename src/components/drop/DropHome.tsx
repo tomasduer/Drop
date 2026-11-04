@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { getRanking } from "@/lib/drop.functions";
 import { STATUS_LABEL, type DropInfo } from "@/lib/drops";
+import { ArtistLine } from "@/components/drop/ArtistLine";
 import { useDropAuth } from "./AuthProvider";
 import { MapaView } from "./MapaView";
 import { PasaporteView } from "./PasaporteView";
@@ -49,7 +50,7 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
           <span className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider ${active ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
             {drop.status === "archived" ? "📼 Archivo" : STATUS_LABEL[drop.status]}
           </span>
-          <p className="mt-2 text-sm font-bold text-primary">{drop.artist}</p>
+          <p className="mt-2 text-sm font-bold text-primary"><ArtistLine drop={drop} /></p>
           <h1 className="text-3xl font-black leading-tight">{drop.title}</h1>
           {drop.tagline && <p className="mt-1 text-sm text-muted-foreground">{drop.tagline}</p>}
         </div>

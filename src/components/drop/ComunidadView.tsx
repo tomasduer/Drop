@@ -13,6 +13,10 @@ import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
 import { PHOTOS, avatarFor } from "@/lib/fan-avatars";import airbagBanda from "@/assets/airbag-banda.webp";
 import airbagVivo from "@/assets/airbag-vivo.webp";
 import lnvGira from "@/assets/lnv-gira.webp";
+import pcLaboratorio from "@/assets/pc-laboratorio.webp";
+import pcCaras from "@/assets/pc-caras.webp";
+import pcGlobosSilla from "@/assets/pc-globos-silla.webp";
+import pcGlobosVuelo from "@/assets/pc-globos-vuelo.webp";
 import lnvTraje from "@/assets/lnv-traje.webp";
 import lnvPoster from "@/assets/lnv-poster.webp";
 
@@ -113,9 +117,11 @@ const OTHER_FEEDS: Record<string, Post[]> = {
     { kind: "post", user: "mica.airbag", time: "hace 5 h", text: "Ya tengo la entrada, nos vemos en el pogo 🤘", likes: 402, comments: 71 },
   ],
   dillom: [
-    { kind: "achievement", user: "bauti.correa", time: "hace 20 min", achievement: "completó la trivia de Dillom 5/5", pts: 200 },
-    { kind: "post", user: "ivoperalta", time: "hace 1 h", text: "Escuché Por cesárea de punta a punta otra vez. Cada vez encuentro algo nuevo 🖤", likes: 312, comments: 41 },
-    { kind: "post", user: "facu.aguirre", time: "hace 3 h", text: "El acertijo de hoy estaba re difícil, lo saqué al tercer intento jaja", likes: 128, comments: 22 },
+    { kind: "achievement", user: "bauti.correa", time: "hace 2 semanas", achievement: "terminó #1 en el ranking final de Por cesárea", pts: 0 },
+    { kind: "post", user: "ivoperalta", time: "hace 2 semanas", text: "El momento de los globos en el show no me lo olvido más 🎈🖤", likes: 1240, comments: 168, image: pcGlobosVuelo },
+    { kind: "post", user: "facu.aguirre", time: "hace 3 semanas", text: "Sentado con los globos cantando… Por cesárea en vivo fue otra cosa.", likes: 876, comments: 94, image: pcGlobosSilla },
+    { kind: "post", user: "meli.oscura", time: "hace 3 semanas", text: "La estética de esta era: laboratorio, frascos viejos y anteojos negros.", likes: 512, comments: 47, image: pcLaboratorio },
+    { kind: "post", user: "santi.cesarea", time: "hace 4 semanas", text: "Escuché Por cesárea de punta a punta otra vez. Cada vez encuentro algo nuevo 🖤", likes: 312, comments: 41 },
   ],
   maria: [
     { kind: "achievement", user: "brenda.luna", time: "hace 3 semanas", achievement: "terminó #1 en el ranking final de Quimera", pts: 0 },
@@ -127,6 +133,11 @@ const OTHER_FEEDS: Record<string, Post[]> = {
   ],
 };
 const OTHER_GROUPS: Record<string, typeof groups> = {
+  dillom: [
+    { name: "Comunidad Dillom", members: 9870, img: pcGlobosSilla },
+    { name: "Los globos", members: 4310, img: pcGlobosVuelo },
+    { name: "Caras de cesárea", members: 2650, img: pcCaras },
+  ],
   "dillom-lnv": [
     { name: "La gira violenta", members: 11240, img: lnvGira },
     { name: "Trajes y anteojos", members: 3870, img: lnvTraje },

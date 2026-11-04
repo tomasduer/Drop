@@ -24,6 +24,8 @@ export type DropStatus = "active" | "upcoming" | "archived";
 /** De qué se trata el drop: un álbum, un single, un show o una novedad del artista. */
 export type DropKind = "album" | "single" | "show" | "noticia";
 export const KIND_LABEL: Record<DropKind, string> = { album: "Nuevo álbum", single: "Nuevo single", show: "Show", noticia: "Novedad" };
+/** En el Archivo ya no es "nuevo": solo dice de qué se trató. */
+export const ARCHIVED_KIND_LABEL: Record<DropKind, string> = { album: "Álbum", single: "Single", show: "Show", noticia: "Novedad" };
 /** "LALI · Nuevo álbum" */
 export const artistLine = (d: { artist: string; kind?: DropKind }) => (d.kind ? `${d.artist} · ${KIND_LABEL[d.kind]}` : d.artist);
 

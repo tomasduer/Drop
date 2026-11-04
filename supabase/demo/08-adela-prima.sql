@@ -1,5 +1,5 @@
 -- Drop nuevo (tipo show): Adela presenta PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix.
-INSERT INTO public.campaigns(id,artist,title,status) VALUES ('adela-prima','Adela','PRIMA en el Teatro Vorterix','active')
+INSERT INTO public.campaigns(id,artist,title,status) VALUES ('adela-prima','Adela','PRIMA en el Teatro Vorterix','pending')
 ON CONFLICT (id) DO UPDATE SET status='active', title=EXCLUDED.title;
 
 INSERT INTO public.missions(id,campaign_id,title,kind,status,general_reward,campaign_reward,repeat_period,max_checks,question_seconds) VALUES
@@ -51,3 +51,6 @@ BEGIN
     END IF;
   END LOOP;
 END $$;
+
+-- Tomi lo pasó a Próximamente.
+UPDATE public.campaigns SET status='pending' WHERE id='adela-prima';

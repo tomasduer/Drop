@@ -252,7 +252,7 @@ html[data-drop="adela-prima"] {
   --gradient-drop-soft: linear-gradient(145deg, oklch(0.66 0.25 355 / 0.16), oklch(0.97 0.006 350 / 0.1));
   --gradient-glow: radial-gradient(circle at 85% 0%, oklch(0.8 0.15 355 / 0.35), transparent 50%);
   --shadow-glow: 0 10px 30px -10px oklch(0.58 0.25 357 / 0.45);
-  --font-display: "Permanent Marker", "Comic Sans MS", cursive;
+  --font-display: "Rock Salt", "Comic Sans MS", cursive;
   --display-transform: uppercase;
   --texture-opacity: 0.05;
 }
@@ -380,3 +380,5 @@ body::after {
   box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.06), 0 12px 28px -18px oklch(0 0 0 / 0.8);
 }
 html[data-drop="maria"] { --texture-opacity: 0.05; }
+/* Rock Salt tiene trazos altos: más aire entre líneas para que no pise el texto de abajo. */
+html[data-drop="adela-prima"] :is(h1, h2, h3, .font-display) { line-height: 1.45; }

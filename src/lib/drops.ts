@@ -72,8 +72,8 @@ export const DROP_CATALOG: DropInfo[] = [
   {
     id: "adela-prima", kind: "show", artist: "Adela", title: "PRIMA en el Teatro Vorterix",
     tagline: "Sideshow de Lollapalooza. Una sola noche.",
-    description: "Adela presenta su nuevo álbum PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix. Jugá las misiones, subí en el ranking y acercate a la primera fila.",
-    cover: adelaIcon, hero: adelaHero, album: adelaCover, dates: "Sideshow de Lollapalooza · Teatro Vorterix", status: "active", fandom: "Primas",
+    description: "Adela presenta su nuevo álbum PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix. Activá el aviso y enterate primero cuando abran las misiones.",
+    cover: adelaIcon, hero: adelaHero, album: adelaCover, dates: "Próximamente · Sideshow de Lollapalooza · Teatro Vorterix", status: "upcoming", fandom: "Primas",
   },
   {
     id: "tini", artist: "TINI", title: "Nueva era",

@@ -34,3 +34,4 @@ dist-ssr
 # Claves locales (usar .env.example como plantilla)
 .env
 .env.local
+.env.lovable

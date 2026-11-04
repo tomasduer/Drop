@@ -20,6 +20,7 @@ export type ShowEvent = {
   city: string;
   venue: string;
   image_url: string | null;
+  url?: string;
 };
 
 export type DropCard = {

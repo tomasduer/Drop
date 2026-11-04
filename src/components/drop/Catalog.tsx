@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
-  getCatalogAlbum, getCatalogArtist, searchCatalog,
+  getCatalogAlbum, getCatalogArtist, getExternalShows, searchCatalog, type ExternalShow,
   type CatalogAlbum, type CatalogAlbumDetail, type CatalogArtist, type CatalogArtistDetail, type CatalogSearch, type CatalogTrack,
 } from "@/lib/music.functions";
 import { useMusicPlayer } from "./MusicPlayer";
@@ -17,6 +17,8 @@ const spotifySearch = (q: string) => `https://open.spotify.com/search/${encodeUR
 /** Resultados del catálogo musical para una búsqueda (artistas, álbumes, canciones). */
 export function CatalogResults({ query }: { query: string }) {
   const search = useServerFn(searchCatalog);
+  const searchShows = useServerFn(getExternalShows);
+  const [shows, setShows] = useState<ExternalShow[]>([]);
   const [data, setData] = useState<CatalogSearch | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -25,10 +27,11 @@ export function CatalogResults({ query }: { query: string }) {
 
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) { setData(null); return; }
+    if (q.length < 2) { setData(null); setShows([]); return; }
     let cancelled = false;
     setLoading(true); setError(false);
     const t = setTimeout(() => {
+      searchShows({ data: { q } }).then((r) => { if (!cancelled) setShows(r); }).catch(() => { if (!cancelled) setShows([]); });
       search({ data: { q } })
         .then((r) => { if (!cancelled) setData(r); })
         .catch(() => { if (!cancelled) setError(true); })
@@ -65,6 +68,25 @@ export function CatalogResults({ query }: { query: string }) {
         <div>
           <p className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Canciones</p>
           <TrackList tracks={data.tracks} showCover />
+        </div>
+      )}
+      {shows.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Próximos shows</p>
+          <ul className="divide-y divide-border">
+            {shows.map((s) => (
+              <li key={s.id}>
+                <a href={s.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 py-2.5">
+                  {s.image_url && <img loading="lazy" src={s.image_url} alt="" className="h-12 w-16 shrink-0 rounded-lg object-cover" />}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">{s.title}</span>
+                    <span className="block truncate text-[11px] text-muted-foreground">{s.event_date ? new Date(s.event_date).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" }) : "Fecha a confirmar"} · {s.venue}{s.city ? `, ${s.city}` : ""}</span>
+                  </span>
+                  <ExternalLink className="h-4 w-4 shrink-0 text-primary" />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
       <AlbumSheet id={album} onClose={() => setAlbum(null)} onArtist={(id) => { setAlbum(null); setArtist(id); }} />

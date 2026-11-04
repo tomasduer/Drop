@@ -61,3 +61,47 @@ export const getCatalogArtist = createServerFn({ method: 'POST' })
     const [a, top, albums] = await Promise.all([get(`/artist/${data.id}`), get(`/artist/${data.id}/top?limit=10`), get(`/artist/${data.id}/albums?limit=25`)]);
     return { ...artist(a), top: (top.data ?? []).map((t: unknown) => track(t)), albums: (albums.data ?? []).map((x: unknown) => album(x, a)) };
   });
+
+// Agenda de shows de Ticketmaster (Discovery API). Necesita el secreto TICKETMASTER_API_KEY en Cloudflare.
+export type ExternalShow = { id: string; title: string; artist: string; event_date: string | null; city: string; venue: string; image_url: string | null; url: string };
+export const DEFAULT_SHOW_ARTISTS = ['LALI', 'María Becerra', 'TINI', 'Dillom'];
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function ticketmaster(keyword: string, size: number): Promise<ExternalShow[]> {
+  const key = process.env['TICKETMASTER_API_KEY'];
+  if (!key) return [];
+  const url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${encodeURIComponent(key)}&keyword=${encodeURIComponent(keyword)}&classificationName=music&sort=date,asc&size=${size}`;
+  const res = await fetch(url, { headers: { accept: 'application/json' } });
+  if (!res.ok) return [];
+  const json: any = await res.json();
+  const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const k = norm(keyword);
+  return (json?._embedded?.events ?? [])
+    .filter((e: any) => (e._embedded?.attractions ?? []).some((a: any) => norm(a.name ?? '').includes(k)) || norm(e.name ?? '').includes(k))
+    .map((e: any): ExternalShow => {
+      const venue = e._embedded?.venues?.[0];
+      const img = [...(e.images ?? [])].filter((i: any) => i.ratio === '16_9').sort((a: any, b: any) => Math.abs(a.width - 640) - Math.abs(b.width - 640))[0] ?? e.images?.[0];
+      return {
+        id: `tm-${e.id}`, title: e.name, artist: e._embedded?.attractions?.[0]?.name ?? keyword,
+        event_date: e.dates?.start?.dateTime ?? e.dates?.start?.localDate ?? null,
+        city: [venue?.city?.name, venue?.country?.countryCode].filter(Boolean).join(', '), venue: venue?.name ?? '',
+        image_url: img?.url ?? null, url: e.url ?? '',
+      };
+    });
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+export const getExternalShows = createServerFn({ method: 'POST' })
+  .inputValidator((input: unknown) => z.object({ q: z.string().trim().max(80).optional() }).parse(input ?? {}))
+  .handler(async ({ data }): Promise<ExternalShow[]> => {
+    try {
+      const lists = data.q && data.q.length >= 2
+        ? [await ticketmaster(data.q, 10)]
+        : await Promise.all(DEFAULT_SHOW_ARTISTS.map((a) => ticketmaster(a, 5)));
+      const seen = new Set<string>();
+      return lists.flat().filter((s) => (seen.has(s.id) ? false : (seen.add(s.id), true)))
+        .sort((a, b) => (a.event_date ?? '9').localeCompare(b.event_date ?? '9')).slice(0, 20);
+    } catch {
+      return [];
+    }
+  });

@@ -9,6 +9,7 @@ import { getExploreData, saveDropAction, showAttendanceAction } from "@/lib/expl
 import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData } from "@/lib/explore-data";
 import { useDropAuth } from "./AuthProvider";
 import { CatalogResults } from "./Catalog";
+import { getExternalShows } from "@/lib/music.functions";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
@@ -58,6 +59,9 @@ export function ExplorarView() {
   const [query, setQuery] = useState("");
   const [reading, setReading] = useState<CommunityReview | null>(null);
   const [savingDrop, setSavingDrop] = useState<string | null>(null);
+  const fetchExternalShows = useServerFn(getExternalShows);
+  const [externalShows, setExternalShows] = useState<ShowEvent[]>([]);
+  useEffect(() => { fetchExternalShows({ data: {} }).then(setExternalShows).catch(() => setExternalShows([])); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   useEffect(() => {
     if (mode !== "user") {
@@ -91,7 +95,9 @@ export function ExplorarView() {
   const match = (...parts: (string | null | undefined)[]) => !q || parts.some((p) => p?.toLowerCase().includes(q));
   const visibleDrops = drops.filter((d) => match(d.artist, d.title));
   const visibleReviews = data.reviews.filter((r) => match(r.subject_title, r.subject_artist, r.author_name, r.text));
-  const visibleShows = data.shows.filter((s) => match(s.title, s.artist, s.city, s.venue));
+  const visibleShows = [...externalShows, ...data.shows]
+    .filter((s) => match(s.title, s.artist, s.city, s.venue))
+    .sort((a, b) => (a.event_date ?? "9").localeCompare(b.event_date ?? "9"));
   const visibleGenres = GENRES.filter((g) => match(g.name, g.detail));
 
   const onSaveDrop = async (drop: DropCard) => {
@@ -223,7 +229,7 @@ export function ExplorarView() {
                     <p className="text-[11px] text-muted-foreground">{show.artist}</p>
                     <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground"><CalendarDays className="h-3 w-3" />{show.event_date ? new Date(show.event_date).toLocaleDateString("es-AR") : "Fecha a confirmar"}</p>
                     <p className="flex items-center gap-1 text-[11px] text-muted-foreground"><MapPin className="h-3 w-3" />{show.venue}{show.city ? ` · ${show.city}` : ""}</p>
-                    <Button
+                    {show.url ? <Button asChild variant="outline" size="sm" className="mt-2 w-full text-[11px]"><a href={show.url} target="_blank" rel="noreferrer">Ver entradas</a></Button> : <Button
                       variant={attended ? "secondary" : "outline"}
                       size="sm"
                       className="mt-2 w-full text-[11px]"
@@ -239,7 +245,7 @@ export function ExplorarView() {
                       }}
                     >
                       {attended ? "Asistí ✓" : "Asistí a este show"}
-                    </Button>
+                    </Button>}
                   </div>
                 </article>
               );

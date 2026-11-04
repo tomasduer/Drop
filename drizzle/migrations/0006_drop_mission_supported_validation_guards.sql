@@ -1,0 +1,7 @@
+CREATE FUNCTION public.drop_validate_mission_config() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NEW.status='verified' AND NEW.kind NOT IN ('trivia','order','clue') THEN RAISE EXCEPTION 'this activity has no supported validator'; END IF; RETURN NEW; END $$;
+REVOKE ALL ON FUNCTION public.drop_validate_mission_config() FROM PUBLIC,anon,authenticated;
+CREATE TRIGGER mission_config_validation BEFORE INSERT OR UPDATE ON public.missions FOR EACH ROW EXECUTE FUNCTION public.drop_validate_mission_config();
+CREATE FUNCTION public.drop_validate_attempt_period() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NEW.status='playing' AND EXISTS(SELECT 1 FROM public.missions m WHERE m.id=NEW.mission_id AND m.repeat_period='daily') AND NEW.period_key<>(now() AT TIME ZONE 'America/Argentina/Buenos_Aires')::date::text THEN RAISE EXCEPTION 'daily attempt expired'; END IF; RETURN NEW; END $$;
+REVOKE ALL ON FUNCTION public.drop_validate_attempt_period() FROM PUBLIC,anon,authenticated;
+CREATE TRIGGER mission_attempt_period BEFORE UPDATE ON public.mission_attempts FOR EACH ROW EXECUTE FUNCTION public.drop_validate_attempt_period();
+REVOKE ALL ON FUNCTION public.drop_complete_attempt(uuid,integer,integer) FROM service_role;

@@ -1,0 +1,16 @@
+import asyncio
+from pathlib import Path
+from playwright.async_api import async_playwright
+async def main():
+ Path('/tmp/browser/drop-entry').mkdir(parents=True,exist_ok=True)
+ async with async_playwright() as p:
+  b=await p.chromium.launch(headless=True);page=await b.new_page(viewport={'width':1280,'height':1800});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+  await page.goto('http://localhost:8080/');await page.get_by_role('link',name='Ingresar sin cuenta',exact=True).click();await page.get_by_role('heading',name='Tu DROP sin cuenta.',exact=True).wait_for();assert page.url.endswith('/invitado');await page.wait_for_timeout(1500);assert await page.get_by_label('Email',exact=True).count()==0;await page.get_by_role('button',name='Entrar a Mi DROP',exact=True).click();await page.get_by_role('alert').wait_for();await page.get_by_label('Usuario temporal',exact=True).fill('Fan temporal');await page.get_by_role('button',name='Entrar a Mi DROP',exact=True).click();await page.get_by_role('heading',name='Mi DROP',exact=True).wait_for();await page.get_by_text('Fan temporal',exact=True).wait_for()
+  await page.get_by_role('button',name='Álbumes',exact=True).click();await page.get_by_placeholder('Buscar álbum o artista').fill('BRAVA');card=page.get_by_role('article').filter(has=page.get_by_role('heading',name='BRAVA',exact=True));await card.get_by_role('button',name='Puntuar y reseñar').click();await page.get_by_role('button',name='4 estrellas',exact=True).click();await page.get_by_label('Reseña').fill('Muy buen álbum');await page.get_by_role('button',name='Guardar opinión').click();await card.get_by_text('4/5',exact=True).wait_for();await page.get_by_role('button',name='Perfil',exact=True).click()
+  assert await page.get_by_text('0',exact=True).count()>0,'guest starts and remains at zero real points'
+  await page.get_by_role('link',name='Entrar al drop',exact=True).click();await page.wait_for_timeout(1800);await page.get_by_role('button',name='Misiones',exact=True).click();await page.get_by_role('heading',name='Misiones',exact=True).wait_for();assert await page.get_by_role('button',name='Jugar ahora',exact=True).count()==0,'guest cannot award authenticated mission points';await page.get_by_role('button',name='Jugar de práctica',exact=True).click()
+  await page.get_by_role('dialog').get_by_role('button',name='Jugar de práctica',exact=True).click();await page.get_by_role('button',name='BRAVA',exact=True).click();await page.get_by_role('button',name='María Becerra',exact=True).click();await page.get_by_role('button',name='Dillom',exact=True).click();await page.get_by_text('Resultado: 3 / 3 respuestas correctas',exact=True).wait_for();await page.keyboard.press('Escape')
+  await page.get_by_role('button',name='Ranking',exact=True).click();await page.get_by_text('Ingresá con tu cuenta para participar del ranking real.',exact=True).wait_for();assert not errors,errors
+  await page.goto('http://localhost:8080/mi-drop');await page.wait_for_url('**/auth?mode=login');assert await page.get_by_text('Fan temporal',exact=True).count()==0
+  await b.close();print('PASS direct guest entry with required name, optional photo omitted, practice trivia, session-only album review, zero points, no real ranking and cleared guest on reload')
+asyncio.run(main())

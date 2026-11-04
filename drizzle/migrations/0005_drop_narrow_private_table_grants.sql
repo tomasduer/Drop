@@ -1,0 +1,4 @@
+REVOKE ALL ON public.mission_validation_rules,public.mission_clue_discoveries FROM anon,authenticated; GRANT ALL ON public.mission_validation_rules,public.mission_clue_discoveries TO service_role;
+REVOKE ALL ON public.campaigns,public.missions,public.mission_attempts,public.mission_completions,public.campaign_balances,public.fan_follows,public.reward_catalog,public.reward_redemptions FROM anon,authenticated;
+GRANT SELECT ON public.campaigns,public.missions,public.mission_attempts,public.mission_completions,public.campaign_balances,public.fan_follows,public.reward_catalog,public.reward_redemptions TO authenticated;
+GRANT ALL ON public.campaigns,public.missions,public.mission_attempts,public.mission_completions,public.campaign_balances,public.fan_follows,public.reward_catalog,public.reward_redemptions TO service_role;

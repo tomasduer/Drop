@@ -1,0 +1,49 @@
+# Roadmap
+- [x] Plan Explorar + nuevo Mi DROP aprobado
+- [x] Migración aditiva preparada: username/bio, drop_saves, reviews, shows, user_shows, lectura de seguidores (se aplica al aceptar el borrador)
+- [x] Ruta /explorar con Drops de la semana, Opiniones, Shows, Géneros y Artistas emergentes (estados vacíos honestos)
+- [x] Ruta /actividad con movimientos y recompensas reales
+- [x] Mi DROP reconstruido: encabezado, stats reales, Mis DROPS con estados, pestañas Shows/Reseñas/Actividad/Stats/Álbumes
+- [x] Navegación inferior global (Inicio, Comunidad, Explorar, Actividad, Mi DROP) y aterrizaje en Explorar tras ingresar
+- [x] Verificar en navegador: Explorar, navegación, Mi DROP, invitado, toast de guardado y edición de perfil
+- [ ] Tras aceptar el borrador: probar guardar drop, publicar reseña y registrar show con persistencia real
+- [x] Auditar tablas, funciones, permisos y conexiones actuales de puntos, misiones y rankings
+- [x] Actualizar alcance: canjes independientes del ranking, configuración por campaña, Mi DROP permanente y preservación histórica
+- [x] Exportación descargada; usuaria acepta avanzar sin restauración comprobada
+- [x] Inventariar cuentas, perfiles, saldos, movimientos y almacenamiento sin cambiar datos
+- [x] Registro central, balances separados, operaciones atómicas y bloqueo de escrituras directas
+- [x] Trivia validada, intentos persistidos y anti-duplicados concurrentes; verificar Mi DROP tras recarga
+- [x] Conectar Global, Amigos y Semanal a participación real; preservar seguimiento
+- [x] Mantener streaming/QR/AR/rompecabezas demostrativos sin acreditación; reseñas y álbumes manuales por sesión
+- [x] Probar reglas autenticadas y recorrido invitado, y revisar perfil móvil
+- [ ] Activar desafíos de audio, pistas y recompensas reales (faltan clips autorizados, códigos/contenido y catálogo confirmado)
+- [ ] Verificar canje real y seguimiento entre dos participantes (faltan recompensa configurada y segundo participante autorizado)
+- [x] Corregir ingreso invitado directo con nombre temporal, foto opcional y cero puntos, sin sesión guardada
+- [x] Permitir trivia de práctica para invitados, conservar actividades pendientes como demos y mostrar su foto en Mi DROP
+- [ ] Integraciones musicales reales separadas del login (requiere confirmar conexión propia y credenciales de Spotify/Apple)
+- [ ] Investigar límites oficiales de Spotify, Apple Music y YouTube Music
+- [x] Verificar aislamiento y recorrido invitado en navegador: alta con/sin foto, trivia, reseñas, cero puntos y limpieza al recargar/salir
+- [x] Abrir con la explicación y opciones de acceso; ingresar a Mi DROP
+- [x] Mover selector de drops a Mi DROP con portadas pequeñas en lista
+- [x] Permitir puntuar y reseñar desde la búsqueda al sumar un álbum escuchado
+- [x] Verificar entrada, selección y reseñas
+- [x] Actualizar portadas LIBRA, BRAVA, Soy y A Bailar
+- [x] Agregar y verificar puntuaciones y reseñas de álbumes escuchados
+- [x] Convertir login y perfil en simulación sin datos reales
+- [x] Incorporar Quimera / Por cesárea y las fotos restantes
+- [x] Verificar acceso vacío, perfil y portadas
+- [x] Agregar ingreso sin cuenta y selector LALI / María Becerra / Dillom en bienvenida
+- [x] Cambiar sede del pasaporte a Complejo Art Media
+- [x] Verificar recorrido sin cuenta hasta el pasaporte
+- [x] Reemplazar acceso real por login y registro simulados (pedido actualizado)
+- [x] Recuperar perfil de demostración y bienvenida
+- [x] Verificar registro simulado, acceso y bienvenida
+- [x] Reemplazar el logo y adaptar la paleta DROP
+- [x] Crear Mi DROP con perfil, álbumes y selector de experiencias
+- [x] Conectar puntos generales, marcado de álbumes y canjes simulados
+- [x] Agregar acceso y retorno desde la navegación actual
+- [x] Verificar flujo del prototipo
+- [x] Agregar álbumes manualmente en la sección Álbumes del perfil
+- [x] Verificar alta manual, marcado como escuchado y reseña del álbum agregado
+- [x] Fase 1: auth real email/Google, perfiles persistidos, movimientos de puntos, invitado y recuperación
+- [x] Fase 1: verificar flujo en navegador (invitado, errores, recuperación; login confirmado y Google pendientes de cuenta real)

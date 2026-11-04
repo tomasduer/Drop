@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791234689165,
+      "tag": "0000_create_drop_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793304650167,
+      "tag": "0001_real_auth_points",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793667408997,
+      "tag": "0002_drop_campaign_mission_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793667439222,
+      "tag": "0003_drop_atomic_points_and_mission_validation",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793667455388,
+      "tag": "0004_drop_private_state_and_real_rankings",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793667593960,
+      "tag": "0005_drop_narrow_private_table_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793667788180,
+      "tag": "0006_drop_mission_supported_validation_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793749837536,
+      "tag": "0007_explorar_mi_drop",
+      "breakpoints": true
+    }
+  ]
+}

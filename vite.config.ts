@@ -9,10 +9,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
 import type { Plugin } from "vite";
 
-// Fotos locales: si existe src/assets/fotos/<nombre>.(webp|png|jpg|jpeg), se usa esa
+// Fotos locales (rama sin Lovable): si existe src/assets/fotos/<nombre>.(webp|png|jpg|jpeg), se usa esa
 // en lugar de la URL alojada en Lovable. Así la app funciona fuera de Lovable sin tocar
 // los componentes, que siguen importando los archivos *.asset.json.
 const VIRTUAL = "\0drop-photo:";
+const FALLBACKS = ["album-cover", "drop-photo-18", "drop-photo-19"];
 const LOCAL_EXTS = [".webp", ".avif", ".png", ".jpg", ".jpeg"];
 function localPhotos(): Plugin {
   return {
@@ -30,9 +31,11 @@ function localPhotos(): Plugin {
       const original = meta.original_filename ?? basename(file, ".asset.json");
       const stem = basename(original, extname(original));
       const folder = join(dirname(file), "fotos");
-      const local = [original, ...LOCAL_EXTS.map((ext) => stem + ext)]
-        .map((name) => join(folder, name))
-        .find((candidate) => existsSync(candidate));
+      const find = (base: string, name: string) =>
+        [name, ...LOCAL_EXTS.map((ext) => base + ext)].map((n) => join(folder, n)).find((c) => existsSync(c));
+      // Si falta una foto (por ejemplo, avatares de fans de demo), se usa una portada local
+      // para que no aparezcan imágenes rotas fuera de Lovable.
+      const local = find(stem, original) ?? FALLBACKS.map((f) => find(f, f)).find(Boolean);
       // Sin foto local se mantiene la URL alojada en Lovable.
       const url = local ? `import url from ${JSON.stringify(local + "?url")};` : `const url = ${JSON.stringify(meta.url)};`;
       return `${url}\nexport default { ...${JSON.stringify(meta)}, url };`;

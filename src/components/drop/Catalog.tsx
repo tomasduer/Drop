@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, ExternalLink, Pause, Play, Plus, Users } from "lucide-react";
+import { Check, ExternalLink, Pause, Play, Plus, Star, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -10,6 +10,8 @@ import {
 } from "@/lib/music.functions";
 import { useMusicPlayer } from "./MusicPlayer";
 import { useDropAuth } from "./AuthProvider";
+import { AlbumReviewDialog } from "./AlbumReviewDialog";
+import { useAlbumActions } from "./useAlbumActions";
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 const spotifySearch = (q: string) => `https://open.spotify.com/search/${encodeURIComponent(q)}`;
@@ -142,7 +144,9 @@ export function TrackList({ tracks, showCover }: { tracks: CatalogTrack[]; showC
 
 export function AlbumSheet({ id, onClose, onArtist }: { id: number | null; onClose: () => void; onArtist?: (id: number) => void }) {
   const load = useServerFn(getCatalogAlbum);
-  const { customAlbums, addAlbum, mode } = useDropAuth();
+  const { customAlbums, addAlbum, mode, reviews } = useDropAuth();
+  const { listened, saving: marking, toggleListened, storeReview } = useAlbumActions();
+  const [reviewing, setReviewing] = useState(false);
   const { play } = useMusicPlayer();
   const [album, setAlbum] = useState<CatalogAlbumDetail | null>(null);
   const [error, setError] = useState(false);
@@ -155,6 +159,8 @@ export function AlbumSheet({ id, onClose, onArtist }: { id: number | null; onClo
   }, [id]);
   const libraryId = album ? `dz-${album.id}` : "";
   const inLibrary = customAlbums.some((a) => a.id === libraryId);
+  const isListened = listened.includes(libraryId);
+  const libAlbum = album ? { id: libraryId, title: album.title, artist: album.artist, cover: album.cover } : null;
   return (
     <Drawer open={id !== null} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DrawerContent className="mx-auto max-h-[90dvh] max-w-[440px]">
@@ -179,10 +185,27 @@ export function AlbumSheet({ id, onClose, onArtist }: { id: number | null; onClo
                 setSaving(true);
                 const ok = await addAlbum({ id: libraryId, title: album.title, artist: album.artist, year: album.year, cover: album.cover });
                 setSaving(false);
-                if (ok) toast.success("Álbum sumado a tu biblioteca", { description: mode === "user" ? "Marcalo como escuchado en Mi DROP para sumar 120 puntos." : "En modo invitado se guarda solo durante esta visita." });
+                if (ok) toast.success("Álbum sumado a tu biblioteca", { description: mode === "user" ? "Marcalo como escuchado acá abajo para sumar 120 puntos y reseñarlo." : "En modo invitado se guarda solo durante esta visita." });
               }}>{inLibrary ? <><Check /> En tu biblioteca</> : <><Plus /> Sumar a mi biblioteca</>}</Button>
             </div>
+            {inLibrary && libAlbum && (
+              <div className="mb-3 rounded-2xl border border-primary/40 bg-primary/10 p-3">
+                {reviews[libraryId] && <p className="mb-2 flex items-center gap-1 text-xs font-bold text-primary"><Star className="h-3 w-3 fill-current" />Tu opinión: {reviews[libraryId].rating}/5</p>}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" variant={isListened ? "secondary" : "default"} disabled={marking} onClick={() => void toggleListened(libraryId)}>
+                    {isListened ? <><Check /> Escuchado</> : "Marcar escuchado · +120"}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={marking} onClick={async () => {
+                    if (!isListened && !(await toggleListened(libraryId))) return;
+                    setReviewing(true);
+                  }}><Star /> {reviews[libraryId] ? "Editar reseña" : "Puntuar y reseñar"}</Button>
+                </div>
+              </div>
+            )}
             <TrackList tracks={album.trackList} />
+            {reviewing && libAlbum && listened.includes(libraryId) && (
+              <AlbumReviewDialog album={libAlbum} review={reviews[libraryId]} onClose={() => setReviewing(false)} onSave={(review) => { storeReview(libAlbum, review); setReviewing(false); }} />
+            )}
             <a href={spotifySearch(`${album.artist} ${album.title}`)} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 text-xs font-bold text-primary"><ExternalLink className="h-3.5 w-3.5" /> Escuchar completo en Spotify</a>
             <p className="mt-2 text-center text-[11px] text-muted-foreground">Vistas previas de 30 segundos · catálogo de Deezer</p>
           </div>

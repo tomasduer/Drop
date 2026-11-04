@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useDropAuth } from "./AuthProvider";
 import { useCurrentDrop } from "@/lib/drops";
-import { Heart, MessageCircle, Share2, Trophy, Send } from "lucide-react";
+import { Heart, Loader2, MessageCircle, Share2, Trophy, Send, Trash2 } from "lucide-react";
+import { CommentsDrawer, FanDrawer, FanSearch, FollowButton, sb, timeAgo, type Fan, type FeedPost, type SeedStats } from "./community";
 import { toast } from "sonner";
 import stickerNvaa from "@/assets/sticker-nvaa.png.asset.json";
 import simbolos33 from "@/assets/simbolos-33.png.asset.json";
@@ -10,7 +11,8 @@ import stencilWall from "@/assets/stencil-wall.png.asset.json";
 import laliAuto from "@/assets/lali-auto.png.asset.json";
 import albumCover from "@/assets/album-cover.png.asset.json";
 import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
-import { PHOTOS, avatarFor } from "@/lib/fan-avatars";import airbagBanda from "@/assets/airbag-banda.webp";
+import { PHOTOS, avatarFor } from "@/lib/fan-avatars";
+import airbagBanda from "@/assets/airbag-banda.webp";
 import airbagVivo from "@/assets/airbag-vivo.webp";
 import lnvGira from "@/assets/lnv-gira.webp";
 import adelaLengua from "@/assets/adela-lengua.webp";
@@ -166,37 +168,108 @@ const OTHER_GROUPS: Record<string, typeof groups> = {
   ],
 };
 
+type Card = {
+  key: string; user: string; time: string; text: string; image?: string; avatar?: string | null;
+  likes: number; comments: number; liked: boolean; mine?: boolean; fan?: Fan; postId?: string; local?: boolean;
+};
+
 export function ComunidadView() {
-  const { profile } = useDropAuth();
+  const { profile, mode } = useDropAuth();
   const drop = useCurrentDrop();
   const isLali = drop.id === "lali";
+  const isUser = mode === "user";
   const dropFeed = isLali ? feed : OTHER_FEEDS[drop.id] ?? [];
   const dropGroups = isLali ? groups : OTHER_GROUPS[drop.id] ?? [{ name: drop.fandom, members: 1200 + drop.id.length * 731, img: drop.cover }];
-  const [liked, setLiked] = useState<string[]>([]);
   const [joined, setJoined] = useState<string[]>(() => readLocal<string[]>("drop-grupos", []));
   const postsKey = isLali ? "drop-mis-posts" : `drop-mis-posts-${drop.id}`;
-  const [myPosts, setMyPosts] = useState<Post[]>(() => readLocal<Post[]>(isLali ? "drop-mis-posts" : `drop-mis-posts-${drop.id}`, []));
+  // Los invitados no tienen cuenta: sus posteos quedan solo en este teléfono.
+  const [myPosts, setMyPosts] = useState<Post[]>(() => readLocal<Post[]>(postsKey, []));
   const [draft, setDraft] = useState("");
   const [sticker, setSticker] = useState<string | null>(null);
+  const [posting, setPosting] = useState(false);
+  const [dbPosts, setDbPosts] = useState<FeedPost[]>([]);
+  const [stats, setStats] = useState<SeedStats>({});
+  const [openComments, setOpenComments] = useState<Card | null>(null);
+  const [fan, setFan] = useState<Fan | null>(null);
   useEffect(() => writeLocal("drop-grupos", joined), [joined]);
   useEffect(() => writeLocal(postsKey, myPosts.slice(0, 20)), [myPosts, postsKey]);
   const handle = (profile.username?.trim() || profile.display_name || "fan").replace(/^@/, "");
-  const allPosts = [...myPosts, ...dropFeed];
+  const seedKey = (i: number) => `seed:${drop.id}:${i}`;
 
-  const publish = () => {
+  async function loadFeed() {
+    const keys = dropFeed.map((p, i) => (p.kind === "post" ? seedKey(i) : null)).filter(Boolean);
+    const { data } = await sb.rpc<{ posts: FeedPost[]; stats: SeedStats }>("drop_feed", { p_campaign: drop.id, p_seed_keys: keys });
+    if (!data) return;
+    setDbPosts(data.posts ?? []); setStats(data.stats ?? {});
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void loadFeed(); }, [drop.id, mode]);
+
+  const cards: (Card | Extract<Post, { kind: "achievement" }>)[] = [
+    ...myPosts.flatMap((p, i) => (p.kind === "post" ? [{ key: `local:${i}`, user: p.user, time: p.time, text: p.text, image: p.image, avatar: p.avatar, likes: 0, comments: 0, liked: false, mine: true, local: true }] : [])),
+    ...dbPosts.map((p): Card => ({
+      key: p.key, user: p.author, time: timeAgo(p.created_at), text: p.text, image: p.sticker ?? undefined, avatar: p.avatar,
+      likes: p.likes, comments: p.comments, liked: p.liked, mine: p.mine, postId: p.id,
+      fan: { id: p.user_id, name: p.author, avatar: p.avatar, following: p.following },
+    })),
+    ...dropFeed.map((p, i) => {
+      if (p.kind === "achievement") return p;
+      const st = stats[seedKey(i)];
+      return { key: seedKey(i), user: p.user, time: p.time, text: p.text, image: p.image, avatar: p.avatar, likes: p.likes + (st?.likes ?? 0), comments: st?.comments ?? 0, liked: !!st?.liked };
+    }),
+  ];
+
+  const patchCard = (key: string, f: (c: { likes: number; comments: number; liked: boolean }) => { likes: number; comments: number; liked: boolean }) => {
+    if (key.startsWith("p:")) setDbPosts((ps) => ps.map((p) => (p.key === key ? { ...p, ...f(p) } : p)));
+    else setStats((s) => ({ ...s, [key]: f(s[key] ?? { likes: 0, comments: 0, liked: false }) }));
+  };
+
+  async function toggleLike(c: Card) {
+    if (c.local) return;
+    if (!isUser) { toast.message("Creá tu cuenta para dar like", { description: "Así tus likes y comentarios quedan guardados." }); return; }
+    const like = !c.liked;
+    patchCard(c.key, (x) => ({ ...x, liked: like, likes: x.likes + (like ? 1 : -1) }));
+    const q = like ? sb.from("post_likes").insert({ post_key: c.key }) : sb.from("post_likes").delete().eq("post_key", c.key).eq("user_id", profile.id);
+    const { error } = await q;
+    if (error) { patchCard(c.key, (x) => ({ ...x, liked: !like, likes: x.likes + (like ? -1 : 1) })); toast.error("No se pudo guardar el like"); }
+  }
+
+  const publish = async () => {
     if (!draft.trim() && !sticker) { toast.error("Escribí algo o elegí un sticker"); return; }
-    setMyPosts((p) => [{ kind: "post", user: handle, time: "recién", text: draft.trim(), likes: 0, comments: 0, image: sticker ?? undefined, avatar: profile.avatar_url, mine: true }, ...p]);
-    toast.success("Publicado en Comunidad");
+    if (!isUser) {
+      setMyPosts((p) => [{ kind: "post", user: handle, time: "recién", text: draft.trim(), likes: 0, comments: 0, image: sticker ?? undefined, avatar: profile.avatar_url, mine: true }, ...p]);
+      toast.success("Publicado en este teléfono", { description: "Creá tu cuenta para que lo vean todos los fans." });
+    } else {
+      setPosting(true);
+      const { error } = await sb.from("community_posts").insert({ campaign_id: drop.id, text: draft.trim().slice(0, 500), sticker });
+      setPosting(false);
+      if (error) { toast.error("No se pudo publicar"); return; }
+      toast.success("Publicado en Comunidad");
+      await loadFeed();
+    }
     setDraft(""); setSticker(null);
   };
 
-  const sharePost = async (p: Extract<Post, { kind: "post" }>) => {
+  async function removePost(c: Card) {
+    if (c.local) { setMyPosts((p) => p.filter((_, i) => `local:${i}` !== c.key)); return; }
+    const { error } = await sb.from("community_posts").delete().eq("id", c.postId);
+    if (error) { toast.error("No se pudo borrar"); return; }
+    toast.success("Posteo borrado"); await loadFeed();
+  }
+
+  const sharePost = async (p: Card) => {
     const text = `@${p.user} en DROP: ${p.text}`;
     const url = `${window.location.origin}/drop`;
     try {
       if (navigator.share) await navigator.share({ title: "DROP · Comunidad", text, url });
       else { await navigator.clipboard.writeText(`${text} ${url}`); toast.success("Copiado para compartir"); }
     } catch { /* cancelado */ }
+  };
+
+  // Al seguir/dejar de seguir, actualizamos todos los posteos de ese fan.
+  const onFanChange = (f: Fan) => {
+    setFan(f);
+    setDbPosts((ps) => ps.map((p) => (p.user_id === f.id ? { ...p, following: f.following } : p)));
   };
 
   return (
@@ -215,6 +288,7 @@ export function ComunidadView() {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={2}
+          maxLength={500}
           placeholder="Contá qué encontraste hoy…"
           className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
@@ -232,14 +306,17 @@ export function ComunidadView() {
             </button>
           ))}
           <button
-            onClick={publish}
-            className="mt-1 flex w-full items-center justify-center gap-1 rounded-xl px-4 py-2.5 text-sm font-black text-primary-foreground"
+            onClick={() => void publish()}
+            disabled={posting}
+            className="mt-1 flex w-full items-center justify-center gap-1 rounded-xl px-4 py-2.5 text-sm font-black text-primary-foreground disabled:opacity-60"
             style={{ backgroundImage: "var(--gradient-drop)" }}
           >
-            <Send className="h-3.5 w-3.5" /> Publicar
+            {posting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Publicar
           </button>
         </div>
       </section>
+
+      <FanSearch onOpenFan={setFan} />
 
       {/* Groups */}
       <h2 className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -281,8 +358,8 @@ export function ComunidadView() {
         Actividad
       </h2>
       <div className="space-y-3">
-        {allPosts.map((p, i) =>
-          p.kind === "achievement" ? (
+        {cards.map((p, i) =>
+          "kind" in p ? (
             <div
               key={`a${i}`}
               className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3"
@@ -304,24 +381,25 @@ export function ComunidadView() {
               </div>
             </div>
           ) : (
-            <article
-              key={`${p.user}-${p.time}-${i}`}
-              className="overflow-hidden rounded-2xl border border-border bg-card"
-            >
+            <article key={p.key} className="overflow-hidden rounded-2xl border border-border bg-card">
               <div className="p-4 pb-3">
                 <header className="mb-2 flex items-center gap-3">
-                  <div
-                    className="grid h-10 w-10 place-items-center rounded-full text-sm font-bold text-primary-foreground"
-                    style={{ backgroundImage: "var(--gradient-drop)" }}
+                  <button
+                    onClick={() => p.fan && !p.mine && setFan(p.fan)}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                    disabled={!p.fan || p.mine}
                   >
-                    <img loading="lazy" decoding="async" src={p.avatar || avatarFor(p.user)} alt={`Foto de @${p.user}`} className="h-full w-full rounded-full object-cover" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">@{p.user}</p>
-                    <p className="text-[11px] text-muted-foreground">{p.time}</p>
-                  </div>
+                    <img loading="lazy" decoding="async" src={p.avatar || avatarFor(p.user)} alt={`Foto de ${p.user}`} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold">{p.fan ? p.user : `@${p.user}`}</span>
+                      <span className="block text-[11px] text-muted-foreground">{p.time}{p.local ? " · solo en este teléfono" : ""}</span>
+                    </span>
+                  </button>
+                  {p.fan && !p.mine && isUser && (
+                    <FollowButton small fan={p.fan} onChange={(following) => onFanChange({ ...p.fan!, following })} />
+                  )}
                 </header>
-                {p.text && <p className="text-sm leading-relaxed">{p.text}</p>}
+                {p.text && <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{p.text}</p>}
               </div>
 
               {p.image && (
@@ -329,38 +407,50 @@ export function ComunidadView() {
                   src={p.image}
                   alt={`Publicación de ${p.user}`}
                   loading="lazy"
-                  className={p.mine ? "mx-4 mb-1 h-32 w-32 rounded-xl object-cover" : "max-h-72 w-full object-cover"}
+                  className={p.fan || p.local ? "mx-4 mb-1 h-32 w-32 rounded-xl object-cover" : "max-h-72 w-full object-cover"}
                 />
               )}
 
               <footer className="flex items-center justify-between p-4 pt-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-5">
                   <button
-                    onClick={() =>
-                      setLiked((l) => (l.includes(p.user + p.time) ? l.filter((n) => n !== p.user + p.time) : [...l, p.user + p.time]))
-                    }
-                    className={`flex items-center gap-1 ${liked.includes(p.user + p.time) ? "text-primary" : ""}`}
+                    onClick={() => void toggleLike(p)}
+                    disabled={p.local}
+                    aria-label={p.liked ? "Quitar me gusta" : "Me gusta"}
+                    className={`flex items-center gap-1 ${p.liked ? "text-primary" : ""}`}
                   >
-                    <Heart
-                      className={`h-4 w-4 ${liked.includes(p.user + p.time) ? "fill-current" : ""}`}
-                    />{" "}
-                    {p.likes + (liked.includes(p.user + p.time) ? 1 : 0)}
+                    <Heart className={`h-4 w-4 ${p.liked ? "fill-current" : ""}`} /> {p.likes}
                   </button>
-                  <button
-                    onClick={() => toast.message(`${p.comments} comentarios`, { description: "Los comentarios se abren durante el drop en vivo." })}
-                    className="flex items-center gap-1"
-                  >
-                    <MessageCircle className="h-4 w-4" /> {p.comments}
+                  {!p.local && (
+                    <button onClick={() => setOpenComments(p)} aria-label="Comentarios" className="flex items-center gap-1">
+                      <MessageCircle className="h-4 w-4" /> {p.comments}
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  {p.mine && (
+                    <button onClick={() => void removePost(p)} aria-label="Borrar posteo" className="flex items-center gap-1">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button onClick={() => void sharePost(p)} className="flex items-center gap-1 font-semibold">
+                    <Share2 className="h-4 w-4" /> Compartir
                   </button>
                 </div>
-                <button onClick={() => void sharePost(p)} className="flex items-center gap-1 font-semibold">
-                  <Share2 className="h-4 w-4" /> Compartir
-                </button>
               </footer>
             </article>
           )
         )}
       </div>
+
+      <CommentsDrawer
+        postKey={openComments?.key ?? null}
+        title={openComments ? `${openComments.user}: ${openComments.text}` : ""}
+        onClose={() => setOpenComments(null)}
+        onCountChange={(key, d) => patchCard(key, (x) => ({ ...x, comments: Math.max(0, x.comments + d) }))}
+        onOpenFan={(f) => { setOpenComments(null); setFan(f); }}
+      />
+      <FanDrawer fan={fan} onClose={() => setFan(null)} onChange={onFanChange} />
     </div>
   );
 }

@@ -4,17 +4,19 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { ALBUMS } from "@/lib/albums";
-import { deleteReview, getProfileExtras, publishReview } from "@/lib/explore.functions";
+import { getProfileExtras } from "@/lib/explore.functions";
+import { searchCatalog, type CatalogAlbum } from "@/lib/music.functions";
+import { useAlbumActions } from "./useAlbumActions";
 import { AlbumReviewDialog } from "./AlbumReviewDialog";
 import { AddAlbumDialog } from "./AddAlbumDialog";
 import { useDropAuth } from "./AuthProvider";
 import albumCover from "@/assets/album-cover.png.asset.json";
 
 export function AlbumsSection() {
-  const { profile, movePoints, mode, reviews, saveReview, mergeReviews, customAlbums, addAlbum } = useDropAuth();
+  const { profile, mode, reviews, mergeReviews, customAlbums, addAlbum } = useDropAuth();
   const listened = profile?.listened_albums ?? [];
   const points = profile?.general_points ?? 0;
-  const [saving, setSaving] = useState(false);
+  const { saving, toggleListened: onToggle, storeReview } = useAlbumActions();
   const [preparingReview, setPreparingReview] = useState(false);
   const [adding, setAdding] = useState(false);
   const allAlbums = useMemo(() => [...customAlbums, ...ALBUMS], [customAlbums]);
@@ -22,8 +24,6 @@ export function AlbumsSection() {
   const reviewAlbum = allAlbums.find((album) => album.id === reviewAlbumId && listened.includes(album.id));
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"todos" | "escuchados" | "pendientes">("todos");
-  const publish = useServerFn(publishReview);
-  const remove = useServerFn(deleteReview);
   const loadExtras = useServerFn(getProfileExtras);
 
   // Carga las reseñas persistentes del usuario y las fusiona con el caché de sesión.
@@ -46,24 +46,6 @@ export function AlbumsSection() {
   }), [allAlbums, filter, listened, query]);
   const albumsCount = allAlbums.length;
 
-  const onToggle = async (id: string): Promise<boolean> => {
-    const isListened = listened.includes(id);
-    if (mode === "user" && isListened && !id.startsWith("custom-") && points < 120) { toast.error("No podés quitar un álbum cuyos puntos ya canjeaste."); return false; }
-    setSaving(true);
-    const saved = await movePoints(
-      { amount: isListened ? -120 : 120, reason: isListened ? "album_unlistened" : "album_listened", reference: id },
-      { listened_albums: isListened ? listened.filter((item) => item !== id) : [...listened, id] },
-    );
-    setSaving(false);
-    if (!saved) return false;
-    if (mode !== "user" || id.startsWith("custom-")) return true;
-    toast[isListened ? "message" : "success"](
-      isListened ? "Álbum quitado de tu historial" : "+120 puntos DROP",
-      { description: isListened ? "El saldo fue actualizado." : "Sumaste un álbum escuchado." },
-    );
-    return true;
-  };
-
   return (
     <div className="space-y-4 pt-5">
       <section className="rounded-2xl border border-primary/35 bg-primary/10 p-4">
@@ -84,7 +66,7 @@ export function AlbumsSection() {
 
       <label className="flex items-center gap-2 rounded-xl border border-input bg-card px-3 py-2.5">
         <Search className="h-4 w-4 text-muted-foreground" />
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar álbum o artista" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar en tu biblioteca o en el catálogo" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
       </label>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -125,19 +107,41 @@ export function AlbumsSection() {
           })}
         </div>
       </fieldset>
-      {visible.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">No encontramos álbumes con ese filtro.</p>}
-      {reviewAlbum && <AlbumReviewDialog key={reviewAlbum.id} album={reviewAlbum} review={reviews[reviewAlbum.id]} onClose={() => setReviewAlbumId(null)} onSave={(review) => {
-        saveReview(reviewAlbum.id, review);
-        setReviewAlbumId(null);
-        if (mode === "user") {
-          const call = review
-            ? publish({ data: { subject_type: "album", subject_id: reviewAlbum.id, subject_title: reviewAlbum.title, subject_artist: reviewAlbum.artist, subject_image: reviewAlbum.cover, rating: review.rating, text: review.text } })
-            : remove({ data: { subject_type: "album", subject_id: reviewAlbum.id } });
-          call.catch(() => toast.message("Tu opinión se guardó en esta sesión; la persistencia se activa al aceptar los cambios de datos."));
-        }
-        toast.success(review ? "Opinión guardada" : "Opinión eliminada");
-      }} />}
-      {adding && <AddAlbumDialog fallbackCover={albumCover.url} onClose={() => setAdding(false)} onAdd={(album) => { addAlbum(album); setAdding(false); setFilter("todos"); setQuery(""); toast.success("Álbum agregado", { description: "Álbum manual de esta sesión · sin puntos reales." }); }} />}
+      {visible.length === 0 && query.trim().length < 2 && <p className="py-12 text-center text-sm text-muted-foreground">No encontramos álbumes con ese filtro.</p>}
+      {query.trim().length >= 2 && <CatalogAlbumHits query={query} onAdd={async (album) => { if (await addAlbum(album)) { setQuery(""); setFilter("todos"); toast.success("Álbum sumado a tu biblioteca", { description: "Ya podés marcarlo como escuchado y reseñarlo." }); } }} exclude={allAlbums.map((a) => a.id)} />}
+      {reviewAlbum && <AlbumReviewDialog key={reviewAlbum.id} album={reviewAlbum} review={reviews[reviewAlbum.id]} onClose={() => setReviewAlbumId(null)} onSave={(review) => { storeReview(reviewAlbum, review); setReviewAlbumId(null); }} />}
+      {adding && <AddAlbumDialog fallbackCover={albumCover.url} onClose={() => setAdding(false)} onAdd={async (album) => { if (!(await addAlbum(album))) return; setAdding(false); setFilter("todos"); setQuery(""); toast.success("Álbum agregado", { description: album.id.startsWith("dz-") ? "Ya podés marcarlo como escuchado y reseñarlo." : "Álbum manual de esta sesión · sin puntos reales." }); }} />}
     </div>
+  );
+}
+
+/** Cuando buscás en la biblioteca, también te mostramos álbumes del catálogo para sumarlos. */
+function CatalogAlbumHits({ query, onAdd, exclude }: { query: string; onAdd: (a: { id: string; title: string; artist: string; year: string; cover: string }) => void; exclude: string[] }) {
+  const search = useServerFn(searchCatalog);
+  const [hits, setHits] = useState<CatalogAlbum[] | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let cancelled = false; setHits(null); setError(false);
+    const t = setTimeout(() => {
+      search({ data: { q: query.trim() } }).then((r) => { if (!cancelled) setHits(r.albums); }).catch(() => { if (!cancelled) setError(true); });
+    }, 400);
+    return () => { cancelled = true; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+  const list = (hits ?? []).filter((a) => !exclude.includes(`dz-${a.id}`)).slice(0, 8);
+  return (
+    <section className="space-y-2">
+      <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Del catálogo · tocá para sumar</p>
+      {error ? <p className="text-xs text-muted-foreground">No pudimos buscar en el catálogo. Probá de nuevo en un rato.</p>
+        : hits === null ? <p className="text-xs text-muted-foreground">Buscando…</p>
+        : list.length === 0 ? <p className="text-xs text-muted-foreground">No hay más álbumes con ese nombre.</p>
+        : list.map((a) => (
+          <button key={a.id} onClick={() => onAdd({ id: `dz-${a.id}`, title: a.title, artist: a.artist, year: a.year, cover: a.cover })} className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-2 text-left">
+            <img src={a.cover} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{a.title}</span><span className="block truncate text-xs text-muted-foreground">{a.artist}{a.year ? ` · ${a.year}` : ""}</span></span>
+            <Plus className="h-4 w-4 shrink-0 text-primary" />
+          </button>
+        ))}
+    </section>
   );
 }

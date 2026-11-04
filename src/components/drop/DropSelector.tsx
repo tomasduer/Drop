@@ -6,12 +6,14 @@ import { ArtistLine } from "@/components/drop/ArtistLine";
 
 // Acceso rápido a todos los drops: podés entrar a los que quieras, sin elegir uno solo.
 export function DropSelector() {
-  const drops = useDrops();
+  const ORDER = { active: 0, upcoming: 1, archived: 2 } as const;
+  // Primero los activos, después los próximos y al final el archivo.
+  const drops = [...useDrops()].sort((a, b) => ORDER[a.status] - ORDER[b.status]);
   return <section id="elegir-drop" className="scroll-mt-24">
     <h2 className="mb-3 text-lg font-black">Todos los drops</h2>
     <div className="space-y-3">
       {drops.map((drop) => <article key={drop.id} className="flex items-start gap-3 rounded-lg border border-border bg-card p-3">
-        <img loading="lazy" decoding="async" src={drop.cover} alt={`Portada de ${drop.title}`} className="h-16 w-16 shrink-0 rounded-md object-cover" />
+        <img loading="lazy" decoding="async" src={drop.status === "archived" ? drop.album : drop.cover} alt={`Portada de ${drop.title}`} className="h-16 w-16 shrink-0 rounded-md object-cover" />
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-black"><ArtistLine drop={drop} /></h3>
           <p className="mt-1 text-xs leading-snug text-muted-foreground">{drop.title}</p>

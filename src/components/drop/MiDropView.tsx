@@ -16,6 +16,8 @@ import { useDropAuth } from "./AuthProvider";
 import { AlbumsSection } from "./AlbumsSection";
 import { RewardsRedeem } from "./RewardsRedeem";
 import { DropSelector } from "./DropSelector";
+import { useDrops } from "@/lib/drops";
+import { achievements, dropProgress } from "@/lib/progress";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
@@ -35,8 +37,7 @@ type ProfileTab = "shows" | "resenas" | "actividad" | "stats" | "albumes";
 const TABS: { id: ProfileTab; label: string }[] = [
   { id: "shows", label: "Shows" },
   { id: "resenas", label: "Reseñas" },
-  { id: "actividad", label: "Actividad" },
-  { id: "stats", label: "Stats" },
+  { id: "stats", label: "Puntos y premios" },
   { id: "albumes", label: "Álbumes" },
 ];
 
@@ -45,7 +46,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
   const navigate = useNavigate();
   const fetchExtras = useServerFn(getProfileExtras);
   const [extras, setExtras] = useState<ProfileExtras>(emptyProfileExtras);
-  const [tab, setTab] = useState<ProfileTab>(initialTab ?? "shows");
+  const [tab, setTab] = useState<ProfileTab>(initialTab === "actividad" ? "stats" : initialTab ?? "shows");
   const [dropFilter, setDropFilter] = useState<SavedDropStatus | "todos">("todos");
   const [editing, setEditing] = useState(false);
   const [settings, setSettings] = useState(false);
@@ -59,6 +60,10 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
   const listened = profile?.listened_albums ?? [];
   const generalPoints = profile?.general_points ?? 0;
   const campaignPoints = state.balances.reduce((sum, b) => sum + b.score, 0);
+  const allDrops = useDrops();
+  const progress = dropProgress(state, allDrops);
+  const stamps = progress.filter((p) => p.participating);
+  const logros = achievements(state, progress, listened.length).filter((l) => l.unlocked);
   const username = profile.username?.trim() || profile.display_name?.replace(/^@/, "") || "fan";
   const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString("es-AR", { month: "long", year: "numeric" }) : null;
 
@@ -134,12 +139,51 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
         <Stat value={avgRating ?? "—"} label="Promedio" />
       </section>
 
+      {/* Puntos generales: se usan en toda la plataforma */}
+      <section className="mt-5 rounded-3xl p-4 text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
+        <p className="text-[11px] font-bold uppercase tracking-widest opacity-80">Puntos generales DROP</p>
+        <p className="text-3xl font-black tabular-nums">{generalPoints.toLocaleString("es-AR")}</p>
+        <p className="mt-1 text-xs opacity-90">Los sumás en cualquier drop y con tus álbumes, y los canjeás por premios. Los puntos de cada artista se ven dentro de su drop.</p>
+        <Button size="sm" variant="secondary" className="mt-3" onClick={() => setTab("stats")}>Ver premios</Button>
+      </section>
+
+      {/* Pasaporte: registro de experiencias */}
+      <section className="mt-7">
+        <div className="mb-3 flex items-end justify-between">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Tu recorrido</p>
+            <h2 className="text-xl font-black">Pasaporte</h2>
+          </div>
+          <Link to="/actividad" className="text-xs font-bold text-primary">{logros.length} logros</Link>
+        </div>
+        {stamps.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
+            <p className="text-sm font-bold">Tu pasaporte está esperando su primer sello</p>
+            <p className="mt-1 text-xs text-muted-foreground">Cada drop en el que participás deja un sello acá.</p>
+            <Button asChild size="sm" className="mt-3"><Link to="/explorar">Elegir un drop</Link></Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-3">
+            {stamps.map((p) => (
+              <Link key={p.drop.id} to="/drop" search={{ d: p.drop.id }} className="text-center">
+                <span className="relative mx-auto block h-20 w-20 rotate-[-6deg] overflow-hidden rounded-full border-4 border-dashed border-primary/60">
+                  <img loading="lazy" decoding="async" src={p.drop.cover} alt="" className={`h-full w-full object-cover ${p.drop.status === "archived" ? "sepia-[0.5]" : ""}`} />
+                </span>
+                <p className="mt-2 truncate text-xs font-bold">{p.drop.artist}</p>
+                <p className="text-[11px] text-muted-foreground">{p.score.toLocaleString("es-AR")} pts · {p.drop.status === "archived" ? "finalizado" : "en curso"}</p>
+              </Link>
+            ))}
+          </div>
+        )}
+        {logros.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{logros.map((l) => <span key={l.id} className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-semibold">{l.icon} {l.title}</span>)}</div>}
+      </section>
+
       {/* Mis DROPS: colección protagonista */}
       <section className="mt-7">
         <div className="mb-3 flex items-end justify-between">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Tu colección</p>
-            <h2 className="text-xl font-black">Mis DROPS</h2>
+            <h2 className="text-xl font-black">Drops guardados</h2>
           </div>
           <Link to="/explorar" className="text-xs font-bold text-primary">Descubrir</Link>
         </div>
@@ -259,7 +303,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
         <section className="mt-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <StatCard value={generalPoints.toLocaleString("es-AR")} label="Puntos generales" />
-            <StatCard value={campaignPoints.toLocaleString("es-AR")} label="Puntos de campaña" />
+            <StatCard value={`${stamps.length}`} label="Drops jugados" />
             <StatCard value={`${listened.length}`} label="Álbumes escuchados" />
             <StatCard value={avgRating ?? "—"} label="Calificación promedio" />
           </div>

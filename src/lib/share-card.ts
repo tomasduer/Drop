@@ -25,7 +25,7 @@ export async function makeStoryImage(d: StoryData): Promise<Blob | null> {
 
   ctx.textAlign = "center"; ctx.fillStyle = "#fff";
   ctx.font = "900 120px system-ui, sans-serif"; ctx.fillText("DROP", 540, 230);
-  ctx.font = "600 40px system-ui, sans-serif"; ctx.globalAlpha = 0.85; ctx.fillText("LALI · No Vayas a Atender", 540, 300); ctx.globalAlpha = 1;
+  ctx.font = "600 40px system-ui, sans-serif"; ctx.globalAlpha = 0.85; ctx.fillText("LALI · No vayas a atender cuando el demonio llama", 540, 300, 980); ctx.globalAlpha = 1;
 
   const avatar = d.avatarUrl ? await loadImage(d.avatarUrl) : null;
   ctx.save(); ctx.beginPath(); ctx.arc(540, 620, 220, 0, Math.PI * 2); ctx.closePath();

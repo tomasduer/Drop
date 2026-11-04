@@ -100,7 +100,7 @@ const groups = [
 ];
 
 const stickers = [
-  { src: stickerNvaa.url, label: "No vayas a atender" },
+  { src: stickerNvaa.url, label: "No vayas a atender cuando el demonio llama" },
   { src: simbolos33.url, label: "Pentagrama 33" },
   { src: laliLogo.url, label: "LALI." },
   { src: albumCover.url, label: "Tapa del álbum" },

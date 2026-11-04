@@ -115,7 +115,7 @@ function StreamSim({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
   const done = plays >= PLAYS;
   return <div className="space-y-4 text-center">
     <img decoding="async" src={fanaticoSingle.url} alt="Portada de Fanático" className={`mx-auto h-40 w-40 rounded-2xl object-cover shadow-lg transition-transform ${playing ? 'scale-105' : ''}`} />
-    <div><p className="font-black">Fanático</p><p className="text-xs text-muted-foreground">LALI · No vayas a atender</p></div>
+    <div><p className="font-black">Fanático</p><p className="text-xs text-muted-foreground">LALI · No vayas a atender cuando el demonio llama</p></div>
     <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-[width] duration-100" style={{ width: `${done ? 100 : progress}%` }} /></div>
     <div className="flex justify-center gap-2">{Array.from({ length: PLAYS }, (_, i) => <span key={i} className={`grid h-8 w-8 place-items-center rounded-full border text-xs font-bold ${i < plays ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground'}`}>{i < plays ? <Check className="h-4 w-4" /> : i + 1}</span>)}</div>
     <p className="text-sm text-muted-foreground">{done ? '¡Listo! Escuchaste Fanático 3 veces.' : `Reproducción ${Math.min(plays + 1, PLAYS)} de ${PLAYS}`}</p>

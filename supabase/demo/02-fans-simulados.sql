@@ -129,12 +129,12 @@ SELECT public.drop_demo_welcome(p.id) FROM public.profiles p WHERE NOT EXISTS (S
 
 -- Reseñas
 WITH r(album,title,artist,rating,body) AS (VALUES
- ('nvaa','No vayas a atender','LALI',5,'El mejor disco de LALI sin dudas. "Fanático" no sale de mi cabeza.'),
- ('nvaa','No vayas a atender','LALI',5,'La producción está en otro nivel. Cada tema tiene un easter egg.'),
- ('nvaa','No vayas a atender','LALI',4,'Más oscuro de lo que esperaba y me encanta. Falta un tema lento.'),
- ('nvaa','No vayas a atender','LALI',5,'Lo escuché entero tres veces el día que salió. Obra maestra.'),
- ('nvaa','No vayas a atender','LALI',5,'La estética rock le queda perfecta. Quiero verlo en vivo ya.'),
- ('nvaa','No vayas a atender','LALI',4,'Muy bueno, aunque extraño un poco el pop de antes.'),
+ ('nvaa','No vayas a atender cuando el demonio llama','LALI',5,'El mejor disco de LALI sin dudas. "Fanático" no sale de mi cabeza.'),
+ ('nvaa','No vayas a atender cuando el demonio llama','LALI',5,'La producción está en otro nivel. Cada tema tiene un easter egg.'),
+ ('nvaa','No vayas a atender cuando el demonio llama','LALI',4,'Más oscuro de lo que esperaba y me encanta. Falta un tema lento.'),
+ ('nvaa','No vayas a atender cuando el demonio llama','LALI',5,'Lo escuché entero tres veces el día que salió. Obra maestra.'),
+ ('nvaa','No vayas a atender cuando el demonio llama','LALI',5,'La estética rock le queda perfecta. Quiero verlo en vivo ya.'),
+ ('nvaa','No vayas a atender cuando el demonio llama','LALI',4,'Muy bueno, aunque extraño un poco el pop de antes.'),
  ('lali','LALI','LALI',5,'"Disciplina" es un himno. Este disco la consolidó.'),
  ('lali','LALI','LALI',4,'Disco redondo, ideal para la previa.'),
  ('lali','LALI','LALI',5,'"Quiénes son" me representa demasiado.'),
@@ -154,7 +154,7 @@ WITH r(album,title,artist,rating,body) AS (VALUES
  ('mechon','Un mechón de pelo','TINI',4,'TINI más íntima que nunca. Me sorprendió.'),
  ('mechon','Un mechón de pelo','TINI',5,'Las letras son preciosas. Mi favorito de ella.'),
  ('lali','LALI','LALI',3,'Tiene temazos pero algunos se me hicieron parecidos.'),
- ('nvaa','No vayas a atender','LALI',5,'Encontré el stencil en Palermo después de escucharlo. Esta era es todo.'),
+ ('nvaa','No vayas a atender cuando el demonio llama','LALI',5,'Encontré el stencil en Palermo después de escucharlo. Esta era es todo.'),
  ('brava','BRAVA','LALI',4,'Lo redescubrí gracias a la trivia de DROP.'),
  ('soy','Soy','LALI',5,'Cada vez que lo escucho me acuerdo de mi adolescencia.')
 ), numbered AS (SELECT r.*, row_number() OVER () n FROM r),
@@ -183,7 +183,7 @@ ON CONFLICT DO NOTHING;
 
 -- Recompensas
 INSERT INTO public.reward_catalog(id,title,cost,active,available) VALUES
- ('wallpaper-nvaa','Wallpaper exclusivo de No vayas a atender',150,true,NULL),
+ ('wallpaper-nvaa','Wallpaper exclusivo de No vayas a atender cuando el demonio llama',150,true,NULL),
  ('stickers-digitales','Pack de stickers digitales del drop',250,true,NULL),
  ('descuento-merch','20% off en merch oficial',350,true,300),
  ('sorteo-entradas','Participación en sorteo: 2 entradas para Vélez',450,true,150),

@@ -10,7 +10,7 @@ import coverABailar from "@/assets/drop-photo-37.png.asset.json";
 export type AlbumEntry = { id: string; title: string; artist: string; year: string; cover: string };
 
 export const ALBUMS: AlbumEntry[] = [
-  { id: "nvaa", title: "No vayas a atender", artist: "LALI", year: "2025", cover: albumCover.url },
+  { id: "nvaa", title: "No vayas a atender cuando el demonio llama", artist: "LALI", year: "2025", cover: albumCover.url },
   { id: "lali", title: "LALI", artist: "LALI", year: "2023", cover: coverLali.url },
   { id: "libra", title: "LIBRA", artist: "LALI", year: "2020", cover: coverLibra.url },
   { id: "brava", title: "BRAVA", artist: "LALI", year: "2018", cover: coverBrava.url },

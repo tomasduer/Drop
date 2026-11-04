@@ -10,7 +10,7 @@ import laliAuto from "@/assets/lali-auto.png.asset.json";
 
 // Cada recompensa se desbloquea al llegar a una cantidad de misiones completadas.
 const rewards = [
-  { img: stickerNvaa.url, label: "Sticker: No vayas a atender", need: 1 },
+  { img: stickerNvaa.url, label: "Sticker: No vayas a atender cuando el demonio llama", need: 1 },
   { img: fanaticoSingle.url, label: "Fragmento: 'Fanático'", need: 2 },
   { img: laliAuto.url, label: "Foto exclusiva #01", need: 4 },
   { img: simbolos33.url, label: "Sticker: pentagrama 33", need: 6 },
@@ -55,7 +55,7 @@ export function PasaporteView({ embedded = false }: { embedded?: boolean }) {
               Acceso VIP · Primeros 150
             </p>
             <h2 className="text-xl font-black">Listening Party</h2>
-            <p className="text-xs text-muted-foreground">LALI · No Vayas a Atender</p>
+            <p className="text-xs text-muted-foreground">LALI · No vayas a atender cuando el demonio llama</p>
           </div>
           <ShieldCheck className="h-6 w-6 text-primary" />
         </div>

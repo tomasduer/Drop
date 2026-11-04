@@ -4,4 +4,9 @@
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
+  // Valores públicos de Supabase (la clave publicable viaja igual en el navegador).
+  "vars": {
+    "SUPABASE_URL": "https://ccugbmnrpzvvurnwhmut.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_M7C21iy9g8Eel0n6y32lKg_EOFLN77D"
+  }
 }

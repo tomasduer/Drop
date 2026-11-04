@@ -27,8 +27,8 @@ copia de Lovable, que solo carga desde el dominio de Lovable.
 ```bash
 npm install
 npx vite dev --host 127.0.0.1   # local
-npm run build                   # genera .output/
-npx wrangler login && npx wrangler deploy --config .output/server/wrangler.json   # publica en Cloudflare (gratis)
 ```
-En Cloudflare, cargá las mismas variables del `.env` (Settings → Variables); marcá
-`SUPABASE_SERVICE_ROLE_KEY` como secreta.
+Publicación: el repo está conectado a Cloudflare Workers (Workers & Pages → Import a repository).
+Comando de build `npm run build`, comando de deploy `npx wrangler deploy`. Los valores públicos de
+Supabase ya vienen en `.env.production` y `wrangler.jsonc`, así que no hace falta cargar variables.
+Cada push a `main` se publica solo.

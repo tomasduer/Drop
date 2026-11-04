@@ -8,6 +8,9 @@ import dillomCover from "@/assets/drop-photo-19.png.asset.json";
 import dillomIcon from "@/assets/dillom-icon.webp";
 import laliIcon from "@/assets/lali-icon.webp";
 import tiniIcon from "@/assets/tini-icon.webp";
+import airbagCover from "@/assets/airbag-portada.webp";
+import airbagIcon from "@/assets/airbag-icon.webp";
+import airbagHero from "@/assets/airbag-hero.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
 
 // Estado de cada experiencia: activo (suma puntos), próximamente o archivo (finalizado, solo para revisitar).
@@ -41,6 +44,12 @@ export const DROP_CATALOG: DropInfo[] = [
     tagline: "El universo más oscuro del rap argentino.",
     description: "Trivias, acertijos y desafíos diarios alrededor de Por cesárea. Sumá puntos y escalá el ranking de la comunidad de Dillom.",
     cover: dillomIcon, hero: dillomCover.url, album: dillomCover.url, dates: "En curso", status: "active", fandom: "Comunidad Dillom",
+  },
+  {
+    id: "airbag", artist: "Airbag", title: "El Club de la Pelea I",
+    tagline: "Primera regla: no le cuentes a nadie.",
+    description: "Entrá al club. Trivias de los 7 temas, acertijos y desafíos alrededor de El Club de la Pelea I. Sumá puntos y peleá el ranking con los fans de Airbag.",
+    cover: airbagIcon, hero: airbagHero, album: airbagCover, dates: "En curso", status: "active", fandom: "El Club",
   },
   {
     id: "tini", artist: "TINI", title: "Nueva era",

@@ -22,8 +22,9 @@ import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
 import eventCrowd from "@/assets/event-crowd.jpg";
+import airbagCover from "@/assets/airbag-portada.webp";
 
-const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url };
+const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url, airbag: airbagCover };
 
 const STATUS_LABEL: Record<SavedDropStatus, string> = {
   guardado: "Guardado",

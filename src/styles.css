@@ -206,6 +206,29 @@ html[data-drop="lali"] {
   --font-display: "Rubik Dirt", "Arial Black", sans-serif;
   --display-transform: uppercase;
 }
+/* Airbag · El Club de la Pelea I: negro de fotocopia, lila del título, texto blanco gastado. */
+html[data-drop="airbag"] {
+  --background: oklch(0.12 0.006 310);
+  --foreground: oklch(0.95 0.008 310);
+  --card: oklch(0.17 0.014 310);
+  --popover: oklch(0.17 0.014 310);
+  --muted: oklch(0.23 0.025 310);
+  --muted-foreground: oklch(0.73 0.04 310);
+  --border: oklch(0.32 0.05 310);
+  --input: oklch(0.27 0.04 310);
+  --primary: oklch(0.72 0.1 312);
+  --primary-foreground: oklch(0.12 0.006 310);
+  --ring: oklch(0.72 0.1 312);
+  --accent: oklch(0.55 0.08 315);
+  --accent-foreground: oklch(0.97 0 0);
+  --gradient-drop: linear-gradient(105deg, oklch(0.5 0.08 315), oklch(0.74 0.1 312));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.72 0.1 312 / 0.2), oklch(0.5 0.08 315 / 0.06));
+  --gradient-glow: radial-gradient(circle at 20% 0%, oklch(0.55 0.08 315 / 0.3), transparent 50%), radial-gradient(circle at 100% 80%, oklch(0.55 0.08 315 / 0.14), transparent 50%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.72 0.1 312 / 0.5);
+  --font-display: "Anton", "Impact", sans-serif;
+  --display-transform: uppercase;
+  --texture-opacity: 0.16;
+}
 /* Dillom · Por cesárea: negro crudo, hueso, máquina de escribir. */
 html[data-drop="dillom"] {
   --background: oklch(0.11 0 0);

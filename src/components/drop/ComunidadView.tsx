@@ -10,7 +10,9 @@ import stencilWall from "@/assets/stencil-wall.png.asset.json";
 import laliAuto from "@/assets/lali-auto.png.asset.json";
 import albumCover from "@/assets/album-cover.png.asset.json";
 import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
-import { PHOTOS, avatarFor } from "@/lib/fan-avatars";
+import { PHOTOS, avatarFor } from "@/lib/fan-avatars";import airbagBanda from "@/assets/airbag-banda.webp";
+import airbagVivo from "@/assets/airbag-vivo.webp";
+
 
 type Post =
   | {
@@ -95,6 +97,12 @@ const stickers = [
 
 // Feed de cada fandom (LALI tiene el suyo más arriba).
 const OTHER_FEEDS: Record<string, Post[]> = {
+  airbag: [
+    { kind: "achievement", user: "sardelli.fan", time: "hace 12 min", achievement: "completó la trivia de El Club de la Pelea 5/5", pts: 200 },
+    { kind: "post", user: "juli.rockea", time: "hace 45 min", text: "Anarquía en Buenos Aires en loop desde que salió. Primera regla del club: no hablar del club 🚬", likes: 287, comments: 36 },
+    { kind: "post", user: "nacho.donto", time: "hace 2 h", text: "Verte de cerca para cerrar el disco es una locura. ¿Cuál es su favorito?", likes: 194, comments: 58 },
+    { kind: "post", user: "mica.airbag", time: "hace 5 h", text: "Ya tengo la entrada, nos vemos en el pogo 🤘", likes: 402, comments: 71 },
+  ],
   dillom: [
     { kind: "achievement", user: "bauti.correa", time: "hace 20 min", achievement: "completó la trivia de Dillom 5/5", pts: 200 },
     { kind: "post", user: "ivoperalta", time: "hace 1 h", text: "Escuché Por cesárea de punta a punta otra vez. Cada vez encuentro algo nuevo 🖤", likes: 312, comments: 41 },
@@ -109,7 +117,12 @@ const OTHER_FEEDS: Record<string, Post[]> = {
     { kind: "post", user: "tati.rojas", time: "hace 2 h", text: "¿Alguien más vio la cuenta regresiva? Algo se viene con TINI 👀", likes: 655, comments: 98 },
   ],
 };
-const OTHER_GROUPS: Record<string, typeof groups> = {};
+const OTHER_GROUPS: Record<string, typeof groups> = {
+  airbag: [
+    { name: "El Club", members: 8420, img: airbagBanda },
+    { name: "Pogo en primera fila", members: 2310, img: airbagVivo },
+  ],
+};
 
 export function ComunidadView() {
   const { profile } = useDropAuth();

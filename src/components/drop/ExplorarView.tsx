@@ -28,14 +28,16 @@ import generoElectronica from "@/assets/genero-electronica.webp";
 import generoHiphop from "@/assets/genero-hiphop.webp";
 import generoRnb from "@/assets/genero-rnb.webp";
 import generoPoppunk from "@/assets/genero-poppunk.webp";
+import airbagCover from "@/assets/airbag-portada.webp";
+import airbagBanda from "@/assets/airbag-banda.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { ALBUMS } from "@/lib/albums";
 import type { ShowEvent } from "@/lib/explore-data";
 
-const SHOW_IMAGES: Record<string, string> = { LALI: fanLali.url, "María Becerra": fanMaria.url, Dillom: dillomCover.url };
+const SHOW_IMAGES: Record<string, string> = { LALI: fanLali.url, "María Becerra": fanMaria.url, Dillom: dillomCover.url, Airbag: airbagBanda };
 const reviewImage = (r: CommunityReview) => (r.subject_type === "album" ? ALBUMS.find((a) => a.id === r.subject_id)?.cover : null) ?? r.subject_image;
 
-const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url };
+const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url, airbag: airbagCover };
 
 const FALLBACK_DROPS: DropCard[] = [
   { id: "lali", artist: "LALI", title: "No vayas a atender cuando el demonio llama", cover: laliCover.url, status: "active" },

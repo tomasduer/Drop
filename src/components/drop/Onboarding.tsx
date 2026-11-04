@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Archive, Compass, Gift, MapPin, QrCode, Sparkles, Target, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/drop-logo-2026.webp.asset.json";
-import crowd from "@/assets/event-crowd.jpg";
+import crowd from "@/assets/onboarding-1.webp";
 import phone from "@/assets/hero-phone.jpg";
 import street from "@/assets/qr-street.jpg";
 import stage from "@/assets/stage-lights.jpg";

@@ -5,7 +5,6 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/drop-logo-2026.webp.asset.json";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useDropAuth } from "./AuthProvider";
 
 const input = "h-12 w-full rounded-lg border border-input bg-card px-4 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring";
@@ -59,10 +58,10 @@ export function ConnectView() {
 
   async function google() {
     setError(""); setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
-    if (result.error) { setError("No pudimos conectar con Google. Probá de nuevo."); setBusy(false); return; }
-    if (result.redirected) return;
-    setBusy(false);
+    // Login de Google directo con Supabase (sin depender de Lovable).
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + "/auth" } });
+    if (error) { setError("No pudimos conectar con Google. Probá de nuevo."); setBusy(false); return; }
+    // Si no hubo error, el navegador ya está yendo a Google.
   }
 
   return <div className="min-h-screen w-full bg-background px-7 pb-10 pt-8 text-foreground">

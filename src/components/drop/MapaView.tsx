@@ -247,7 +247,7 @@ export function MapaView({ onGoMisiones, embedded = false }: { onGoMisiones: () 
         className="relative h-[460px] overflow-hidden rounded-3xl border border-border"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 30% 10%, oklch(0.62 0.24 25 / 0.35), transparent 55%), radial-gradient(circle at 80% 90%, oklch(0.45 0.22 15 / 0.4), transparent 55%), linear-gradient(180deg, oklch(0.16 0.05 20), oklch(0.10 0.03 20))",
+            "radial-gradient(circle at 30% 10%, oklch(0.5 0.08 250 / 0.35), transparent 55%), radial-gradient(circle at 80% 90%, oklch(0.7 0.09 70 / 0.22), transparent 55%), linear-gradient(180deg, oklch(0.18 0.012 60), oklch(0.11 0.008 60))",
         }}
       >
         <img loading="lazy" decoding="async"
@@ -263,8 +263,8 @@ export function MapaView({ onGoMisiones, embedded = false }: { onGoMisiones: () 
         >
           <defs>
             <linearGradient id="pathGrad" x1="0" x2="1">
-              <stop offset="0" stopColor="oklch(0.68 0.26 30)" stopOpacity="0.9" />
-              <stop offset="1" stopColor="oklch(0.45 0.22 15)" stopOpacity="0.5" />
+              <stop offset="0" stopColor="oklch(0.8 0.09 78)" stopOpacity="0.9" />
+              <stop offset="1" stopColor="oklch(0.5 0.08 250)" stopOpacity="0.5" />
             </linearGradient>
           </defs>
           <path

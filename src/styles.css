@@ -181,23 +181,27 @@
  * Estética de cada drop: se activa con <html data-drop="...">.
  * Cada álbum tiene su paleta y tipografía, independientes de la de DROP.
  */
-/* LALI · No vayas a atender cuando el demonio llama: rojo sangre, negro, rock. */
+/* LALI · No vayas a atender cuando el demonio llame: cuero negro, denim gastado
+   y bronce envejecido de la hebilla del pentagrama. Grabado en mayúsculas (Cinzel). */
 html[data-drop="lali"] {
-  --background: oklch(0.11 0.03 25);
-  --card: oklch(0.16 0.05 25);
-  --popover: oklch(0.16 0.05 25);
-  --muted: oklch(0.22 0.05 25);
-  --muted-foreground: oklch(0.74 0.04 25);
-  --border: oklch(0.3 0.07 25);
-  --input: oklch(0.26 0.06 25);
-  --primary: oklch(0.62 0.235 27);
-  --ring: oklch(0.62 0.235 27);
-  --accent: oklch(0.5 0.2 20);
-  --gradient-drop: linear-gradient(105deg, oklch(0.4 0.17 20), oklch(0.62 0.235 27));
-  --gradient-drop-soft: linear-gradient(145deg, oklch(0.62 0.235 27 / 0.25), oklch(0.4 0.17 20 / 0.08));
-  --gradient-glow: radial-gradient(circle at 30% 0%, oklch(0.55 0.22 25 / 0.3), transparent 55%), radial-gradient(circle at 90% 70%, oklch(0.4 0.17 20 / 0.25), transparent 55%);
-  --shadow-glow: 0 10px 30px -8px oklch(0.55 0.22 25 / 0.7);
-  --font-display: "Anton", "Inter", sans-serif;
+  --background: oklch(0.13 0.008 60);
+  --foreground: oklch(0.93 0.02 75);
+  --card: oklch(0.18 0.012 60);
+  --popover: oklch(0.18 0.012 60);
+  --muted: oklch(0.24 0.02 250);
+  --muted-foreground: oklch(0.72 0.03 75);
+  --border: oklch(0.32 0.035 250);
+  --input: oklch(0.27 0.03 250);
+  --primary: oklch(0.74 0.09 70);
+  --primary-foreground: oklch(0.14 0.01 60);
+  --ring: oklch(0.74 0.09 70);
+  --accent: oklch(0.5 0.08 250);
+  --accent-foreground: oklch(0.95 0.01 250);
+  --gradient-drop: linear-gradient(105deg, oklch(0.55 0.07 60), oklch(0.8 0.09 78) 55%, oklch(0.66 0.08 65));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.74 0.09 70 / 0.18), oklch(0.45 0.08 250 / 0.12));
+  --gradient-glow: radial-gradient(circle at 25% 0%, oklch(0.5 0.08 250 / 0.28), transparent 55%), radial-gradient(circle at 90% 75%, oklch(0.7 0.09 70 / 0.14), transparent 55%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.74 0.09 70 / 0.55);
+  --font-display: "Cinzel", "Georgia", serif;
   --display-transform: uppercase;
 }
 /* Dillom · Por cesárea: negro crudo, hueso, máquina de escribir. */

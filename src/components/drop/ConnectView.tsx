@@ -67,7 +67,7 @@ export function ConnectView() {
 
   return <div className="min-h-screen w-full bg-background px-7 pb-10 pt-8 text-foreground">
     <div className="mx-auto flex w-full max-w-[440px] flex-col">
-      <img src={logo.url} alt="DROP" className="h-auto w-full max-w-[320px] object-contain drop-shadow-[0_0_14px_var(--primary)]" />
+      <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-full max-w-[320px] object-contain drop-shadow-[0_0_14px_var(--primary)]" />
       <h1 className="mt-5 text-3xl font-black leading-tight">{mode === "signup" ? "Creá tu cuenta." : mode === "forgot" ? "Recuperá tu acceso." : "Tu música. Tu DROP."}</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mode === "signup" ? "Guardá tus puntos, álbumes y drops en todos tus dispositivos." : mode === "forgot" ? "Te enviamos un enlace para elegir una nueva contraseña." : "Entrá a tu cuenta y seguí viviendo la música."}</p>
       {mode !== "forgot" && <Button type="button" variant="outline" disabled={busy} onClick={google} className="mt-7 h-12 w-full font-bold">Continuar con Google</Button>}

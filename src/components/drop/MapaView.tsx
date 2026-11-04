@@ -108,13 +108,13 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
     <div className="space-y-5 px-4">
       {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl border border-border p-6">
-        <img
+        <img decoding="async"
           src={heroPhone}
           alt="Teléfono rojo entre humo"
           className="absolute inset-0 h-full w-full object-cover opacity-80"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
-        <img
+        <img decoding="async"
           src={albumCover.url}
           alt="Tapa del álbum 'No vayas a atender cuando el demonio llama'"
           className="absolute -right-5 -top-5 h-32 w-32 rotate-12 rounded-2xl border border-border object-cover shadow-2xl"
@@ -171,7 +171,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
             "radial-gradient(circle at 30% 10%, oklch(0.62 0.24 25 / 0.35), transparent 55%), radial-gradient(circle at 80% 90%, oklch(0.45 0.22 15 / 0.4), transparent 55%), linear-gradient(180deg, oklch(0.16 0.05 20), oklch(0.10 0.03 20))",
         }}
       >
-        <img
+        <img loading="lazy" decoding="async"
           src={stencilWall.url}
           alt=""
           aria-hidden
@@ -246,7 +246,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
 
       {/* Active drop */}
       <section className="overflow-hidden rounded-2xl border border-primary/40 bg-card">
-        <img
+        <img decoding="async"
           src={qrStreet}
           alt="Afiche con QR en la calle"
           loading="lazy"
@@ -398,7 +398,7 @@ function IncomingCall({
         </DrawerHeader>
         <div className="flex flex-col items-center gap-4 px-6 pb-10">
           <div className={`relative ${answered ? "" : "animate-pulse"}`}>
-            <img
+            <img decoding="async"
               src={laliPhones.url}
               alt="LALI atendiendo dos teléfonos"
               className="h-28 w-28 rounded-full border-2 border-primary/60 object-cover shadow-[0_10px_40px_-8px_rgba(220,38,38,0.8)]"

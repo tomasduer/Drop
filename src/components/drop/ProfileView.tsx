@@ -54,7 +54,7 @@ export function ProfileView({ onClose, backControl }: { onClose?: () => void; ba
           <h1 className="truncate text-xl font-black">{title}</h1>
         </div>
         <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-primary/50 bg-card">
-          {profile.avatar_url ? <img src={profile.avatar_url} alt="Foto de perfil" className="h-full w-full object-cover" /> : mode === "guest" ? <UserRound className="h-5 w-5 text-muted-foreground" /> : <img src={PHOTOS.worldCup} alt="Foto de perfil" className="h-full w-full object-cover" />}
+          {profile.avatar_url ? <img decoding="async" src={profile.avatar_url} alt="Foto de perfil" className="h-full w-full object-cover" /> : mode === "guest" ? <UserRound className="h-5 w-5 text-muted-foreground" /> : <img decoding="async" src={PHOTOS.worldCup} alt="Foto de perfil" className="h-full w-full object-cover" />}
         </div>
       </header>
 
@@ -159,7 +159,7 @@ function ProfileHome({
         <div className="space-y-2">
           {artistPoints.map((artist) => (
             <div key={artist.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-              <img src={artist.photo} alt={`Foto de ${artist.name}`} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+              <img loading="lazy" decoding="async" src={artist.photo} alt={`Foto de ${artist.name}`} className="h-10 w-10 shrink-0 rounded-full object-cover" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold">{artist.name}</p>
                 <p className="text-[10px] text-muted-foreground">Participación en DROP</p>
@@ -173,7 +173,7 @@ function ProfileHome({
       <section>
         <h2 className="mb-3 text-lg font-black">Tus drops anteriores</h2><p className="mb-2 text-xs text-muted-foreground">Experiencias de muestra · no representan actividad de tu cuenta.</p>
         <div className="space-y-2">
-          {[{ artist: "LALI", title: "LALI · 2023", points: "2.480", image: coverLali.url }, { artist: "María Becerra", title: "La Nena de Argentina", points: "860", image: coverNena.url }, { artist: "TINI", title: "Un mechón de pelo", points: "540", image: coverMechon.url }].map((drop) => <article key={drop.artist} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"><img src={drop.image} alt={`Portada de ${drop.title}`} className="h-14 w-14 shrink-0 rounded-md object-cover" /><div className="min-w-0 flex-1"><p className="text-sm font-bold">{drop.artist}</p><p className="text-xs text-muted-foreground">{drop.title}</p><p className="mt-1 text-[10px] text-primary">Completado</p></div><span className="text-xs font-bold">{drop.points} pts</span></article>)}
+          {[{ artist: "LALI", title: "LALI · 2023", points: "2.480", image: coverLali.url }, { artist: "María Becerra", title: "La Nena de Argentina", points: "860", image: coverNena.url }, { artist: "TINI", title: "Un mechón de pelo", points: "540", image: coverMechon.url }].map((drop) => <article key={drop.artist} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"><img loading="lazy" decoding="async" src={drop.image} alt={`Portada de ${drop.title}`} className="h-14 w-14 shrink-0 rounded-md object-cover" /><div className="min-w-0 flex-1"><p className="text-sm font-bold">{drop.artist}</p><p className="text-xs text-muted-foreground">{drop.title}</p><p className="mt-1 text-[10px] text-primary">Completado</p></div><span className="text-xs font-bold">{drop.points} pts</span></article>)}
         </div>
       </section>
 

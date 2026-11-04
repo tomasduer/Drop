@@ -68,7 +68,7 @@ export function TopBar({
     <>
       <header className="sticky top-0 z-30 flex items-center justify-between bg-background/70 px-5 pb-3 pt-5 backdrop-blur-xl">
         <div className="flex items-center gap-2">
-          <img
+          <img decoding="async"
             src={logo.url}
             alt="DROP"
             className="h-12 w-28 shrink-0 object-contain drop-shadow-[0_0_8px_var(--primary)]"

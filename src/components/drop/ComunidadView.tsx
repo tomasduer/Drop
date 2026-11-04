@@ -123,7 +123,7 @@ export function ComunidadView() {
               }`}
               aria-label={`Sticker ${s.label}`}
             >
-              <img src={s.src} alt={s.label} className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={s.src} alt={s.label} className="h-full w-full object-cover" />
             </button>
           ))}
           <button
@@ -164,7 +164,7 @@ export function ComunidadView() {
                 isIn ? "border-primary bg-primary/10" : "border-border bg-card"
               }`}
             >
-              <img
+              <img loading="lazy" decoding="async"
                 src={g.img}
                 alt={g.name}
                 className="mb-2 h-10 w-10 rounded-xl object-cover"
@@ -217,7 +217,7 @@ export function ComunidadView() {
                     className="grid h-10 w-10 place-items-center rounded-full text-sm font-bold text-primary-foreground"
                     style={{ backgroundImage: "var(--gradient-drop)" }}
                   >
-                    <img src={avatarFor(p.user)} alt={`Foto de @${p.user}`} className="h-full w-full rounded-full object-cover" />
+                    <img loading="lazy" decoding="async" src={avatarFor(p.user)} alt={`Foto de @${p.user}`} className="h-full w-full rounded-full object-cover" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold">@{p.user}</p>
@@ -228,7 +228,7 @@ export function ComunidadView() {
               </div>
 
               {p.image && (
-                <img
+                <img decoding="async"
                   src={p.image}
                   alt={`Publicación de ${p.user}`}
                   loading="lazy"

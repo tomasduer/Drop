@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,8 +44,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [reviews, setReviews] = useState<Record<string, AlbumReview>>({});
   const [customAlbums, setCustomAlbums] = useState<CustomAlbum[]>([]);
   const guestActive = useRef(false);
+  // Evita pedir el perfil dos veces cuando getUser e INITIAL_SESSION llegan casi juntos.
+  const inflight = useRef<{ id: string; promise: Promise<void> } | null>(null);
 
-  async function loadProfile(u: User) {
+  function loadProfile(u: User, dedupe = false) {
+    if (dedupe && inflight.current?.id === u.id) return inflight.current.promise;
+    const promise = doLoadProfile(u).finally(() => {
+      if (inflight.current?.promise === promise) inflight.current = null;
+    });
+    inflight.current = { id: u.id, promise };
+    return promise;
+  }
+  async function doLoadProfile(u: User) {
     try {
       const data = await fetchState();
       if (guestActive.current) return;
@@ -56,16 +66,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function refresh() { if (user && mode === 'user') await loadProfile(user); }
 
   useEffect(() => {
-    const apply = (u: User | null) => {
+    const apply = (u: User | null, dedupe = false) => {
       if (guestActive.current) return;
       setUser(u);
-      if (u) { setMode("user"); void loadProfile(u); }
+      if (u) { setMode("user"); void loadProfile(u, dedupe); }
       else setMode((m) => (m === "guest" ? "guest" : "signed_out"));
     };
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED" || event === "INITIAL_SESSION") apply(session?.user ?? null);
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED" || event === "INITIAL_SESSION") apply(session?.user ?? null, event === "INITIAL_SESSION" || event === "SIGNED_IN");
     });
-    void supabase.auth.getUser().then(({ data }) => apply(data.user));
+    void supabase.auth.getUser().then(({ data }) => apply(data.user, true));
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -119,7 +129,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     resetProfile(); setUser(null); setMode("signed_out");
   }
 
-  return <AuthContext.Provider value={{ state, refresh, revision, mode, user, profile, saveProfile, movePoints, enterGuest, signOut, resetProfile, reviews, saveReview, mergeReviews, customAlbums, addAlbum: (a) => setCustomAlbums((prev) => [a, ...prev]) }}>{children}</AuthContext.Provider>;
+  // El valor solo cambia cuando cambia el estado, así las pantallas no se re-renderizan de más.
+  const value = useMemo<Ctx>(
+    () => ({ state, refresh, revision, mode, user, profile, saveProfile, movePoints, enterGuest, signOut, resetProfile, reviews, saveReview, mergeReviews, customAlbums, addAlbum: (a) => setCustomAlbums((prev) => [a, ...prev]) }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- las funciones solo leen estos valores
+    [state, revision, mode, user, profile, reviews, customAlbums, fetchState, operatePoints],
+  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 export function useDropAuth() {
   const ctx = useContext(AuthContext);

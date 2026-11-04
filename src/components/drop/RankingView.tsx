@@ -108,7 +108,7 @@ function DemoRanking() {
             className="flex flex-col items-center transition-transform active:scale-95"
           >
             <div className="relative mb-2">
-              <img
+              <img decoding="async"
                 src={avatarFor(p.fan.name)}
                 alt={p.fan.name}
                 loading="lazy"
@@ -161,7 +161,7 @@ function DemoRanking() {
             <span className="w-8 text-center text-sm font-bold text-muted-foreground">
               {u.rank}
             </span>
-            <img
+            <img decoding="async"
               src={avatarFor(u.name)}
               alt={u.name}
               loading="lazy"
@@ -237,7 +237,7 @@ function FanSheet({
           <>
             <DrawerHeader className="text-left">
               <div className="flex items-center gap-3">
-                <img
+                <img loading="lazy" decoding="async"
                   src={avatarFor(fan.name)}
                   alt={fan.name}
                   className="h-14 w-14 rounded-full border-2 border-primary/50 object-cover"
@@ -328,8 +328,8 @@ function LiveRanking() {
   useEffect(()=>{if(mode==='user')void load();else setData(null);},[mode,scope,profile.active_drop,revision]);
   return <div className="space-y-4 px-5"><h1 className="text-3xl font-black">Ranking</h1><p className="text-sm text-muted-foreground">Puntaje de campaña · los canjes no cambian tu posición.</p><div className="flex gap-2">{(['Global','Amigos','Semanal'] as Scope[]).map(s=><Button key={s} variant={scope===s?'default':'outline'} size="sm" onClick={()=>setScope(s)}>{s==='Amigos'&&<Users className="h-4 w-4" />}{s}</Button>)}</div>{scope==='Semanal'&&<p className="text-xs text-muted-foreground">Desde el lunes · horario de Buenos Aires</p>}
     {mode!=='user'?<p className="py-6 text-sm text-muted-foreground">Ingresá con tu cuenta para participar del ranking real.</p>:loading?<p className="text-sm">Cargando ranking…</p>:error?<div role="alert">{error}<Button onClick={load} variant="outline">Reintentar</Button></div>:<>
-    <div className="grid grid-cols-3 items-end gap-2">{data?.rows.slice(0,3).map(f=><Button key={f.id} variant="outline" className="h-auto min-w-0 flex-col gap-2 p-3" onClick={()=>setFan(f)}><img src={avatarFor(f.display_name)} alt={f.display_name} className="h-12 w-12 rounded-full object-cover" /><span className="w-full truncate text-xs">{f.display_name}</span><span>#{f.rank}</span><span className="text-xs text-primary">{f.score} pts</span></Button>)}</div>
-    <div className="divide-y divide-border">{data?.rows.slice(3).map(f=><Button key={f.id} variant="ghost" className="h-auto w-full justify-start gap-3 py-3" onClick={()=>setFan(f)}><span>#{f.rank}</span><img src={avatarFor(f.display_name)} alt="" className="h-9 w-9 rounded-full object-cover" /><span className="min-w-0 flex-1 truncate text-left">{f.display_name}</span><span>{f.score} pts</span></Button>)}</div>
+    <div className="grid grid-cols-3 items-end gap-2">{data?.rows.slice(0,3).map(f=><Button key={f.id} variant="outline" className="h-auto min-w-0 flex-col gap-2 p-3" onClick={()=>setFan(f)}><img loading="lazy" decoding="async" src={avatarFor(f.display_name)} alt={f.display_name} className="h-12 w-12 rounded-full object-cover" /><span className="w-full truncate text-xs">{f.display_name}</span><span>#{f.rank}</span><span className="text-xs text-primary">{f.score} pts</span></Button>)}</div>
+    <div className="divide-y divide-border">{data?.rows.slice(3).map(f=><Button key={f.id} variant="ghost" className="h-auto w-full justify-start gap-3 py-3" onClick={()=>setFan(f)}><span>#{f.rank}</span><img loading="lazy" decoding="async" src={avatarFor(f.display_name)} alt="" className="h-9 w-9 rounded-full object-cover" /><span className="min-w-0 flex-1 truncate text-left">{f.display_name}</span><span>{f.score} pts</span></Button>)}</div>
     {data?.me&&<p className="rounded-xl border border-primary/40 bg-primary/5 p-3 text-sm font-bold">Tu posición: #{data.me.rank} · {data.me.score} pts de campaña</p>}{scope==='Amigos'&&data?.rows.length===1&&<p className="text-xs text-muted-foreground">Todavía no seguís participantes de esta campaña.</p>}</>}
     <Drawer open={!!fan} onOpenChange={o=>{if(!o)setFan(null);}}><DrawerContent><DrawerHeader><DrawerTitle>{fan?.display_name}</DrawerTitle><DrawerDescription>#{fan?.rank} · {fan?.score} pts de campaña</DrawerDescription></DrawerHeader><div className="space-y-3 px-4 pb-8"><p className="text-sm">{fan?.missions} misiones completadas</p>{fan&&fan.id!==profile.id&&<Button className="w-full" onClick={async()=>{try{await follow({data:{id:fan.id,follow:!fan.following}});setFan({...fan,following:!fan.following});await load();}catch(e){toast.error(e instanceof Error?e.message:'No pudimos guardar');}}}><UserPlus className="h-4 w-4" />{fan.following?'Dejar de seguir':'Seguir fan'}</Button>}</div></DrawerContent></Drawer>
   </div>;

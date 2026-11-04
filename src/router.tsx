@@ -9,6 +9,8 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    // Precarga la pantalla al pasar o tocar un enlace, para que abra casi al instante.
+    defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
   });
 

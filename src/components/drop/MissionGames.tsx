@@ -17,7 +17,7 @@ export function MissionGame({ kind, missionId, verified, onFinish }: { kind: Gam
   if (kind === 'trivia' && mode === 'guest') return <GuestTrivia />;
   if (kind === 'order') return <OrderDemo />;
   return <div className="space-y-4 text-center">
-    <img src={(kind === 'stream' ? fanaticoSingle : albumCover).url} alt="Arte de la experiencia" className="mx-auto h-24 w-24 rounded-2xl object-cover" />
+    <img decoding="async" src={(kind === 'stream' ? fanaticoSingle : albumCover).url} alt="Arte de la experiencia" className="mx-auto h-24 w-24 rounded-2xl object-cover" />
     {kind === 'scan' ? <ScanLine className="mx-auto h-10 w-10 text-primary" /> : kind === 'ar' ? <Sparkles className="mx-auto h-10 w-10 text-primary" /> : <Headphones className="mx-auto h-10 w-10 text-primary" />}
     <p className="font-bold">{mode !== 'user' && verified ? 'Ingresá con tu cuenta para jugar esta misión' : 'Experiencia demostrativa · sin puntos'}</p>
     <p className="text-sm text-muted-foreground">{kind === 'stream' ? 'Las reproducciones no se verifican en DROP.' : kind === 'scan' ? 'La cámara y la ubicación todavía no están conectadas.' : kind === 'ar' ? 'La captura de realidad aumentada está pendiente.' : 'Esta actividad todavía no está habilitada para acreditar puntos.'}</p>

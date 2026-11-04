@@ -28,7 +28,7 @@ export function GuestEntry() {
 
   return <main className="min-h-screen bg-background px-7 py-8 text-foreground">
     <div className="mx-auto w-full max-w-[440px]">
-      <img src={logo.url} alt="DROP" className="h-auto w-44 object-contain" />
+      <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-44 object-contain" />
       <h1 className="mt-6 text-3xl font-black">Tu DROP sin cuenta.</h1>
       <p className="mt-3 text-sm text-muted-foreground">Tu perfil temporal desaparece al recargar o salir. No se guardan datos ni puntos.</p>
       <form className="mt-7 space-y-5" onSubmit={event => {
@@ -40,7 +40,7 @@ export function GuestEntry() {
       }}>
         <label className="block text-sm font-semibold">Usuario temporal<input autoComplete="off" maxLength={80} value={name} onChange={e => setName(e.target.value)} className="mt-2 h-12 w-full rounded-lg border border-input bg-card px-4 text-foreground outline-none focus:ring-2 focus:ring-ring" /></label>
         <div className="flex items-center gap-4">
-          <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-border bg-card">{photo ? <img src={photo} alt="Tu foto temporal" className="h-full w-full object-cover" /> : <UserRound className="h-7 w-7 text-muted-foreground" />}</div>
+          <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-border bg-card">{photo ? <img decoding="async" src={photo} alt="Tu foto temporal" className="h-full w-full object-cover" /> : <UserRound className="h-7 w-7 text-muted-foreground" />}</div>
           <label className="cursor-pointer text-sm font-semibold"><span className="flex items-center gap-2"><Camera className="h-4 w-4" />Foto (opcional)</span><input aria-label="Foto opcional" type="file" accept="image/jpeg,image/png,image/webp" className="mt-2 block w-full min-w-0 text-xs text-muted-foreground" onChange={e => { void choosePhoto(e.target.files?.[0]); e.target.value = ""; }} /></label>
           {photo && <Button type="button" variant="ghost" size="icon" aria-label="Quitar foto" onClick={() => setPhoto(null)}><X /></Button>}
         </div>

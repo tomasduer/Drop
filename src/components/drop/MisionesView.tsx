@@ -277,7 +277,7 @@ function MissionCard({
     <article className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-start gap-3">
         {m.cover ? (
-          <img
+          <img decoding="async"
             src={m.cover}
             alt={m.title}
             loading="lazy"
@@ -356,7 +356,7 @@ function MissionDetail({
             <DrawerHeader className="text-left">
               <div className="flex items-start gap-3">
                 {mission.cover ? (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={mission.cover}
                     alt={mission.title}
                     className="h-12 w-12 shrink-0 rounded-2xl border border-border object-cover"

@@ -17,7 +17,7 @@ export function DropSelector() {
         { artist: "María Becerra", album: "quimera", cover: maria.url, available: false },
         { artist: "Dillom", album: "por cesárea", cover: dillom.url, available: false },
       ].map((drop) => <article key={drop.artist} className="flex items-start gap-3 rounded-lg border border-border bg-card p-3">
-        <img src={drop.cover} alt={`Portada de ${drop.album}`} className="h-16 w-16 shrink-0 rounded-md object-cover" />
+        <img loading="lazy" decoding="async" src={drop.cover} alt={`Portada de ${drop.album}`} className="h-16 w-16 shrink-0 rounded-md object-cover" />
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-black">{drop.artist}</h3>
           <p className="mt-1 text-xs leading-snug text-muted-foreground">{drop.album}</p>

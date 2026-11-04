@@ -100,7 +100,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
       <header className="pt-2">
         <div className="flex items-start gap-4">
           <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-primary/50 bg-card">
-            {profile.avatar_url ? <img src={profile.avatar_url} alt="Foto de perfil" className="h-full w-full object-cover" /> : mode === "guest" ? <UserRound className="h-8 w-8 text-muted-foreground" /> : <img src={PHOTOS.worldCup} alt="Foto de perfil" className="h-full w-full object-cover" />}
+            {profile.avatar_url ? <img decoding="async" src={profile.avatar_url} alt="Foto de perfil" className="h-full w-full object-cover" /> : mode === "guest" ? <UserRound className="h-8 w-8 text-muted-foreground" /> : <img decoding="async" src={PHOTOS.worldCup} alt="Foto de perfil" className="h-full w-full object-cover" />}
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-2xl font-black leading-tight">{profile.display_name}</h1>
@@ -160,7 +160,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
             {visibleDrops.map((drop) => (
               <article key={drop.campaign_id} className="w-36 shrink-0">
                 <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border bg-muted">
-                  <img src={COVERS[drop.campaign_id] ?? laliCover.url} alt={`Portada de ${drop.title}`} loading="lazy" className="h-full w-full object-cover" />
+                  <img decoding="async" src={COVERS[drop.campaign_id] ?? laliCover.url} alt={`Portada de ${drop.title}`} loading="lazy" className="h-full w-full object-cover" />
                   <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide ${drop.status === "en_curso" ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
                     {STATUS_LABEL[drop.status]}
                   </span>
@@ -194,7 +194,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
             </div>
           ) : extras.shows.map((show) => (
             <article key={show.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-              <img src={show.image_url ?? eventCrowd} alt={`Imagen de ${show.title}`} className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+              <img loading="lazy" decoding="async" src={show.image_url ?? eventCrowd} alt={`Imagen de ${show.title}`} className="h-14 w-14 shrink-0 rounded-xl object-cover" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{show.title}</p>
                 <p className="text-[11px] text-muted-foreground">{show.artist}</p>
@@ -216,7 +216,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
             </div>
           ) : myReviews.map((r) => (
             <article key={r.id} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3">
-              {r.subject_image && <img src={r.subject_image} alt={`Imagen de ${r.subject_title}`} className="h-14 w-14 shrink-0 rounded-xl object-cover" />}
+              {r.subject_image && <img loading="lazy" decoding="async" src={r.subject_image} alt={`Imagen de ${r.subject_title}`} className="h-14 w-14 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{r.subject_title}</p>
                 <p className="text-[11px] text-muted-foreground">{r.subject_artist}</p>

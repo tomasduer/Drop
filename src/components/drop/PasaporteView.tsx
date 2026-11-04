@@ -29,7 +29,7 @@ export function PasaporteView() {
       {/* VIP Ticket */}
       <section className="relative mb-6 overflow-hidden rounded-3xl border border-primary/50 bg-card">
         <div className="relative h-28 w-full overflow-hidden">
-          <img
+          <img decoding="async"
             src={eventCrowd}
             alt="Público en el listening party"
             loading="lazy"
@@ -89,7 +89,7 @@ export function PasaporteView() {
               className="overflow-hidden rounded-2xl border border-border bg-card"
             >
               <div className="relative h-24 bg-muted">
-                <img
+                <img decoding="async"
                   src={r.img}
                   alt={r.label}
                   loading="lazy"

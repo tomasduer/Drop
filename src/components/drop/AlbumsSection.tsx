@@ -100,7 +100,7 @@ export function AlbumsSection() {
             return (
               <article key={album.id} className="overflow-hidden rounded-2xl border border-border bg-card">
                 <div className="relative aspect-square overflow-hidden bg-muted">
-                  <img src={album.cover} alt={`Portada de ${album.title}`} loading="lazy" className="h-full w-full object-cover" />
+                  <img decoding="async" src={album.cover} alt={`Portada de ${album.title}`} loading="lazy" className="h-full w-full object-cover" />
                   {done && <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="h-4 w-4" /></span>}
                 </div>
                 <div className="p-3">

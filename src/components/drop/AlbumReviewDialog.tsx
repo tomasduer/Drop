@@ -20,7 +20,7 @@ export function AlbumReviewDialog({ album, review, onClose, onSave }: {
           <DialogTitle>Tu opinión</DialogTitle>
           <DialogDescription>{album.title} · {album.artist}</DialogDescription>
         </DialogHeader>
-        <img src={album.cover} alt={`Portada de ${album.title}`} className="mx-auto h-28 w-28 rounded-md object-cover" />
+        <img decoding="async" src={album.cover} alt={`Portada de ${album.title}`} className="mx-auto h-28 w-28 rounded-md object-cover" />
         <fieldset>
           <legend className="mb-2 text-sm font-bold">Puntuación</legend>
           <div className="flex justify-center gap-2">

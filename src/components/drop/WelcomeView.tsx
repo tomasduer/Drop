@@ -12,7 +12,7 @@ const steps = [
 export function WelcomeView() {
   return <div className="min-h-screen bg-background px-7 py-8 text-foreground">
     <div className="mx-auto max-w-[440px]">
-      <img src={logo.url} alt="DROP" className="h-auto w-44 object-contain drop-shadow-[0_0_14px_var(--primary)]" />
+      <img decoding="async" src={logo.url} alt="DROP" className="h-auto w-44 object-contain drop-shadow-[0_0_14px_var(--primary)]" />
       <p className="mt-5 text-xs font-bold uppercase text-primary">Bienvenid@ a DROP</p>
       <h1 className="mt-2 text-3xl font-black leading-tight">La música se vive.<br />Y también suma.</h1>
       <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Elegí la experiencia de un artista, jugá sus misiones y sumá puntos con la música que ya escuchás.</p>

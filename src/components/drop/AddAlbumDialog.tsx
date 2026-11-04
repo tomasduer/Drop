@@ -23,7 +23,7 @@ export function AddAlbumDialog({ onClose, onAdd, fallbackCover }: { onClose: () 
           <label className="block space-y-1 text-sm font-bold">Portada <span className="font-normal text-muted-foreground">(opcional)</span>
             <Input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setCover(URL.createObjectURL(file)); }} />
           </label>
-          {cover && <img src={cover} alt="Vista previa de la portada" className="mx-auto h-24 w-24 rounded-md object-cover" />}
+          {cover && <img decoding="async" src={cover} alt="Vista previa de la portada" className="mx-auto h-24 w-24 rounded-md object-cover" />}
           <Button type="submit" className="w-full" disabled={!title.trim()}>Agregar a mi biblioteca</Button>
         </form>
       </DialogContent>

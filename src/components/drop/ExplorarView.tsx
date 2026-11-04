@@ -125,7 +125,7 @@ export function ExplorarView() {
             return (
               <article key={drop.id} className="w-40 shrink-0">
                 <button onClick={() => onEnterDrop(drop)} className="relative block aspect-square w-full overflow-hidden rounded-2xl border border-border bg-muted">
-                  <img src={drop.cover} alt={`Portada de ${drop.title}`} loading="lazy" className="h-full w-full object-cover" />
+                  <img decoding="async" src={drop.cover} alt={`Portada de ${drop.title}`} loading="lazy" className="h-full w-full object-cover" />
                   <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide ${drop.status === "active" ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
                     {drop.status === "active" ? "Drop activo" : drop.status === "finished" ? "Finalizado" : "Nuevo"}
                   </span>
@@ -167,7 +167,7 @@ export function ExplorarView() {
           <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
             {visibleReviews.map((r) => (
               <article key={r.id} className="w-44 shrink-0 rounded-2xl border border-border bg-card p-3">
-                {r.subject_image && <img src={r.subject_image} alt={`Imagen de ${r.subject_title}`} loading="lazy" className="mb-2 aspect-square w-full rounded-xl object-cover" />}
+                {r.subject_image && <img decoding="async" src={r.subject_image} alt={`Imagen de ${r.subject_title}`} loading="lazy" className="mb-2 aspect-square w-full rounded-xl object-cover" />}
                 <p className="truncate text-sm font-bold">{r.subject_title}</p>
                 <p className="truncate text-[11px] text-muted-foreground">{r.subject_artist || r.subject_type}</p>
                 <div className="mt-1.5"><Stars value={r.rating} /></div>
@@ -197,7 +197,7 @@ export function ExplorarView() {
               const attended = data.myShowIds.includes(show.id);
               return (
                 <article key={show.id} className="w-52 shrink-0 overflow-hidden rounded-2xl border border-border bg-card">
-                  <img src={show.image_url ?? eventCrowd} alt={`Imagen de ${show.title}`} loading="lazy" className="h-28 w-full object-cover" />
+                  <img decoding="async" src={show.image_url ?? eventCrowd} alt={`Imagen de ${show.title}`} loading="lazy" className="h-28 w-full object-cover" />
                   <div className="p-3">
                     <p className="truncate text-sm font-bold">{show.title}</p>
                     <p className="text-[11px] text-muted-foreground">{show.artist}</p>
@@ -234,7 +234,7 @@ export function ExplorarView() {
         <div className="grid grid-cols-2 gap-3">
           {visibleGenres.map((genre) => (
             <button key={genre.name} onClick={() => setQuery(genre.name === "Pop" || genre.name === "Urbano" ? "" : genre.name)} className="relative h-24 overflow-hidden rounded-2xl border border-border text-left">
-              <img src={genre.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
+              <img decoding="async" src={genre.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
               <span className="absolute inset-0" style={{ backgroundImage: "var(--gradient-drop-soft)" }} />
               <span className="absolute bottom-2 left-3 right-3">
                 <span className="block text-sm font-black">{genre.name}</span>

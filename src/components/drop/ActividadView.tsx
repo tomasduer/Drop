@@ -28,7 +28,7 @@ function DropRow({ p, cta }: { p: DropProgress; cta: string }) {
   const pct = p.total ? Math.round((100 * p.done) / p.total) : 0;
   return (
     <Link to="/drop" search={{ d: p.drop.id }} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-      <img loading="lazy" decoding="async" src={p.drop.cover} alt="" className={`h-14 w-14 shrink-0 rounded-xl object-cover ${p.drop.status === "archived" ? "sepia-[0.4]" : ""}`} />
+      <img loading="lazy" decoding="async" src={p.drop.status === "archived" ? p.drop.album : p.drop.cover} alt="" className={`h-14 w-14 shrink-0 rounded-xl object-cover ${p.drop.status === "archived" ? "sepia-[0.4]" : ""}`} />
       <div className="min-w-0 flex-1">
         <p className="text-xs font-bold text-primary">{p.drop.artist}</p>
         <p className="truncate text-sm font-black">{p.drop.title}</p>

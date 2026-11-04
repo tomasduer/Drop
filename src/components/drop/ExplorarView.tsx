@@ -203,7 +203,7 @@ export function ExplorarView() {
           <div className="space-y-3">
             {archivedDrops.map((drop) => (
               <button key={drop.id} onClick={() => onEnterDrop(drop)} className="flex w-full items-center gap-3 rounded-2xl border border-border bg-background/50 p-2 text-left">
-                <img decoding="async" src={drop.cover} alt="" loading="lazy" className="h-16 w-16 shrink-0 rounded-xl object-cover sepia-[0.4]" />
+                <img decoding="async" src={drop.album} alt="" loading="lazy" className="h-16 w-16 shrink-0 rounded-xl object-cover sepia-[0.4]" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-xs font-bold text-muted-foreground">{drop.artist} · {drop.dates}</span>
                   <span className="block truncate text-base font-black">{drop.title}</span>

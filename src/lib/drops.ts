@@ -20,6 +20,8 @@ export type DropInfo = {
   description: string;
   cover: string;
   hero: string;
+  /** Tapa del álbum (para el Archivo y las listas de discos). */
+  album: string;
   dates: string;
   status: DropStatus;
   fandom: string;
@@ -31,25 +33,25 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "lali", artist: "LALI", title: "No vayas a atender cuando el demonio llama",
     tagline: "Atendé la llamada. Resolvé el misterio.",
     description: "Una búsqueda del tesoro alrededor del nuevo álbum: llamadas misteriosas, fragmentos inéditos, afiches con QR en la calle y un listening party para los primeros 150.",
-    cover: laliHero.url, hero: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
+    cover: laliHero.url, hero: laliCover.url, album: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
   },
   {
     id: "dillom", artist: "Dillom", title: "Por cesárea",
     tagline: "El universo más oscuro del rap argentino.",
     description: "Trivias, acertijos y desafíos diarios alrededor de Por cesárea. Sumá puntos y escalá el ranking de la comunidad de Dillom.",
-    cover: dillomCover.url, hero: dillomCover.url, dates: "En curso", status: "active", fandom: "Comunidad Dillom",
+    cover: dillomCover.url, hero: dillomCover.url, album: dillomCover.url, dates: "En curso", status: "active", fandom: "Comunidad Dillom",
   },
   {
     id: "tini", artist: "TINI", title: "Nueva era",
     tagline: "Algo nuevo se viene.",
     description: "TINI prepara una nueva etapa. Activá el aviso y enterate primero cuando abra el drop.",
-    cover: tiniHero.url, hero: tiniCover.url, dates: "Próximamente", status: "upcoming", fandom: "Tinistas",
+    cover: tiniHero.url, hero: tiniCover.url, album: tiniCover.url, dates: "Próximamente", status: "upcoming", fandom: "Tinistas",
   },
   {
     id: "maria", artist: "María Becerra", title: "Quimera",
     tagline: "El drop que cerró a lo grande.",
     description: "La experiencia de Quimera ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
-    cover: mariaHero.url, hero: mariaCover.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",
+    cover: mariaHero.url, hero: mariaCover.url, album: mariaCover.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",
   },
 ];
 
@@ -64,7 +66,7 @@ export function useDrops(): DropInfo[] {
     });
     // Campañas nuevas cargadas en la base que todavía no tienen contenido editorial.
     const extra = state.campaigns.filter((c) => !DROP_CATALOG.some((d) => d.id === c.id)).map((c): DropInfo => ({
-      id: c.id, artist: c.artist, title: c.title, tagline: "", description: "", cover: laliCover.url, hero: laliCover.url,
+      id: c.id, artist: c.artist, title: c.title, tagline: "", description: "", cover: laliCover.url, hero: laliCover.url, album: laliCover.url,
       dates: "", status: fromDb(c.status), fandom: `Fans de ${c.artist}`,
     }));
     return [...known, ...extra];

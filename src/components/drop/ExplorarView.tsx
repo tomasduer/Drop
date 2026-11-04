@@ -9,7 +9,7 @@ import { getExploreData, saveDropAction, showAttendanceAction } from "@/lib/expl
 import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData } from "@/lib/explore-data";
 import { useDropAuth } from "./AuthProvider";
 import { useDrops, type DropInfo } from "@/lib/drops";
-import logoViolet from "@/assets/drop-logo-oficial.webp";
+import logoViolet from "@/assets/drop-logo-negativo.webp";
 const logo = { url: logoViolet };
 import { CatalogResults } from "./Catalog";
 import { getExternalShows } from "@/lib/music.functions";

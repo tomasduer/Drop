@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Archive, Compass, Gift, MapPin, QrCode, Sparkles, Target, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoViolet from "@/assets/drop-logo-oficial.webp";
+import logoViolet from "@/assets/drop-logo-negativo.webp";
 const logo = { url: logoViolet };
 import crowd from "@/assets/onboarding-1.webp";
 import phone from "@/assets/onboarding-2.webp";

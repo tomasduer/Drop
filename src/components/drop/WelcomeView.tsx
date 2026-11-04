@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Disc3, Map, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoViolet from "@/assets/drop-logo-oficial.webp";
+import logoViolet from "@/assets/drop-logo-negativo.webp";
 const logo = { url: logoViolet };
 const steps = [
   { icon: Map, title: "Elegí los drops de tus artistas" },

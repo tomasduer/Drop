@@ -3,7 +3,7 @@ import { Eye, EyeOff, Loader2, Mail, ArrowRight } from "lucide-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import logoViolet from "@/assets/drop-logo-oficial.webp";
+import logoViolet from "@/assets/drop-logo-negativo.webp";
 const logo = { url: logoViolet };
 import { supabase } from "@/integrations/supabase/client";
 import { useDropAuth } from "./AuthProvider";

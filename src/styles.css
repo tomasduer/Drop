@@ -64,31 +64,31 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.972 0.002 90);
-  --foreground: oklch(0.16 0.004 30);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.004 30);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.004 30);
-  --primary: oklch(0.6 0.2 38);
+  --background: oklch(0.155 0.004 30);
+  --foreground: oklch(0.97 0.003 90);
+  --card: oklch(0.205 0.006 30);
+  --card-foreground: oklch(0.97 0.003 90);
+  --popover: oklch(0.205 0.006 30);
+  --popover-foreground: oklch(0.97 0.003 90);
+  --primary: oklch(0.64 0.21 40);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.93 0.004 90);
-  --secondary-foreground: oklch(0.16 0.004 30);
-  --muted: oklch(0.93 0.004 90);
-  --muted-foreground: oklch(0.47 0.01 30);
-  --accent: oklch(0.32 0.12 355);
+  --secondary: oklch(0.25 0.008 30);
+  --secondary-foreground: oklch(0.97 0.003 90);
+  --muted: oklch(0.25 0.008 30);
+  --muted-foreground: oklch(0.72 0.01 40);
+  --accent: oklch(0.42 0.14 355);
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.6 0.24 20);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.88 0.004 90);
-  --input: oklch(0.9 0.004 90);
-  --ring: oklch(0.6 0.2 38);
-  --brand-canvas: oklch(0.97 0.008 60);
+  --border: oklch(0.3 0.01 30);
+  --input: oklch(0.27 0.01 30);
+  --ring: oklch(0.64 0.21 40);
+  --brand-canvas: oklch(0.155 0.004 30);
   --gradient-drop: linear-gradient(115deg, oklch(0.3 0.11 355), oklch(0.47 0.17 25) 45%, oklch(0.64 0.21 40));
-  --gradient-drop-soft: linear-gradient(145deg, oklch(0.64 0.21 40 / 0.14), oklch(0.3 0.11 355 / 0.06));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.64 0.21 40 / 0.2), oklch(0.3 0.11 355 / 0.12));
   --gradient-connect: linear-gradient(160deg, oklch(0.105 0.018 28) 0%, oklch(0.16 0.055 10) 58%, oklch(0.22 0.09 36) 100%);
-  --gradient-glow: radial-gradient(circle at 100% 0%, oklch(0.64 0.21 40 / 0.1), transparent 40%);
-  --shadow-glow: 0 10px 28px -12px oklch(0.4 0.15 15 / 0.55);
+  --gradient-glow: radial-gradient(circle at 100% 0%, oklch(0.64 0.21 40 / 0.16), transparent 45%), radial-gradient(circle at 0% 60%, oklch(0.3 0.11 355 / 0.22), transparent 50%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.64 0.21 40 / 0.5);
   --font-body: "Inter", system-ui, sans-serif;
   --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
   --display-transform: none;
@@ -150,6 +150,8 @@
 
   body {
     background-color: var(--color-background);
+    background-image: var(--gradient-glow);
+    background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
@@ -284,3 +286,24 @@ html[data-drop="tini"] {
   70% { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); }
 }
+
+/* Textura: grano fino + rayones suaves, como el fondo del logo. Da profundidad
+   sin tapar el contenido. Va sobre todo y no captura clics. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: var(--texture-opacity, 0.09);
+  mix-blend-mode: overlay;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.6 -0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.35' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 9 -7.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+}
+/* Tarjetas con algo de volumen: luz arriba, sombra abajo. */
+.bg-card {
+  background-image: linear-gradient(180deg, oklch(1 0 0 / 0.045), transparent 40%);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.06), 0 12px 28px -18px oklch(0 0 0 / 0.8);
+}
+html[data-drop="maria"] { --texture-opacity: 0.05; }

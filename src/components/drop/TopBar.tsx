@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import logo from "@/assets/drop-logo-2026.webp.asset.json";
+import logoViolet from "@/assets/drop-logo-violeta.webp";
+const logo = { url: logoViolet };
 import { Bell, BarChart3, X, PhoneCall, Trophy, Gift, Users, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {

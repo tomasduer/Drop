@@ -11,7 +11,8 @@ import albumCover from "@/assets/album-cover.png.asset.json";
 import { toast } from "sonner";
 import { guestQuestions, guestPracticeResult } from "@/lib/guest-practice";
 import { PHOTOS } from "@/lib/fan-avatars";
-import logo from "@/assets/drop-logo-2026.webp.asset.json";
+import logoViolet from "@/assets/drop-logo-violeta.webp";
+const logo = { url: logoViolet };
 import stencilWall from "@/assets/stencil-wall.png.asset.json";
 
 export type GameKind = "trivia" | "order" | "stream" | "scan" | "ar" | "clue";

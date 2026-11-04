@@ -6,6 +6,7 @@ import laliHero from "@/assets/lali-phones.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import mariaHero from "@/assets/drop-photo-31.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
+import dillomIcon from "@/assets/dillom-icon.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
 import tiniHero from "@/assets/drop-photo-32.png.asset.json";
 
@@ -39,7 +40,7 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "dillom", artist: "Dillom", title: "Por cesárea",
     tagline: "El universo más oscuro del rap argentino.",
     description: "Trivias, acertijos y desafíos diarios alrededor de Por cesárea. Sumá puntos y escalá el ranking de la comunidad de Dillom.",
-    cover: dillomCover.url, hero: dillomCover.url, album: dillomCover.url, dates: "En curso", status: "active", fandom: "Comunidad Dillom",
+    cover: dillomIcon, hero: dillomCover.url, album: dillomCover.url, dates: "En curso", status: "active", fandom: "Comunidad Dillom",
   },
   {
     id: "tini", artist: "TINI", title: "Nueva era",

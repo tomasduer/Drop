@@ -9,7 +9,8 @@ import { getExploreData, saveDropAction, showAttendanceAction } from "@/lib/expl
 import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData } from "@/lib/explore-data";
 import { useDropAuth } from "./AuthProvider";
 import { useDrops, type DropInfo } from "@/lib/drops";
-import logo from "@/assets/drop-logo-2026.webp.asset.json";
+import logoViolet from "@/assets/drop-logo-violeta.webp";
+const logo = { url: logoViolet };
 import { CatalogResults } from "./Catalog";
 import { getExternalShows } from "@/lib/music.functions";
 import laliCover from "@/assets/album-cover.png.asset.json";

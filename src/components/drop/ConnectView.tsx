@@ -3,7 +3,8 @@ import { Eye, EyeOff, Loader2, Mail, ArrowRight } from "lucide-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/drop-logo-2026.webp.asset.json";
+import logoViolet from "@/assets/drop-logo-violeta.webp";
+const logo = { url: logoViolet };
 import { supabase } from "@/integrations/supabase/client";
 import { useDropAuth } from "./AuthProvider";
 

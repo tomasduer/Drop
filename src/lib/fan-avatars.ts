@@ -14,6 +14,14 @@ import a24 from "@/assets/drop-photo-24.png.asset.json";
 import a25 from "@/assets/drop-photo-25.png.asset.json";
 import a26 from "@/assets/drop-photo-26.png.asset.json";
 import a27 from "@/assets/drop-photo-27.png.asset.json";
+import av1 from "@/assets/avatares/avatar-1.webp";
+import av2 from "@/assets/avatares/avatar-2.webp";
+import av3 from "@/assets/avatares/avatar-3.webp";
+import av4 from "@/assets/avatares/avatar-4.webp";
+import av5 from "@/assets/avatares/avatar-5.webp";
+import av6 from "@/assets/avatares/avatar-6.webp";
+import av7 from "@/assets/avatares/avatar-7.webp";
+import av8 from "@/assets/avatares/avatar-8.webp";
 
 export const PHOTOS = {
   stage: a9.url,
@@ -34,7 +42,8 @@ export const PHOTOS = {
   pop: a27.url,
 };
 
-const POOL = [a20.url, a21.url, a22.url, a23.url, a24.url, a25.url, a26.url, a27.url];
+/** Casual LALI photos used as user avatars (square, 256px). */
+const POOL = [av1, av2, av3, av4, av5, av6, av7, av8];
 
 /** Deterministic avatar for a username. */
 export function avatarFor(name: string) {

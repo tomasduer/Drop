@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActividadRouteImport } from './routes/actividad'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BienvenidaRouteImport } from './routes/bienvenida'
 import { Route as DropRouteImport } from './routes/drop'
@@ -28,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 const ActividadRoute = ActividadRouteImport.update({
   id: '/actividad',
   path: '/actividad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -74,6 +80,7 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/actividad': typeof ActividadRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bienvenida': typeof BienvenidaRoute
   '/drop': typeof DropRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/actividad': typeof ActividadRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bienvenida': typeof BienvenidaRoute
   '/drop': typeof DropRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/actividad': typeof ActividadRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bienvenida': typeof BienvenidaRoute
   '/drop': typeof DropRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/actividad'
+    | '/admin'
     | '/auth'
     | '/bienvenida'
     | '/drop'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/actividad'
+    | '/admin'
     | '/auth'
     | '/bienvenida'
     | '/drop'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/actividad'
+    | '/admin'
     | '/auth'
     | '/bienvenida'
     | '/drop'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActividadRoute: typeof ActividadRoute
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   BienvenidaRoute: typeof BienvenidaRoute
   DropRoute: typeof DropRoute
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/actividad'
       fullPath: '/actividad'
       preLoaderRoute: typeof ActividadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActividadRoute: ActividadRoute,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   BienvenidaRoute: BienvenidaRoute,
   DropRoute: DropRoute,

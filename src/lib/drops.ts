@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { useDropAuth } from "@/components/drop/AuthProvider";
+import { useDropContent } from "@/lib/drop-content";
+import eventCrowd from "@/assets/event-crowd.jpg";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import mariaHero from "@/assets/drop-photo-31.png.asset.json";
@@ -95,18 +97,31 @@ const fromDb = (s: string): DropStatus => (s === "active" ? "active" : s === "cl
 
 export function useDrops(): DropInfo[] {
   const { state } = useDropAuth();
+  const content = useDropContent();
   return useMemo(() => {
+    const byId = new Map(content.map((c) => [c.campaign_id, c]));
+    // Lo cargado en el panel de admin pisa lo editorial del código (solo los campos completos).
+    const withContent = (d: DropInfo): DropInfo => {
+      const c = byId.get(d.id);
+      if (!c) return d;
+      return {
+        ...d, kind: c.kind ?? d.kind,
+        tagline: c.tagline || d.tagline, description: c.description || d.description,
+        dates: c.dates || d.dates, fandom: c.fandom || d.fandom,
+        cover: c.cover_url || d.cover, hero: c.hero_url || d.hero, album: c.album_url || c.hero_url || d.album,
+      };
+    };
     const known = DROP_CATALOG.map((d) => {
       const c = state.campaigns.find((x) => x.id === d.id);
-      return c ? { ...d, status: fromDb(c.status) } : d;
+      return withContent(c ? { ...d, artist: c.artist || d.artist, title: c.title || d.title, status: fromDb(c.status) } : d);
     });
-    // Campañas nuevas cargadas en la base que todavía no tienen contenido editorial.
-    const extra = state.campaigns.filter((c) => !DROP_CATALOG.some((d) => d.id === c.id)).map((c): DropInfo => ({
-      id: c.id, artist: c.artist, title: c.title, tagline: "", description: "", cover: laliCover.url, hero: laliCover.url, album: laliCover.url,
+    // Drops creados desde el panel (o campañas nuevas sin contenido todavía).
+    const extra = state.campaigns.filter((c) => !DROP_CATALOG.some((d) => d.id === c.id)).map((c): DropInfo => withContent({
+      id: c.id, artist: c.artist, title: c.title, tagline: "", description: "", cover: eventCrowd, hero: eventCrowd, album: eventCrowd,
       dates: "", status: fromDb(c.status), fandom: `Fans de ${c.artist}`,
     }));
     return [...known, ...extra];
-  }, [state.campaigns]);
+  }, [state.campaigns, content]);
 }
 
 export function findDrop(drops: DropInfo[], id: string | undefined) {

@@ -17,6 +17,7 @@ import { AlbumsSection } from "./AlbumsSection";
 import { RewardsRedeem } from "./RewardsRedeem";
 import { DropSelector } from "./DropSelector";
 import { useDrops } from "@/lib/drops";
+import { useIsDropAdmin } from "@/lib/drop-content";
 import { achievements, dropProgress } from "@/lib/progress";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
@@ -45,7 +46,8 @@ const TABS: { id: ProfileTab; label: string }[] = [
 ];
 
 export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
-  const { profile, mode, state, saveProfile, signOut, reviews } = useDropAuth();
+  const { profile, mode, state, saveProfile, signOut, reviews, user } = useDropAuth();
+  const isAdmin = useIsDropAdmin(mode === "user" ? user?.id : null);
   const navigate = useNavigate();
   const fetchExtras = useServerFn(getProfileExtras);
   const [extras, setExtras] = useState<ProfileExtras>(emptyProfileExtras);
@@ -350,6 +352,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
               {mode === "user" ? "Cerrar sesión" : "Salir del modo invitado"}
             </Button>
             <Button variant="ghost" onClick={() => { try { localStorage.removeItem("drop-onboarding-visto"); } catch { /* */ } void navigate({ to: "/explorar" }); }}>Ver cómo funciona DROP</Button>
+            {isAdmin && <Button variant="outline" onClick={() => void navigate({ to: "/admin" })}>Panel de drops (admin)</Button>}
             <a href="/privacidad" className="text-center text-xs text-muted-foreground underline">Política de privacidad</a>
           </DialogContent>
         </Dialog>

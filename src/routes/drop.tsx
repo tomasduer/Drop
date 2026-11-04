@@ -11,6 +11,7 @@ import { DashboardView } from "@/components/drop/DashboardView";
 import { ProfileView } from "@/components/drop/ProfileView";
 import { useDropAuth } from "@/components/drop/AuthProvider";
 import { useCurrentDrop } from "@/lib/drops";
+import { DropThemeStyles } from "@/components/drop/DropThemeStyles";
 
 // Pestañas viejas (mapa, pasaporte) ahora viven dentro del inicio del drop.
 const toTab = (t: unknown): DropTab | undefined =>
@@ -59,6 +60,7 @@ function DropUniverse() {
 
   return (
     <MobileShell>
+      <DropThemeStyles />
       <TopBar
         back="Explorar"
         avatar={drop.cover}

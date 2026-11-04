@@ -21,7 +21,7 @@ export function GlobalNav() {
           return (
             <Link key={it.label} to={it.to} aria-current={isActive ? "page" : undefined}
               className={cn("flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-xs font-medium transition-colors", isActive ? "text-foreground" : "text-muted-foreground")}>
-              <span className={cn("grid h-9 w-9 place-items-center rounded-xl transition-all", isActive && "text-primary-foreground shadow-[0_6px_20px_-4px_rgba(220,38,38,0.7)]")}
+              <span className={cn("grid h-9 w-9 place-items-center rounded-xl transition-all", isActive && "text-primary-foreground shadow-[var(--shadow-glow)]")}
                 style={isActive ? { backgroundImage: "var(--gradient-drop)" } : undefined}>
                 <Icon className="h-4 w-4" />
               </span>

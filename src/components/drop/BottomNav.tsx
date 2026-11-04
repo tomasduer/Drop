@@ -36,7 +36,7 @@ export function BottomNav({
               <span
                 className={cn(
                   "grid h-9 w-9 place-items-center rounded-xl transition-all",
-                  isActive && "text-primary-foreground shadow-[0_6px_20px_-4px_rgba(220,38,38,0.7)]"
+                  isActive && "text-primary-foreground shadow-[var(--shadow-glow)]"
                 )}
                 style={isActive ? { backgroundImage: "var(--gradient-drop)" } : undefined}
               >

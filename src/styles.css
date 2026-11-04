@@ -64,31 +64,34 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.105 0.018 28);
-  --foreground: oklch(0.98 0.01 20);
-  --card: oklch(0.165 0.035 28);
-  --card-foreground: oklch(0.98 0.01 20);
-  --popover: oklch(0.165 0.035 28);
-  --popover-foreground: oklch(0.98 0.01 20);
-  --primary: oklch(0.67 0.235 35);
+  --background: oklch(0.13 0.006 285);
+  --foreground: oklch(0.97 0.004 285);
+  --card: oklch(0.185 0.008 285);
+  --card-foreground: oklch(0.97 0.004 285);
+  --popover: oklch(0.185 0.008 285);
+  --popover-foreground: oklch(0.97 0.004 285);
+  --primary: oklch(0.68 0.21 15);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.43 0.18 8);
+  --secondary: oklch(0.26 0.01 285);
   --secondary-foreground: oklch(0.99 0 0);
-  --muted: oklch(0.225 0.035 28);
-  --muted-foreground: oklch(0.73 0.025 35);
-  --accent: oklch(0.59 0.21 18);
+  --muted: oklch(0.24 0.008 285);
+  --muted-foreground: oklch(0.72 0.01 285);
+  --accent: oklch(0.72 0.17 50);
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.6 0.24 20);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.29 0.045 28);
-  --input: oklch(0.25 0.04 28);
-  --ring: oklch(0.67 0.235 35);
+  --border: oklch(0.29 0.008 285);
+  --input: oklch(0.27 0.008 285);
+  --ring: oklch(0.68 0.21 15);
   --brand-canvas: oklch(0.97 0.008 60);
-  --gradient-drop: linear-gradient(105deg, oklch(0.43 0.18 8), oklch(0.67 0.235 35));
-  --gradient-drop-soft: linear-gradient(145deg, oklch(0.67 0.235 35 / 0.25), oklch(0.43 0.18 8 / 0.08));
+  --gradient-drop: linear-gradient(105deg, oklch(0.62 0.24 0), oklch(0.74 0.18 50));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.74 0.18 50 / 0.22), oklch(0.62 0.24 0 / 0.08));
   --gradient-connect: linear-gradient(160deg, oklch(0.105 0.018 28) 0%, oklch(0.16 0.055 10) 58%, oklch(0.22 0.09 36) 100%);
-  --gradient-glow: radial-gradient(circle at 30% 20%, oklch(0.67 0.235 35 / 0.28), transparent 60%), radial-gradient(circle at 80% 80%, oklch(0.43 0.18 8 / 0.26), transparent 60%);
-  --shadow-glow: 0 10px 40px -10px oklch(0.67 0.235 35 / 0.45);
+  --gradient-glow: radial-gradient(circle at 15% 0%, oklch(0.62 0.24 0 / 0.16), transparent 45%), radial-gradient(circle at 100% 30%, oklch(0.74 0.18 50 / 0.1), transparent 40%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.62 0.24 0 / 0.55);
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --display-transform: none;
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -148,7 +151,119 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
   }
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    text-transform: var(--display-transform);
+    letter-spacing: -0.01em;
+  }
+  /* Los rótulos chicos (secciones en mayúscula) usan la letra de texto. */
+  h2[class*="text-xs"], h2[class*="text-[11px]"], h3[class*="text-xs"], h3[class*="text-[11px]"] {
+    font-family: var(--font-body);
+    text-transform: none;
+    letter-spacing: 0.1em;
+  }
+}
+
+/* Carruseles horizontales: se deslizan con el dedo, sin barras visibles. */
+.overflow-x-auto {
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.overflow-x-auto::-webkit-scrollbar { display: none; }
+.overflow-x-auto > * { scroll-snap-align: start; }
+.overflow-y-auto { scrollbar-width: thin; }
+
+/*
+ * Estética de cada drop: se activa con <html data-drop="...">.
+ * Cada álbum tiene su paleta y tipografía, independientes de la de DROP.
+ */
+/* LALI · No vayas a atender cuando el demonio llama: rojo sangre, negro, rock. */
+html[data-drop="lali"] {
+  --background: oklch(0.11 0.03 25);
+  --card: oklch(0.16 0.05 25);
+  --popover: oklch(0.16 0.05 25);
+  --muted: oklch(0.22 0.05 25);
+  --muted-foreground: oklch(0.74 0.04 25);
+  --border: oklch(0.3 0.07 25);
+  --input: oklch(0.26 0.06 25);
+  --primary: oklch(0.62 0.235 27);
+  --ring: oklch(0.62 0.235 27);
+  --accent: oklch(0.5 0.2 20);
+  --gradient-drop: linear-gradient(105deg, oklch(0.4 0.17 20), oklch(0.62 0.235 27));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.62 0.235 27 / 0.25), oklch(0.4 0.17 20 / 0.08));
+  --gradient-glow: radial-gradient(circle at 30% 0%, oklch(0.55 0.22 25 / 0.3), transparent 55%), radial-gradient(circle at 90% 70%, oklch(0.4 0.17 20 / 0.25), transparent 55%);
+  --shadow-glow: 0 10px 30px -8px oklch(0.55 0.22 25 / 0.7);
+  --font-display: "Anton", "Inter", sans-serif;
+  --display-transform: uppercase;
+}
+/* Dillom · Por cesárea: negro crudo, hueso, máquina de escribir. */
+html[data-drop="dillom"] {
+  --background: oklch(0.11 0 0);
+  --foreground: oklch(0.93 0.015 85);
+  --card: oklch(0.16 0.003 85);
+  --popover: oklch(0.16 0.003 85);
+  --muted: oklch(0.22 0.005 85);
+  --muted-foreground: oklch(0.68 0.02 85);
+  --border: oklch(0.32 0.01 85);
+  --input: oklch(0.26 0.01 85);
+  --primary: oklch(0.87 0.04 85);
+  --primary-foreground: oklch(0.12 0 0);
+  --ring: oklch(0.87 0.04 85);
+  --accent: oklch(0.6 0.03 85);
+  --gradient-drop: linear-gradient(105deg, oklch(0.7 0.03 85), oklch(0.92 0.03 85));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.87 0.04 85 / 0.12), transparent);
+  --gradient-glow: radial-gradient(circle at 50% 0%, oklch(0.87 0.04 85 / 0.07), transparent 50%);
+  --shadow-glow: 0 10px 30px -12px oklch(0.87 0.04 85 / 0.35);
+  --font-display: "Special Elite", "Courier New", monospace;
+  --display-transform: none;
+}
+/* María Becerra · Quimera: crema, rosa, cromado. Tema claro. */
+html[data-drop="maria"] {
+  --background: oklch(0.95 0.018 70);
+  --foreground: oklch(0.22 0.02 20);
+  --card: oklch(0.985 0.01 70);
+  --card-foreground: oklch(0.22 0.02 20);
+  --popover: oklch(0.985 0.01 70);
+  --popover-foreground: oklch(0.22 0.02 20);
+  --muted: oklch(0.9 0.02 60);
+  --muted-foreground: oklch(0.48 0.03 20);
+  --border: oklch(0.86 0.025 40);
+  --input: oklch(0.88 0.02 40);
+  --primary: oklch(0.6 0.17 355);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.9 0.03 355);
+  --secondary-foreground: oklch(0.3 0.05 355);
+  --ring: oklch(0.6 0.17 355);
+  --accent: oklch(0.75 0.12 355);
+  --gradient-drop: linear-gradient(105deg, oklch(0.6 0.17 355), oklch(0.75 0.12 20));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.75 0.12 355 / 0.25), oklch(0.95 0.02 70 / 0.1));
+  --gradient-glow: radial-gradient(circle at 20% 0%, oklch(0.85 0.08 355 / 0.5), transparent 55%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.6 0.17 355 / 0.45);
+  --font-display: "Playfair Display", Georgia, serif;
+  --display-transform: none;
+}
+/* TINI · Nueva era: dorado y caramelo cálido. */
+html[data-drop="tini"] {
+  --background: oklch(0.15 0.02 60);
+  --card: oklch(0.2 0.03 60);
+  --popover: oklch(0.2 0.03 60);
+  --muted: oklch(0.26 0.03 60);
+  --muted-foreground: oklch(0.76 0.04 70);
+  --border: oklch(0.33 0.04 60);
+  --input: oklch(0.28 0.03 60);
+  --primary: oklch(0.8 0.12 75);
+  --primary-foreground: oklch(0.18 0.03 60);
+  --ring: oklch(0.8 0.12 75);
+  --gradient-drop: linear-gradient(105deg, oklch(0.68 0.11 55), oklch(0.84 0.12 85));
+  --gradient-drop-soft: linear-gradient(145deg, oklch(0.8 0.12 75 / 0.2), transparent);
+  --gradient-glow: radial-gradient(circle at 30% 0%, oklch(0.8 0.12 75 / 0.18), transparent 55%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.8 0.12 75 / 0.5);
+  --font-display: "Syne", "Inter", sans-serif;
+  --display-transform: none;
 }
 
 @keyframes scan {

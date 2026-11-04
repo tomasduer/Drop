@@ -241,7 +241,7 @@ export function MisionesView() {
       {featured && (
         <section>
           <SectionTitle icon={Sparkles} title="Misión destacada" hint="Empezá por acá" />
-          <button onClick={() => setSelected(featured)} className="relative block w-full overflow-hidden rounded-3xl border border-primary/50 text-left shadow-[0_16px_40px_-18px_rgba(220,38,38,0.8)]">
+          <button onClick={() => setSelected(featured)} className="relative block w-full overflow-hidden rounded-3xl border border-primary/50 text-left shadow-[var(--shadow-glow)]">
             <img decoding="async" src={featured.cover ?? drop.cover} alt="" className="h-56 w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
             <div className="absolute inset-x-4 bottom-4">

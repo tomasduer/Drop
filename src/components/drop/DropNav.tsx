@@ -21,7 +21,7 @@ export function DropNav({ tab, onChange }: { tab: DropTab; onChange: (t: DropTab
           return (
             <button key={t} onClick={() => onChange(t)} aria-current={active ? "page" : undefined}
               className={cn("flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-xs font-medium transition-colors", active ? "text-foreground" : "text-muted-foreground")}>
-              <span className={cn("grid h-9 w-9 place-items-center rounded-xl transition-all", active && "text-primary-foreground shadow-[0_6px_20px_-4px_rgba(220,38,38,0.7)]")}
+              <span className={cn("grid h-9 w-9 place-items-center rounded-xl transition-all", active && "text-primary-foreground shadow-[var(--shadow-glow)]")}
                 style={active ? { backgroundImage: "var(--gradient-drop)" } : undefined}>
                 <Icon className="h-4 w-4" />
               </span>

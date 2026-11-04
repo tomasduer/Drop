@@ -163,12 +163,12 @@ export function ComunidadView() {
           placeholder="Contá qué encontraste hoy…"
           className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-2 flex flex-wrap gap-2">
           {(isLali ? stickers : [{ src: drop.cover, label: drop.title }]).map((s) => (
             <button
               key={s.label}
               onClick={() => setSticker(sticker === s.src ? null : s.src)}
-              className={`h-12 w-12 shrink-0 overflow-hidden rounded-xl border-2 ${
+              className={`h-11 w-11 shrink-0 overflow-hidden rounded-xl border-2 ${
                 sticker === s.src ? "border-primary" : "border-border"
               }`}
               aria-label={`Sticker ${s.label}`}
@@ -178,7 +178,7 @@ export function ComunidadView() {
           ))}
           <button
             onClick={publish}
-            className="ml-auto flex shrink-0 items-center gap-1 rounded-xl px-4 text-xs font-black text-primary-foreground"
+            className="mt-1 flex w-full items-center justify-center gap-1 rounded-xl px-4 py-2.5 text-sm font-black text-primary-foreground"
             style={{ backgroundImage: "var(--gradient-drop)" }}
           >
             <Send className="h-3.5 w-3.5" /> Publicar
@@ -190,7 +190,7 @@ export function ComunidadView() {
       <h2 className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
         Grupos
       </h2>
-      <div className="mb-6 flex gap-3 overflow-x-auto pb-2">
+      <div className={`mb-6 grid gap-3 ${dropGroups.length >= 3 ? "grid-cols-3" : dropGroups.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
         {dropGroups.map((g) => {
           const isIn = joined.includes(g.name);
           return (
@@ -202,7 +202,7 @@ export function ComunidadView() {
                   isIn ? `Saliste de ${g.name}` : `Te uniste a ${g.name}`
                 );
               }}
-              className={`min-w-[140px] rounded-2xl border p-3 text-left ${
+              className={`min-w-0 rounded-2xl border p-3 text-left ${
                 isIn ? "border-primary bg-primary/10" : "border-border bg-card"
               }`}
             >

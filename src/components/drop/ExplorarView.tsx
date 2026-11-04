@@ -151,7 +151,7 @@ export function ExplorarView() {
           <div className="space-y-4">
             {activeDrops.map((drop) => (
               <article key={drop.id} role="button" tabIndex={0} onClick={() => onEnterDrop(drop)} onKeyDown={(e) => { if (e.key === "Enter") onEnterDrop(drop); }}
-                className="relative cursor-pointer overflow-hidden rounded-3xl border border-primary/40 shadow-[0_12px_40px_-16px_rgba(220,38,38,0.7)]">
+                className="relative cursor-pointer overflow-hidden rounded-3xl border border-primary/40 shadow-[var(--shadow-glow)]">
                 <img decoding="async" src={drop.hero} alt={drop.artist} loading="lazy" className="h-60 w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
                 <div className="absolute right-3 top-3"><SaveButton drop={drop} /></div>

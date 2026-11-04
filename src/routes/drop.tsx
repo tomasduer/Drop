@@ -44,6 +44,11 @@ function DropUniverse() {
   const navigate = useNavigate();
   const goTab = (t: DropTab) => { setDashboard(false); void navigate({ to: "/drop", search: { d: drop.id, tab: t } }); };
 
+  // Cada drop pinta la app con la estética de su álbum (ver styles.css, html[data-drop]).
+  useEffect(() => {
+    document.documentElement.dataset.drop = drop.id;
+    return () => { delete document.documentElement.dataset.drop; };
+  }, [drop.id]);
   useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }, [tab, dashboard, profile, d]);
   // Recordamos el último drop visitado (no limita: podés participar en todos).
   useEffect(() => { if (mode === "user") void saveProfile({ active_drop: drop.id }); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [drop.id, mode]);

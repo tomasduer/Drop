@@ -212,7 +212,7 @@ export function MapaView({ onGoMisiones, embedded = false }: { onGoMisiones: () 
           className="relative mt-4 flex w-full items-center gap-3 rounded-2xl border border-primary/40 bg-background/40 p-2 text-left backdrop-blur transition-colors active:bg-primary/10"
         >
           <span
-            className="grid h-14 w-14 shrink-0 animate-pulse place-items-center rounded-2xl text-primary-foreground shadow-[0_10px_30px_-6px_rgba(220,38,38,0.7)]"
+            className="grid h-14 w-14 shrink-0 animate-pulse place-items-center rounded-2xl text-primary-foreground shadow-[var(--shadow-glow)]"
             style={{ backgroundImage: "var(--gradient-drop)" }}
           >
             <PhoneCall className="h-6 w-6" />
@@ -301,7 +301,7 @@ export function MapaView({ onGoMisiones, embedded = false }: { onGoMisiones: () 
                     (done
                       ? "border-primary/60 bg-primary/25 text-foreground"
                       : active
-                        ? "border-transparent text-primary-foreground shadow-[0_8px_25px_-4px_rgba(220,38,38,0.8)]"
+                        ? "border-transparent text-primary-foreground shadow-[var(--shadow-glow)]"
                         : "border-border bg-muted text-muted-foreground")
                   }
                   style={active ? { backgroundImage: "var(--gradient-drop)" } : undefined}
@@ -482,7 +482,7 @@ function IncomingCall({
             <img decoding="async"
               src={laliPhones.url}
               alt="LALI atendiendo dos teléfonos"
-              className="h-28 w-28 rounded-full border-2 border-primary/60 object-cover shadow-[0_10px_40px_-8px_rgba(220,38,38,0.8)]"
+              className="h-28 w-28 rounded-full border-2 border-primary/60 object-cover shadow-[var(--shadow-glow)]"
             />
             <span
               className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full text-primary-foreground"

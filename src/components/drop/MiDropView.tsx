@@ -346,6 +346,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
             <Button variant="outline" onClick={async () => { await signOut(); void navigate({ to: "/auth", search: { mode: "login" }, replace: true }); }}>
               {mode === "user" ? "Cerrar sesión" : "Salir del modo invitado"}
             </Button>
+            <Button variant="ghost" onClick={() => { try { localStorage.removeItem("drop-onboarding-visto"); } catch { /* */ } void navigate({ to: "/explorar" }); }}>Ver cómo funciona DROP</Button>
             <a href="/privacidad" className="text-center text-xs text-muted-foreground underline">Política de privacidad</a>
           </DialogContent>
         </Dialog>

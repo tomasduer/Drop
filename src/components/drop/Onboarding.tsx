@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
-import { Archive, Compass, Gift, Target, Trophy, Users } from "lucide-react";
+import { Archive, Compass, Gift, MapPin, QrCode, Sparkles, Target, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import laliHero from "@/assets/lali-9.png.asset.json";
-import mariaHero from "@/assets/drop-photo-31.png.asset.json";
-import tiniHero from "@/assets/drop-photo-32.png.asset.json";
+import logo from "@/assets/drop-logo-2026.webp.asset.json";
+import crowd from "@/assets/event-crowd.jpg";
+import phone from "@/assets/hero-phone.jpg";
+import street from "@/assets/qr-street.jpg";
+import stage from "@/assets/stage-lights.jpg";
 
 const KEY = "drop-onboarding-visto";
 
-const slides = [
-  { image: laliHero.url, title: "Explorá y elegí tus drops", points: [{ icon: Compass, text: "Cada drop es el universo de un artista" }, { icon: Users, text: "Sumate a todos los que quieras, a la vez" }] },
-  { image: tiniHero.url, title: "Jugá y sumá puntos", points: [{ icon: Target, text: "Completá misiones, trivias y desafíos" }, { icon: Trophy, text: "Subí en el ranking de cada artista" }] },
-  { image: mariaHero.url, title: "Ganá premios y volvé cuando quieras", points: [{ icon: Gift, text: "Desbloqueá recompensas y experiencias" }, { icon: Archive, text: "Los drops que terminan quedan en el Archivo" }] },
+// Fotos genéricas que ilustran cada idea (sin artistas).
+const slides: { image: string | null; title: string; points: { icon: typeof Compass; text: string }[] }[] = [
+  { image: null, title: "La música se vive. Y también suma.", points: [{ icon: Sparkles, text: "Cada lanzamiento se convierte en un juego" }, { icon: Users, text: "Participá con miles de fans" }] },
+  { image: crowd, title: "Elegí tus drops", points: [{ icon: Compass, text: "En Explorar están todos los artistas" }, { icon: Users, text: "Sumate a los drops que quieras, a la vez" }] },
+  { image: phone, title: "Jugá misiones", points: [{ icon: Target, text: "Trivias, acertijos y desafíos diarios" }, { icon: Sparkles, text: "Cada misión te dice cuántos puntos da" }] },
+  { image: street, title: "Salí a buscar", points: [{ icon: QrCode, text: "Escaneá afiches con QR en la calle" }, { icon: MapPin, text: "El mapa te muestra dónde está la acción" }] },
+  { image: stage, title: "Subí en el ranking y ganá", points: [{ icon: Trophy, text: "Cada artista tiene su propio ranking" }, { icon: Gift, text: "Desbloqueá premios y experiencias" }, { icon: Archive, text: "Los drops que terminan quedan en el Archivo" }] },
 ];
 
 // Introducción breve la primera vez que alguien entra. Se puede saltear.
@@ -25,8 +30,17 @@ export function Onboarding() {
   return (
     <div role="dialog" aria-modal="true" aria-label="Cómo funciona DROP" className="fixed inset-0 z-50 mx-auto flex max-w-[440px] flex-col bg-background">
       <div className="relative h-[52%] shrink-0 overflow-hidden">
-        <img decoding="async" src={s.image} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+        {s.image ? (
+          <>
+            <img decoding="async" src={s.image} alt="" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+            <img decoding="async" src={logo.url} alt="DROP" className="absolute left-5 top-[max(1rem,env(safe-area-inset-top))] h-9 w-24 object-contain object-left drop-shadow-[0_0_8px_var(--primary)]" />
+          </>
+        ) : (
+          <div className="grid h-full place-items-center" style={{ backgroundImage: "radial-gradient(circle at 50% 45%, oklch(0.62 0.24 25 / 0.45), transparent 65%)" }}>
+            <img decoding="async" src={logo.url} alt="DROP" className="w-64 object-contain drop-shadow-[0_0_24px_var(--primary)]" />
+          </div>
+        )}
         <button onClick={close} className="absolute right-4 top-[max(1rem,env(safe-area-inset-top))] rounded-full bg-background/70 px-3 py-1.5 text-xs font-bold backdrop-blur">Saltear</button>
       </div>
       <div className="flex flex-1 flex-col px-7 pb-[max(1.5rem,env(safe-area-inset-bottom))]">

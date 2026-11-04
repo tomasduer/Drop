@@ -31,7 +31,7 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "lali", artist: "LALI", title: "No vayas a atender cuando el demonio llama",
     tagline: "Atendé la llamada. Resolvé el misterio.",
     description: "Una búsqueda del tesoro alrededor del nuevo álbum: llamadas misteriosas, fragmentos inéditos, afiches con QR en la calle y un listening party para los primeros 150.",
-    cover: laliCover.url, hero: laliHero.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
+    cover: laliHero.url, hero: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
   },
   {
     id: "dillom", artist: "Dillom", title: "Por cesárea",

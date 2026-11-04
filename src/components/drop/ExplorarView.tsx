@@ -15,6 +15,12 @@ import fanMaria from "@/assets/drop-photo-31.png.asset.json";
 import fanTini from "@/assets/drop-photo-32.png.asset.json";
 import fanLali from "@/assets/drop-photo-33.png.asset.json";
 import eventCrowd from "@/assets/event-crowd.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { ALBUMS } from "@/lib/albums";
+import type { ShowEvent } from "@/lib/explore-data";
+
+const SHOW_IMAGES: Record<string, string> = { LALI: fanLali.url, "María Becerra": fanMaria.url, Dillom: dillomCover.url };
+const reviewImage = (r: CommunityReview) => (r.subject_type === "album" ? ALBUMS.find((a) => a.id === r.subject_id)?.cover : null) ?? r.subject_image;
 
 const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url };
 
@@ -51,7 +57,16 @@ export function ExplorarView() {
   const [savingDrop, setSavingDrop] = useState<string | null>(null);
 
   useEffect(() => {
-    if (mode !== "user") { setData(emptyExploreData); return; }
+    if (mode !== "user") {
+      // Invitados: reseñas y agenda públicas.
+      const db = supabase as unknown as { from: (t: string) => { select: (c: string) => { order: (c: string, o: { ascending: boolean }) => { limit: (n: number) => Promise<{ data: unknown[] | null }> } } } };
+      Promise.all([
+        db.from("reviews").select("*").order("created_at", { ascending: false }).limit(30),
+        db.from("shows").select("*").order("event_date", { ascending: true }).limit(30),
+      ]).then(([r, sh]) => setData({ ...emptyExploreData, reviews: (r.data ?? []) as CommunityReview[], shows: (sh.data ?? []) as ShowEvent[] }))
+        .catch(() => setData(emptyExploreData));
+      return;
+    }
     fetchExplore().then(setData).catch(() => setData(emptyExploreData));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
@@ -167,7 +182,7 @@ export function ExplorarView() {
           <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
             {visibleReviews.map((r) => (
               <article key={r.id} className="w-44 shrink-0 rounded-2xl border border-border bg-card p-3">
-                {r.subject_image && <img decoding="async" src={r.subject_image} alt={`Imagen de ${r.subject_title}`} loading="lazy" className="mb-2 aspect-square w-full rounded-xl object-cover" />}
+                {reviewImage(r) && <img decoding="async" src={reviewImage(r) ?? undefined} alt={`Imagen de ${r.subject_title}`} loading="lazy" className="mb-2 aspect-square w-full rounded-xl object-cover" />}
                 <p className="truncate text-sm font-bold">{r.subject_title}</p>
                 <p className="truncate text-[11px] text-muted-foreground">{r.subject_artist || r.subject_type}</p>
                 <div className="mt-1.5"><Stars value={r.rating} /></div>
@@ -185,7 +200,7 @@ export function ExplorarView() {
           <h2 className="text-xl font-black">Shows cerca tuyo</h2>
           <span className="text-xs font-bold text-primary">Ver todo</span>
         </div>
-        <p className="mb-3 text-[11px] text-muted-foreground">Agenda general · las recomendaciones por ubicación llegan pronto.</p>
+        <p className="mb-3 text-[11px] text-muted-foreground">Próximas fechas de tus artistas.</p>
         {visibleShows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
             <p className="text-sm font-bold">La agenda se está armando</p>
@@ -197,7 +212,7 @@ export function ExplorarView() {
               const attended = data.myShowIds.includes(show.id);
               return (
                 <article key={show.id} className="w-52 shrink-0 overflow-hidden rounded-2xl border border-border bg-card">
-                  <img decoding="async" src={show.image_url ?? eventCrowd} alt={`Imagen de ${show.title}`} loading="lazy" className="h-28 w-full object-cover" />
+                  <img decoding="async" src={show.image_url ?? SHOW_IMAGES[show.artist] ?? eventCrowd} alt={`Imagen de ${show.title}`} loading="lazy" className="h-28 w-full object-cover" />
                   <div className="p-3">
                     <p className="truncate text-sm font-bold">{show.title}</p>
                     <p className="text-[11px] text-muted-foreground">{show.artist}</p>

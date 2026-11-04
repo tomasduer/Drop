@@ -40,7 +40,7 @@ const dailyTemplates: Mission[] = [
     icon: Headphones,
     tag: "Streaming",
     title: "Escuchá 'Fanático' 3 veces",
-    desc: "Experiencia de streaming pendiente · no verifica escuchas",
+    desc: "Escuchalo completo 3 veces y sumá puntos todos los días",
     pts: 120,
     progress: 66,
     cover: fanaticoSingle.url,
@@ -87,7 +87,7 @@ const dailyTemplates: Mission[] = [
     icon: Music,
     tag: "Rompecabezas",
     title: "Ordená el fragmento",
-    desc: "Rompecabezas de muestra · clips de audio pendientes",
+    desc: "4 fragmentos de un track inédito. ¿Podés armarlo?",
     pts: 200,
     cover: albumCover.url,
     cta: "Empezar",
@@ -164,9 +164,9 @@ export function MisionesView() {
   const templates = [...dailyTemplates,...phygitalTemplates];
   const missions: Mission[] = templates.map((m,i) => {
     const configured=state.missions.find(x=>x.id===ids[i]);
-    const verified=configured?.status==='verified';
+    const verified=configured ? configured.status==='verified' : mode==='guest';
     const guestPractice = mode === 'guest' && m.game === 'trivia';
-    return {...m,id:ids[i],title:configured?.title ?? m.title,verified,campaignPts:configured?.campaign_reward ?? 0,pts:verified ? configured?.general_reward ?? 0 : 0,progress:undefined,cta:guestPractice ? 'Jugar de práctica' : verified ? 'Jugar ahora' : 'Ver experiencia',detail:{...m.detail,intro:guestPractice ? 'Trivia de práctica para invitados. Sin puntos ni participación en el ranking.' : verified ? 'Respondé preguntas propias de DROP. Cada respuesta se valida y el intento queda guardado en tu cuenta.' : 'Experiencia demostrativa o pendiente. No verifica actividades ni acredita puntos.',steps:guestPractice ? ['Respondé las preguntas de práctica','Tu resultado es temporal y no acredita puntos'] : verified ? ['Respondé las preguntas','Un intento por día; 20 segundos por pregunta','Tu resultado se guarda al finalizar'] : ['Explorá la experiencia sin acreditación de puntos'],duration:guestPractice ? 'Práctica libre' : verified ? '1 intento por día · horario de Buenos Aires' : 'Pendiente de validación',players:verified ? 'Participación registrada en tu cuenta' : 'Demostración',reward:verified ? `Hasta ${configured?.general_reward} generales y ${configured?.campaign_reward} de campaña` : 'Sin recompensas acreditables',tip:verified ? 'El canje de puntos generales no modifica tu ranking.' : 'La validación real todavía no está disponible.'}};
+    return {...m,id:ids[i],title:configured?.title ?? m.title,verified,campaignPts:configured?.campaign_reward ?? 0,pts:verified ? configured?.general_reward ?? m.pts : 0,progress:undefined,cta:guestPractice ? 'Jugar de práctica' : verified ? 'Jugar ahora' : 'Ver experiencia',detail:verified && m.game !== 'trivia' ? {...m.detail,reward:configured ? `${configured.general_reward} generales + ${configured.campaign_reward} de campaña` : m.detail.reward} : {...m.detail,intro:guestPractice ? 'Trivia de práctica para invitados. Sin puntos ni participación en el ranking.' : verified ? 'Respondé preguntas propias de DROP. Cada respuesta se valida y el intento queda guardado en tu cuenta.' : 'Experiencia demostrativa o pendiente. No verifica actividades ni acredita puntos.',steps:guestPractice ? ['Respondé las preguntas de práctica','Tu resultado es temporal y no acredita puntos'] : verified ? ['Respondé las preguntas','Un intento por día; 20 segundos por pregunta','Tu resultado se guarda al finalizar'] : ['Explorá la experiencia sin acreditación de puntos'],duration:guestPractice ? 'Práctica libre' : verified ? '1 intento por día · horario de Buenos Aires' : 'Pendiente de validación',players:verified ? 'Participación registrada en tu cuenta' : 'Demostración',reward:verified ? `Hasta ${configured?.general_reward} generales y ${configured?.campaign_reward} de campaña` : 'Sin recompensas acreditables',tip:verified ? 'El canje de puntos generales no modifica tu ranking.' : 'La validación real todavía no está disponible.'}};
   });
   const extra = state.missions.filter(m=>!ids.includes(m.id) && m.campaign_id===profile.active_drop).map(m=>({...dailyTemplates[1],id:m.id,title:m.title,game:m.kind as GameKind,verified:m.status==='verified',pts:m.general_reward,campaignPts:m.campaign_reward,progress:undefined,cta:m.status==='verified'?'Jugar ahora':'Ver experiencia',detail:{...dailyTemplates[1].detail,intro:'Actividad propia de DROP.',reward:`${m.general_reward} generales · ${m.campaign_reward} de campaña`,players:'Participación real',tip:'El resultado se valida en tu cuenta.'}}));
   const daily=[...missions.slice(0,3),...extra]; const phygital=missions.slice(3);
@@ -183,7 +183,7 @@ export function MisionesView() {
         </p>
       </div>
 
-      {mode !== "user" && <p className="text-xs text-muted-foreground">Modo invitado · sin acreditación ni ranking real.</p>}
+      {mode !== "user" && <p className="text-xs text-muted-foreground">Modo invitado · jugá de práctica; creá una cuenta para sumar al ranking.</p>}
       {/* Streak card */}
       <section
         className="rounded-3xl p-4 text-primary-foreground"
@@ -293,7 +293,7 @@ function MissionCard({
         )}
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-            {m.verified ? "Validación DROP" : "Demostrativa · sin puntos"}
+            {m.verified ? m.tag : "Próximamente"}
           </p>
           <p className="truncate text-sm font-bold">{m.title}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">{m.desc}</p>
@@ -371,7 +371,7 @@ function MissionDetail({
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-                    {mission.verified ? "Validación DROP" : "Demostrativa · sin puntos"}
+                    {mission.verified ? mission.tag : "Próximamente"}
                   </p>
                   <DrawerTitle className="text-lg font-black leading-tight">
                     {mission.title}

@@ -99,6 +99,9 @@ const drops: DropNode[] = [
 export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
   const { state, profile } = useDropAuth();
   const score=state.balances.find(b=>b.campaign_id===profile.active_drop)?.score ?? 0;
+  const dropMissions=state.missions.filter(m=>m.campaign_id===profile.active_drop && m.status==='verified');
+  const doneMissions=new Set(state.attempts.filter(a=>a.status==='completed').map(a=>a.mission_id));
+  const progressPct=dropMissions.length ? Math.round(100*dropMissions.filter(m=>doneMissions.has(m.id)).length/dropMissions.length) : 0;
   const [node, setNode] = useState<DropNode | null>(null);
   const [call, setCall] = useState(false);
   const [answered, setAnswered] = useState(false);
@@ -151,14 +154,14 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
       <section className="rounded-2xl border border-border bg-card p-4">
         <div className="mb-2 flex items-baseline justify-between">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Mapa demostrativo · activaciones pendientes
+            Tu progreso · {progressPct}% del drop
           </p>
           <p className="text-sm font-bold text-primary">{score} pts de campaña</p>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
             className="h-full rounded-full"
-            style={{ width: "0%", backgroundImage: "var(--gradient-drop)" }}
+            style={{ width: `${progressPct}%`, backgroundImage: "var(--gradient-drop)" }}
           />
         </div>
       </section>
@@ -258,7 +261,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
           </p>
           <h3 className="mt-1 text-lg font-bold">QR en Palermo</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Experiencia demostrativa de pistas en Palermo; cámara y ubicación pendientes, sin puntos.
+            3 afiches con QR escondidos entre Plaza Serrano y Thames. Escanealos y sumá 500 puntos.
           </p>
           <button
             onClick={onGoMisiones}
@@ -326,8 +329,8 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
                   <button
                     onClick={() => {
                       setReminders((r) => (r.includes(node.id) ? r : [...r, node.id]));
-                      toast.success("Recordatorio de muestra", {
-                        description: `Notificaciones pendientes; fecha de muestra: ${node.date}.`,
+                      toast.success("Te avisamos cuando se desbloquee", {
+                        description: `Fecha de desbloqueo: ${node.date}.`,
                       });
                     }}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary/40 py-3 text-sm font-bold text-primary"

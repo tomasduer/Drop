@@ -43,13 +43,13 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "tini", artist: "TINI", title: "Nueva era",
     tagline: "Algo nuevo se viene.",
     description: "TINI prepara una nueva etapa. Activá el aviso y enterate primero cuando abra el drop.",
-    cover: tiniCover.url, hero: tiniHero.url, dates: "Próximamente", status: "upcoming", fandom: "Tinistas",
+    cover: tiniHero.url, hero: tiniCover.url, dates: "Próximamente", status: "upcoming", fandom: "Tinistas",
   },
   {
     id: "maria", artist: "María Becerra", title: "Quimera",
     tagline: "El drop que cerró a lo grande.",
     description: "La experiencia de Quimera ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
-    cover: mariaCover.url, hero: mariaHero.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",
+    cover: mariaHero.url, hero: mariaCover.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",
   },
 ];
 

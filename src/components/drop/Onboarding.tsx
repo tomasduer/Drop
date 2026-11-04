@@ -3,7 +3,7 @@ import { Archive, Compass, Gift, MapPin, QrCode, Sparkles, Target, Trophy, Users
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/drop-logo-2026.webp.asset.json";
 import crowd from "@/assets/onboarding-1.webp";
-import phone from "@/assets/hero-phone.jpg";
+import phone from "@/assets/onboarding-2.webp";
 import street from "@/assets/qr-street.jpg";
 import stage from "@/assets/stage-lights.jpg";
 

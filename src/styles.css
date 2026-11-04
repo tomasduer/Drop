@@ -182,7 +182,7 @@
  * Cada álbum tiene su paleta y tipografía, independientes de la de DROP.
  */
 /* LALI · No vayas a atender cuando el demonio llame: cuero negro, denim gastado
-   y bronce envejecido de la hebilla del pentagrama. Grabado en mayúsculas (Cinzel). */
+   y bronce envejecido de la hebilla del pentagrama. Títulos en aerosol tipo afiche de gira (Rubik Dirt). */
 html[data-drop="lali"] {
   --background: oklch(0.13 0.008 60);
   --foreground: oklch(0.93 0.02 75);
@@ -201,7 +201,7 @@ html[data-drop="lali"] {
   --gradient-drop-soft: linear-gradient(145deg, oklch(0.74 0.09 70 / 0.18), oklch(0.45 0.08 250 / 0.12));
   --gradient-glow: radial-gradient(circle at 25% 0%, oklch(0.5 0.08 250 / 0.28), transparent 55%), radial-gradient(circle at 90% 75%, oklch(0.7 0.09 70 / 0.14), transparent 55%);
   --shadow-glow: 0 10px 30px -10px oklch(0.74 0.09 70 / 0.55);
-  --font-display: "Cinzel", "Georgia", serif;
+  --font-display: "Rubik Dirt", "Arial Black", sans-serif;
   --display-transform: uppercase;
 }
 /* Dillom · Por cesárea: negro crudo, hueso, máquina de escribir. */

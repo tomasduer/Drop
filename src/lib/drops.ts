@@ -9,6 +9,8 @@ import dillomIcon from "@/assets/dillom-icon.webp";
 import laliIcon from "@/assets/lali-icon.webp";
 import tiniIcon from "@/assets/tini-icon.webp";
 import airbagCover from "@/assets/airbag-portada.webp";
+import lnvCover from "@/assets/lnv-portada.webp";
+import lnvIcon from "@/assets/lnv-icon.webp";
 import airbagIcon from "@/assets/airbag-icon.webp";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
@@ -47,10 +49,16 @@ export const DROP_CATALOG: DropInfo[] = [
     cover: laliIcon, hero: laliCover.url, album: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
   },
   {
+    id: "dillom-lnv", kind: "album", artist: "Dillom", title: "La nueva violencia",
+    tagline: "Bienvenidos a la nueva violencia.",
+    description: "Dillom vuelve con La nueva violencia y La gira violenta. Trivias diarias, acertijos y desafíos alrededor del disco. Sumá puntos y peleá el ranking del fandom.",
+    cover: lnvIcon, hero: lnvCover, album: lnvCover, dates: "En curso · La gira violenta", status: "active", fandom: "La nueva violencia",
+  },
+  {
     id: "dillom", kind: "album", artist: "Dillom", title: "Por cesárea",
     tagline: "El universo más oscuro del rap argentino.",
-    description: "Trivias, acertijos y desafíos diarios alrededor de Por cesárea. Sumá puntos y escalá el ranking de la comunidad de Dillom.",
-    cover: dillomIcon, hero: dillomCover.url, album: dillomCover.url, dates: "En curso", status: "active", fandom: "Comunidad Dillom",
+    description: "La experiencia de Por cesárea ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
+    cover: dillomIcon, hero: dillomCover.url, album: dillomCover.url, dates: "Finalizado", status: "archived", fandom: "Comunidad Dillom",
   },
   {
     id: "airbag", kind: "album", artist: "Airbag", title: "El Club de la Pelea I",

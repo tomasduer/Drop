@@ -12,6 +12,9 @@ import albumCover from "@/assets/album-cover.png.asset.json";
 import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
 import { PHOTOS, avatarFor } from "@/lib/fan-avatars";import airbagBanda from "@/assets/airbag-banda.webp";
 import airbagVivo from "@/assets/airbag-vivo.webp";
+import lnvGira from "@/assets/lnv-gira.webp";
+import lnvTraje from "@/assets/lnv-traje.webp";
+import lnvPoster from "@/assets/lnv-poster.webp";
 
 
 type Post =
@@ -97,6 +100,12 @@ const stickers = [
 
 // Feed de cada fandom (LALI tiene el suyo más arriba).
 const OTHER_FEEDS: Record<string, Post[]> = {
+  "dillom-lnv": [
+    { kind: "achievement", user: "rocio.violenta", time: "hace 8 min", achievement: "completó la trivia de La nueva violencia 5/5", pts: 200 },
+    { kind: "post", user: "tomas.dllm", time: "hace 30 min", text: "La nueva violencia de punta a punta sin saltear nada. Dillom no erra 🩷🖤", likes: 534, comments: 87 },
+    { kind: "post", user: "agus.gira", time: "hace 2 h", text: "¿Quién va a La gira violenta en Mendoza? Armemos grupo 🎤", likes: 211, comments: 64 },
+    { kind: "post", user: "lu.anteojos", time: "hace 4 h", text: "Ya tengo el traje y los anteojos para el show 🕶️", likes: 389, comments: 42 },
+  ],
   airbag: [
     { kind: "achievement", user: "sardelli.fan", time: "hace 12 min", achievement: "completó la trivia de El Club de la Pelea 5/5", pts: 200 },
     { kind: "post", user: "juli.rockea", time: "hace 45 min", text: "Anarquía en Buenos Aires en loop desde que salió. Primera regla del club: no hablar del club 🚬", likes: 287, comments: 36 },
@@ -118,6 +127,11 @@ const OTHER_FEEDS: Record<string, Post[]> = {
   ],
 };
 const OTHER_GROUPS: Record<string, typeof groups> = {
+  "dillom-lnv": [
+    { name: "La gira violenta", members: 11240, img: lnvGira },
+    { name: "Trajes y anteojos", members: 3870, img: lnvTraje },
+    { name: "Los violentos", members: 6520, img: lnvPoster },
+  ],
   airbag: [
     { name: "El Club", members: 8420, img: airbagBanda },
     { name: "Pogo en primera fila", members: 2310, img: airbagVivo },

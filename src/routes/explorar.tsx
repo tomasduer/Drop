@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { MobileShell } from "@/components/drop/MobileShell";
 import { GlobalNav } from "@/components/drop/GlobalNav";
 import { ExplorarView } from "@/components/drop/ExplorarView";
+import { Onboarding } from "@/components/drop/Onboarding";
 
 export const Route = createFileRoute("/explorar")({
   head: () => ({
@@ -24,6 +25,7 @@ function Explorar() {
         <ExplorarView />
       </main>
       <GlobalNav />
+      <Onboarding />
     </MobileShell>
   );
 }

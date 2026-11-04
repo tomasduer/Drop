@@ -3,9 +3,9 @@ import { ArrowRight, Disc3, Map, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/drop-logo-2026.webp.asset.json";
 const steps = [
-  { icon: Map, title: "Jugá las misiones del drop" },
-  { icon: Trophy, title: "Sumá puntos y subí en el ranking" },
-  { icon: Disc3, title: "Escuchá, reseñá y canjeá premios" },
+  { icon: Map, title: "Elegí los drops de tus artistas" },
+  { icon: Trophy, title: "Jugá misiones y subí en el ranking" },
+  { icon: Disc3, title: "Desbloqueá premios y experiencias" },
 ];
 
 export function WelcomeView() {

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { useDropAuth } from "@/components/drop/AuthProvider";
 import laliCover from "@/assets/album-cover.png.asset.json";
-import laliHero from "@/assets/lali-9.png.asset.json";
+import laliHero from "@/assets/lali-phones.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import mariaHero from "@/assets/drop-photo-31.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";

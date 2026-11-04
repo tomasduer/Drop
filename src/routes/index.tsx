@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { useDropAuth } from "@/components/drop/AuthProvider";
 import { WelcomeView } from "@/components/drop/WelcomeView";
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -11,6 +12,13 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: WelcomeView,
+  component: Home,
 });
+
+// Quien ya entró (cuenta o invitado) arranca en Explorar; quien llega por primera vez ve la bienvenida.
+function Home() {
+  const { mode } = useDropAuth();
+  if (mode === "user" || mode === "guest") return <Navigate to="/explorar" replace />;
+  return <WelcomeView />;
+}
 

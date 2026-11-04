@@ -6,6 +6,7 @@ import { MissionGame, type GameKind } from "@/components/drop/MissionGames";
 import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
 import albumCover from "@/assets/album-cover.png.asset.json";
 import { PHOTOS } from "@/lib/fan-avatars";
+import { useCurrentDrop } from "@/lib/drops";
 import {
   Drawer,
   DrawerContent,
@@ -159,7 +160,10 @@ const phygitalTemplates: Mission[] = [
 
 export function MisionesView() {
   const [selected, setSelected] = useState<Mission | null>(null);
-  const { state, mode, profile } = useDropAuth();
+  const { state, mode } = useDropAuth();
+  const drop = useCurrentDrop();
+  const isLali = drop.id === "lali";
+  const archived = drop.status === "archived";
   const ids = ['lali-stream','lali-trivia','lali-order','lali-qr','lali-ar'];
   const templates = [...dailyTemplates,...phygitalTemplates];
   const missions: Mission[] = templates.map((m,i) => {
@@ -168,21 +172,23 @@ export function MisionesView() {
     const guestPractice = mode === 'guest' && m.game === 'trivia';
     return {...m,id:ids[i],title:configured?.title ?? m.title,verified,campaignPts:configured?.campaign_reward ?? 0,pts:verified ? configured?.general_reward ?? m.pts : 0,progress:undefined,cta:guestPractice ? 'Jugar de práctica' : verified ? 'Jugar ahora' : 'Ver experiencia',detail:verified && m.game !== 'trivia' ? {...m.detail,reward:configured ? `${configured.general_reward} generales + ${configured.campaign_reward} de campaña` : m.detail.reward} : {...m.detail,intro:guestPractice ? 'Trivia de práctica para invitados. Sin puntos ni participación en el ranking.' : verified ? 'Respondé preguntas propias de DROP. Cada respuesta se valida y el intento queda guardado en tu cuenta.' : 'Experiencia demostrativa o pendiente. No verifica actividades ni acredita puntos.',steps:guestPractice ? ['Respondé las preguntas de práctica','Tu resultado es temporal y no acredita puntos'] : verified ? ['Respondé las preguntas','Un intento por día; 20 segundos por pregunta','Tu resultado se guarda al finalizar'] : ['Explorá la experiencia sin acreditación de puntos'],duration:guestPractice ? 'Práctica libre' : verified ? '1 intento por día · horario de Buenos Aires' : 'Pendiente de validación',players:verified ? 'Participación registrada en tu cuenta' : 'Demostración',reward:verified ? `Hasta ${configured?.general_reward} generales y ${configured?.campaign_reward} de campaña` : 'Sin recompensas acreditables',tip:verified ? 'El canje de puntos generales no modifica tu ranking.' : 'La validación real todavía no está disponible.'}};
   });
-  const extra = state.missions.filter(m=>!ids.includes(m.id) && m.campaign_id===profile.active_drop).map(m=>({...dailyTemplates[1],id:m.id,title:m.title,game:m.kind as GameKind,verified:m.status==='verified',pts:m.general_reward,campaignPts:m.campaign_reward,progress:undefined,cta:m.status==='verified'?'Jugar ahora':'Ver experiencia',detail:{...dailyTemplates[1].detail,intro:'Actividad propia de DROP.',reward:`${m.general_reward} generales · ${m.campaign_reward} de campaña`,players:'Participación real',tip:'El resultado se valida en tu cuenta.'}}));
-  const daily=[...missions.slice(0,3),...extra]; const phygital=missions.slice(3);
+  const extra = state.missions.filter(m=>!ids.includes(m.id) && m.campaign_id===drop.id).map(m=>({...dailyTemplates[1],cover:isLali?dailyTemplates[1].cover:drop.cover,tag:m.kind==='clue'?'Acertijo':m.kind==='trivia'?'Trivia':dailyTemplates[1].tag,desc:m.repeat_period==='daily'?'Nueva ronda todos los días':'Una sola vez por fan',id:m.id,title:m.title,game:m.kind as GameKind,verified:m.status==='verified',pts:m.general_reward,campaignPts:m.campaign_reward,progress:undefined,cta:m.status==='verified'?'Jugar ahora':'Ver experiencia',detail:{...dailyTemplates[1].detail,intro:'Actividad propia de DROP.',reward:`${m.general_reward} generales · ${m.campaign_reward} de campaña`,players:'Participación real',tip:'El resultado se valida en tu cuenta.'}}));
+  const daily=isLali?[...missions.slice(0,3),...extra]:extra; const phygital=isLali?missions.slice(3):[];
   const earned: Record<string,number>={};
   for(const m of [...daily,...phygital]) { const a=state.attempts.find(a=>a.mission_id===m.id && a.status==='completed' && (state.missions.find(x=>x.id===m.id)?.repeat_period!=='daily'||a.period_key===new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires'}).format(new Date()))); if(a) earned[m.title]=a.general_award; }
   const streak = computeStreak(state.attempts.filter((a) => a.status === 'completed').map((a) => a.period_key));
-  const total=state.movements.filter(m=>m.evidence_type==='drop_verified').reduce((sum,m)=>sum+m.amount,0);
+  const total=state.movements.filter(m=>m.evidence_type==='drop_verified' && m.campaign_id===drop.id).reduce((sum,m)=>sum+m.amount,0);
 
   return (
     <div className="space-y-6 px-5">
       <div>
         <h1 className="text-3xl font-black">Misiones</h1>
         <p className="text-sm text-muted-foreground">
-          Sumá puntos, escalá el ranking, desbloqueá tu QR.
+          {archived ? `Las misiones que formaron parte de ${drop.title}.` : `Jugá, sumá puntos de ${drop.artist} y escalá el ranking.`}
         </p>
       </div>
+      {archived && <p className="rounded-2xl border border-border bg-card p-3 text-xs text-muted-foreground">📼 Este drop finalizó. Podés ver sus misiones y tus resultados, pero ya no suman puntos.</p>}
+      {drop.status === "upcoming" && <p className="rounded-2xl border border-border bg-card p-3 text-xs text-muted-foreground">⏳ Este drop todavía no empezó. Las misiones se habilitan cuando abra.</p>}
 
       {mode !== "user" && <p className="text-xs text-muted-foreground">Modo invitado · jugá de práctica; creá una cuenta para sumar al ranking.</p>}
       {/* Streak card */}
@@ -230,6 +236,7 @@ export function MisionesView() {
           </h2>
         </div>
         <div className="space-y-3">
+          {daily.length === 0 && <p className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">Las misiones de este drop se anuncian pronto.</p>}
           {daily.map((m) => (
             <MissionCard
               key={m.title}
@@ -242,7 +249,7 @@ export function MisionesView() {
       </section>
 
       {/* Phygital */}
-      <section>
+      {phygital.length > 0 && <section>
         <div className="mb-2 flex items-center gap-2">
           <MapPin className="h-4 w-4 text-primary" />
           <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -259,12 +266,13 @@ export function MisionesView() {
             />
           ))}
         </div>
-      </section>
+      </section>}
 
       <MissionDetail
         mission={selected}
         onClose={() => setSelected(null)}
         earned={selected ? earned[selected.title] : undefined}
+        locked={archived ? "Este drop finalizó: la misión ya no suma puntos." : drop.status === "upcoming" ? "Se habilita cuando abra el drop." : undefined}
         onEarn={() => {}}
       />
     </div>
@@ -338,10 +346,12 @@ function MissionDetail({
   onClose,
   earned,
   onEarn,
+  locked,
 }: {
   mission: Mission | null;
   onClose: () => void;
   earned?: number;
+  locked?: string;
   onEarn: (m: Mission, pts: number) => void;
 }) {
   const Icon = mission?.icon ?? Sparkles;
@@ -506,8 +516,10 @@ function MissionDetail({
 
                   {typeof earned === "number" ? (
                     <div className="rounded-xl border border-primary/40 bg-primary/10 py-3 text-center text-sm font-bold text-primary">
-                      Ya completaste esta misión · +{earned} pts
+                      Completaste esta misión · +{earned} pts
                     </div>
+                  ) : locked ? (
+                    <div className="rounded-xl border border-border bg-card py-3 text-center text-sm font-semibold text-muted-foreground">{locked}</div>
                   ) : (
                     <button
                       onClick={() => setMode("play")}

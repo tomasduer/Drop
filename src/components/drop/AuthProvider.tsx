@@ -77,6 +77,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCustomAlbums((prev) => (prev.some((x) => x.id === a.id) ? prev : [a, ...prev]));
     return true;
   }
+  // Invitados: drops y misiones públicas, para explorar todos los universos sin cuenta.
+  async function loadPublicCatalog() {
+    const db = supabase as unknown as { from: (t: string) => { select: (c: string) => Promise<{ data: unknown[] | null }> } };
+    try {
+      const [c, m] = await Promise.all([db.from("campaigns").select("*"), db.from("missions").select("*")]);
+      if (!guestActive.current) return;
+      setState({ ...emptyDropState, campaigns: (c.data ?? []) as DropState["campaigns"], missions: (m.data ?? []) as DropState["missions"] });
+    } catch { /* sin catálogo: se usan los datos editoriales */ }
+  }
   async function refresh() { if (user && mode === 'user') await loadProfile(user); }
 
   useEffect(() => {
@@ -87,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       else {
         let saved: { name?: string; avatar?: string | null } | null = null;
         try { saved = JSON.parse(localStorage.getItem(GUEST_KEY) ?? "null"); } catch { saved = null; }
-        if (saved?.name) { guestActive.current = true; setProfile({ ...guestProfile, display_name: saved.name, avatar_url: saved.avatar ?? null }); setMode("guest"); return; }
+        if (saved?.name) { guestActive.current = true; setProfile({ ...guestProfile, display_name: saved.name, avatar_url: saved.avatar ?? null }); setMode("guest"); void loadPublicCatalog(); return; }
         setMode((m) => (m === "guest" ? "guest" : "signed_out"));
       }
     };
@@ -141,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     resetProfile(); setUser(null);
     setProfile({ ...guestProfile, display_name: details.name.trim(), avatar_url: details.avatar });
     setMode("guest");
+    void loadPublicCatalog();
     // Recordar al invitado en este navegador para que recargar no borre su perfil.
     try { localStorage.setItem(GUEST_KEY, JSON.stringify({ name: details.name.trim(), avatar: details.avatar && details.avatar.length < 900_000 ? details.avatar : null })); } catch { /* sin almacenamiento */ }
   }

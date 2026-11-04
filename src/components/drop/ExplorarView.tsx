@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { getExploreData, saveDropAction, showAttendanceAction } from "@/lib/explore.functions";
 import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData } from "@/lib/explore-data";
 import { useDropAuth } from "./AuthProvider";
+import { useDrops, type DropInfo } from "@/lib/drops";
+import logo from "@/assets/drop-logo-2026.webp.asset.json";
 import { CatalogResults } from "./Catalog";
 import { getExternalShows } from "@/lib/music.functions";
 import laliCover from "@/assets/album-cover.png.asset.json";
@@ -78,29 +80,22 @@ export function ExplorarView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
-  const drops: DropCard[] = useMemo(() => {
-    if (mode === "user" && state.campaigns.length > 0) {
-      return state.campaigns.map((c) => ({
-        id: c.id,
-        artist: c.artist,
-        title: c.title,
-        cover: COVERS[c.id] ?? laliCover.url,
-        status: c.status === "active" ? "active" : c.status === "finished" ? "finished" : "upcoming",
-      }));
-    }
-    return FALLBACK_DROPS;
-  }, [mode, state.campaigns]);
+  const catalog = useDrops();
 
   const q = query.trim().toLowerCase();
   const match = (...parts: (string | null | undefined)[]) => !q || parts.some((p) => p?.toLowerCase().includes(q));
-  const visibleDrops = drops.filter((d) => match(d.artist, d.title));
+  const visibleDrops = catalog.filter((d) => match(d.artist, d.title, d.fandom));
+  const activeDrops = visibleDrops.filter((d) => d.status === "active");
+  const upcomingDrops = visibleDrops.filter((d) => d.status === "upcoming");
+  const archivedDrops = visibleDrops.filter((d) => d.status === "archived");
+  const myScore = (id: string) => state.balances.find((b) => b.campaign_id === id)?.score ?? 0;
   const visibleReviews = data.reviews.filter((r) => match(r.subject_title, r.subject_artist, r.author_name, r.text));
   const visibleShows = [...externalShows, ...data.shows]
     .filter((s) => match(s.title, s.artist, s.city, s.venue))
     .sort((a, b) => (a.event_date ?? "9").localeCompare(b.event_date ?? "9"));
   const visibleGenres = GENRES.filter((g) => match(g.name, g.detail));
 
-  const onSaveDrop = async (drop: DropCard) => {
+  const onSaveDrop = async (drop: DropInfo) => {
     if (mode !== "user") { toast.message("Creá una cuenta para guardar drops en tu colección."); return; }
     const saved = data.mySavedDropIds.includes(drop.id);
     setSavingDrop(drop.id);
@@ -113,20 +108,29 @@ export function ExplorarView() {
     } finally { setSavingDrop(null); }
   };
 
-  const onEnterDrop = (drop: DropCard) => {
-    if (drop.id === "lali" && drop.status === "active") {
-      void saveProfile({ active_drop: "lali" });
-      void navigate({ to: "/drop" });
-    } else {
-      toast(`El drop de ${drop.artist} abre muy pronto`);
-    }
+  const onEnterDrop = (drop: DropInfo) => { void navigate({ to: "/drop", search: { d: drop.id } }); };
+
+  const SaveButton = ({ drop }: { drop: DropInfo }) => {
+    const saved = data.mySavedDropIds.includes(drop.id);
+    return (
+      <button
+        onClick={(e) => { e.stopPropagation(); void onSaveDrop(drop); }}
+        disabled={savingDrop === drop.id}
+        aria-label={saved ? `Quitar ${drop.title} de Mis DROPS` : `Guardar ${drop.title} en Mis DROPS`}
+        className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border backdrop-blur ${saved ? "border-primary bg-primary/25 text-primary" : "border-border bg-background/60 text-foreground"}`}
+      >
+        {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+      </button>
+    );
   };
 
   return (
     <div className="px-5 pb-4">
       <header className="pt-2">
-        <h1 className="text-3xl font-black tracking-tight">EXPLORAR</h1>
-        <label className="mt-3 flex items-center gap-2 rounded-2xl border border-input bg-card px-4 py-3">
+        <img decoding="async" src={logo.url} alt="DROP" className="h-10 w-24 object-contain object-left drop-shadow-[0_0_8px_var(--primary)]" />
+        <h1 className="mt-3 text-3xl font-black leading-tight">Elegí tu próximo drop</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Cada lanzamiento es un juego: misiones, ranking y recompensas con tus artistas. Podés sumarte a todos los que quieras.</p>
+        <label className="mt-4 flex items-center gap-2 rounded-2xl border border-input bg-card px-4 py-3">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             value={query}
@@ -139,43 +143,82 @@ export function ExplorarView() {
 
       <CatalogResults query={query} />
 
-      {/* Drops de la semana */}
-      <section className="mt-7">
-        <div className="mb-3 flex items-end justify-between">
-          <h2 className="text-xl font-black">Drops de la semana</h2>
-          <Link to="/mi-drop" className="text-xs font-bold text-primary">Ver todo</Link>
-        </div>
-        <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
-          {visibleDrops.map((drop) => {
-            const saved = data.mySavedDropIds.includes(drop.id);
-            return (
-              <article key={drop.id} className="w-40 shrink-0">
-                <button onClick={() => onEnterDrop(drop)} className="relative block aspect-square w-full overflow-hidden rounded-2xl border border-border bg-muted">
-                  <img decoding="async" src={drop.cover} alt={`Portada de ${drop.title}`} loading="lazy" className="h-full w-full object-cover" />
-                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide ${drop.status === "active" ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
-                    {drop.status === "active" ? "Drop activo" : drop.status === "finished" ? "Finalizado" : "Nuevo"}
-                  </span>
-                </button>
-                <div className="mt-2 flex items-start justify-between gap-1">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{drop.title}</p>
-                    <p className="truncate text-xs text-muted-foreground">{drop.artist}</p>
+      {/* Drops activos */}
+      {activeDrops.length > 0 && (
+        <section className="mt-7">
+          <h2 className="text-xl font-black">Drops activos</h2>
+          <p className="mb-3 text-xs text-muted-foreground">Participá ahora: sumá puntos y competí en el ranking.</p>
+          <div className="space-y-4">
+            {activeDrops.map((drop) => (
+              <article key={drop.id} role="button" tabIndex={0} onClick={() => onEnterDrop(drop)} onKeyDown={(e) => { if (e.key === "Enter") onEnterDrop(drop); }}
+                className="relative cursor-pointer overflow-hidden rounded-3xl border border-primary/40 shadow-[0_12px_40px_-16px_rgba(220,38,38,0.7)]">
+                <img decoding="async" src={drop.hero} alt={drop.artist} loading="lazy" className="h-60 w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+                <div className="absolute right-3 top-3"><SaveButton drop={drop} /></div>
+                <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-primary-foreground">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-foreground" />Activo
+                </span>
+                <div className="absolute inset-x-4 bottom-4">
+                  <p className="text-sm font-bold text-primary">{drop.artist}</p>
+                  <h3 className="text-2xl font-black leading-tight">{drop.title}</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{drop.tagline}</p>
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold">{myScore(drop.id) > 0 ? `Participando · ${myScore(drop.id).toLocaleString("es-AR")} pts` : "Todavía no participás"}</span>
+                    <span className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
+                      {myScore(drop.id) > 0 ? "Continuar" : "Entrar al drop"} <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
                   </div>
-                  <button
-                    onClick={() => onSaveDrop(drop)}
-                    disabled={savingDrop === drop.id}
-                    aria-label={saved ? `Quitar ${drop.title} de Mis DROPS` : `Guardar ${drop.title} en Mis DROPS`}
-                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border ${saved ? "border-primary bg-primary/15 text-primary" : "border-border bg-card text-muted-foreground"}`}
-                  >
-                    {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-                  </button>
                 </div>
               </article>
-            );
-          })}
-          {visibleDrops.length === 0 && <p className="py-6 text-sm text-muted-foreground">Sin resultados para esa búsqueda.</p>}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Próximamente */}
+      {upcomingDrops.length > 0 && (
+        <section className="mt-7">
+          <h2 className="text-xl font-black">Próximamente</h2>
+          <p className="mb-3 text-xs text-muted-foreground">Drops anunciados. Activá el aviso y enterate primero.</p>
+          <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
+            {upcomingDrops.map((drop) => (
+              <button key={drop.id} onClick={() => onEnterDrop(drop)} className="w-44 shrink-0 text-left">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-border">
+                  <img decoding="async" src={drop.hero} alt={drop.artist} loading="lazy" className="h-full w-full object-cover opacity-70" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
+                  <span className="absolute left-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-[11px] font-black uppercase">Próximamente</span>
+                  <span className="absolute inset-x-3 bottom-3"><span className="block text-xs font-bold text-primary">{drop.artist}</span><span className="block text-base font-black leading-tight">{drop.title}</span></span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Archivo */}
+      {archivedDrops.length > 0 && (
+        <section className="mt-7 rounded-3xl border border-border bg-[linear-gradient(160deg,oklch(0.2_0.03_60/0.6),transparent)] p-4">
+          <h2 className="text-xl font-black">📼 Archivo</h2>
+          <p className="mb-3 text-xs text-muted-foreground">Drops que ya terminaron. Volvé a recorrerlos, mirá el ranking final y tus logros.</p>
+          <div className="space-y-3">
+            {archivedDrops.map((drop) => (
+              <button key={drop.id} onClick={() => onEnterDrop(drop)} className="flex w-full items-center gap-3 rounded-2xl border border-border bg-background/50 p-2 text-left">
+                <img decoding="async" src={drop.cover} alt="" loading="lazy" className="h-16 w-16 shrink-0 rounded-xl object-cover sepia-[0.4]" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-bold text-muted-foreground">{drop.artist} · {drop.dates}</span>
+                  <span className="block truncate text-base font-black">{drop.title}</span>
+                  <span className="block text-xs text-primary">{myScore(drop.id) > 0 ? `Participaste · ${myScore(drop.id).toLocaleString("es-AR")} pts` : "Ver cómo terminó"}</span>
+                </span>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+      {visibleDrops.length === 0 && q && <p className="mt-6 text-sm text-muted-foreground">Ningún drop coincide con esa búsqueda.</p>}
+
+      <h2 className="mt-10 text-2xl font-black">Descubrí música</h2>
+      <p className="text-xs text-muted-foreground">Reseñas de fans, shows y artistas para escuchar.</p>
 
       {/* Opiniones de la comunidad */}
       <section className="mt-7">

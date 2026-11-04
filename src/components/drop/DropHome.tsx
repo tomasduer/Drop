@@ -1,0 +1,154 @@
+import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowRight, Bell, BellRing, Gift, Lock, Medal, Target, Trophy } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { getRanking } from "@/lib/drop.functions";
+import { STATUS_LABEL, type DropInfo } from "@/lib/drops";
+import { useDropAuth } from "./AuthProvider";
+import { MapaView } from "./MapaView";
+import { PasaporteView } from "./PasaporteView";
+import type { DropTab } from "./DropNav";
+
+// Recompensas genéricas para drops que todavía no tienen una colección propia.
+const GENERIC_REWARDS = [
+  { label: "Insignia de fan", need: 1 },
+  { label: "Wallpaper exclusivo", need: 2 },
+  { label: "Participación en el sorteo de entradas", need: 3 },
+];
+
+export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) => void }) {
+  const { state, mode } = useDropAuth();
+  const fetchRanking = useServerFn(getRanking);
+  const [rank, setRank] = useState<number | null>(null);
+  const [remind, setRemind] = useState(() => { try { return localStorage.getItem(`drop-aviso-${drop.id}`) === "1"; } catch { return false; } });
+
+  useEffect(() => {
+    setRank(null);
+    if (mode !== "user" || drop.status === "upcoming") return;
+    fetchRanking({ data: { campaign: drop.id, scope: "Global" } }).then((r) => setRank(r.me?.rank ?? null)).catch(() => setRank(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, drop.id, drop.status]);
+
+  const missions = state.missions.filter((m) => m.campaign_id === drop.id && m.status === "verified");
+  const doneIds = new Set(state.attempts.filter((a) => a.status === "completed").map((a) => a.mission_id));
+  const done = missions.filter((m) => doneIds.has(m.id)).length;
+  const score = state.balances.find((b) => b.campaign_id === drop.id)?.score ?? 0;
+  const pct = missions.length ? Math.round((100 * done) / missions.length) : 0;
+  const featured = missions.find((m) => !doneIds.has(m.id)) ?? missions[0];
+  const active = drop.status === "active";
+
+  return (
+    <div className="space-y-6 px-5">
+      {/* Portada del drop */}
+      <section className="relative -mx-5 -mt-2 overflow-hidden">
+        <img decoding="async" src={drop.hero} alt={drop.artist} className={`h-72 w-full object-cover ${drop.status === "archived" ? "grayscale-[60%]" : ""}`} />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        <div className="absolute inset-x-5 bottom-4">
+          <span className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider ${active ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
+            {drop.status === "archived" ? "📼 Archivo" : STATUS_LABEL[drop.status]}
+          </span>
+          <p className="mt-2 text-sm font-bold text-primary">{drop.artist}</p>
+          <h1 className="text-3xl font-black leading-tight">{drop.title}</h1>
+          {drop.tagline && <p className="mt-1 text-sm text-muted-foreground">{drop.tagline}</p>}
+        </div>
+      </section>
+
+      {drop.description && <p className="text-sm leading-relaxed text-muted-foreground">{drop.description}</p>}
+
+      {/* Progreso del fan en este drop */}
+      {drop.status !== "upcoming" && (
+        <section className="rounded-3xl p-4 text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest opacity-80">{drop.status === "archived" ? "Tu resultado final" : "Tu progreso en este drop"}</p>
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+            <div><p className="text-2xl font-black tabular-nums">{score.toLocaleString("es-AR")}</p><p className="text-[11px] opacity-80">pts de {drop.artist}</p></div>
+            <div><p className="text-2xl font-black tabular-nums">{rank ? `#${rank}` : "—"}</p><p className="text-[11px] opacity-80">ranking</p></div>
+            <div><p className="text-2xl font-black tabular-nums">{done}/{missions.length}</p><p className="text-[11px] opacity-80">misiones</p></div>
+          </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-background/25"><div className="h-full rounded-full bg-background" style={{ width: `${pct}%` }} /></div>
+          <p className="mt-2 text-xs opacity-90">
+            {mode !== "user" ? "Creá una cuenta para sumar puntos y aparecer en el ranking." : drop.status === "archived" ? "Este drop finalizó: tu resultado quedó guardado." : pct === 100 ? "¡Completaste todo! Mantené tu racha con las misiones diarias." : "Los puntos de este drop cuentan solo para su ranking. Tus puntos generales están en tu perfil."}
+          </p>
+          {mode !== "user" && <Button asChild size="sm" variant="secondary" className="mt-3 w-full"><Link to="/auth" search={{ mode: "signup" }}>Crear cuenta</Link></Button>}
+        </section>
+      )}
+
+      {/* Próximamente */}
+      {drop.status === "upcoming" && (
+        <section className="rounded-3xl border border-border bg-card p-5 text-center">
+          <p className="text-lg font-black">Muy pronto</p>
+          <p className="mt-1 text-sm text-muted-foreground">Las misiones, el ranking y las recompensas se habilitan cuando abra el drop.</p>
+          <Button className="mt-4 w-full" variant={remind ? "secondary" : "default"} onClick={() => {
+            const next = !remind; setRemind(next);
+            try { localStorage.setItem(`drop-aviso-${drop.id}`, next ? "1" : "0"); } catch { /* sin almacenamiento */ }
+            toast.success(next ? `Te avisamos cuando abra el drop de ${drop.artist}` : "Aviso desactivado");
+          }}>{remind ? <BellRing /> : <Bell />}{remind ? "Aviso activado" : "Avisarme cuando abra"}</Button>
+        </section>
+      )}
+
+      {/* Misión destacada */}
+      {featured && drop.status !== "upcoming" && (
+        <section>
+          <h2 className="mb-3 text-xl font-black">{active ? "Tu próxima misión" : "Misiones del drop"}</h2>
+          <button onClick={() => onGo("misiones")} className="relative block w-full overflow-hidden rounded-3xl border border-primary/40 text-left">
+            <img decoding="async" src={drop.cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+            <div className="relative p-5">
+              <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-primary"><Target className="h-3.5 w-3.5" />{featured.kind === "trivia" ? "Trivia" : featured.kind === "clue" ? "Acertijo" : "Desafío"}{featured.repeat_period === "daily" ? " · diaria" : ""}</span>
+              <p className="mt-1 text-lg font-black leading-tight">{featured.title}</p>
+              <p className="mt-1 text-sm font-bold text-primary">+{featured.campaign_reward} pts de {drop.artist}</p>
+              <span className="mt-4 inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
+                {active ? (doneIds.has(featured.id) ? "Ver misiones" : "Jugar ahora") : "Ver misiones"} <ArrowRight className="h-4 w-4" />
+              </span>
+            </div>
+          </button>
+          <Button variant="outline" className="mt-3 w-full" onClick={() => onGo("misiones")}>Ver las {missions.length} misiones</Button>
+        </section>
+      )}
+
+      {/* Recorrido (mapa) */}
+      {drop.id === "lali" && <MapaView embedded onGoMisiones={() => onGo("misiones")} />}
+
+      {/* Recompensas */}
+      {drop.id === "lali" ? <PasaporteView embedded /> : drop.status !== "upcoming" && (
+        <section>
+          <h2 className="text-xl font-black">Recompensas</h2>
+          <p className="mb-3 text-sm text-muted-foreground">{drop.status === "archived" ? "Lo que se podía ganar en este drop." : "Completá misiones para desbloquearlas."}</p>
+          <div className="space-y-2">
+            {GENERIC_REWARDS.map((r) => {
+              const got = done >= r.need;
+              return (
+                <div key={r.label} className={`flex items-center gap-3 rounded-2xl border p-3 ${got ? "border-primary/50 bg-primary/10" : "border-border bg-card"}`}>
+                  <span className={`grid h-10 w-10 place-items-center rounded-xl ${got ? "text-primary-foreground" : "bg-muted text-muted-foreground"}`} style={got ? { backgroundImage: "var(--gradient-drop)" } : undefined}>
+                    {got ? <Gift className="h-5 w-5" /> : <Lock className="h-4 w-4" />}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold">{r.label}</p>
+                    <p className="text-xs text-muted-foreground">{got ? "Desbloqueada" : `Completá ${r.need} ${r.need === 1 ? "misión" : "misiones"} (${Math.min(done, r.need)}/${r.need})`}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Accesos */}
+      {drop.status !== "upcoming" && (
+        <section className="grid grid-cols-2 gap-3">
+          <button onClick={() => onGo("ranking")} className="rounded-2xl border border-border bg-card p-4 text-left">
+            {drop.status === "archived" ? <Medal className="h-5 w-5 text-primary" /> : <Trophy className="h-5 w-5 text-primary" />}
+            <p className="mt-2 text-sm font-bold">{drop.status === "archived" ? "Ranking final" : "Ranking"}</p>
+            <p className="text-xs text-muted-foreground">Los fans que más sumaron</p>
+          </button>
+          <button onClick={() => onGo("comunidad")} className="rounded-2xl border border-border bg-card p-4 text-left">
+            <span className="text-lg">💬</span>
+            <p className="mt-1 text-sm font-bold">{drop.fandom}</p>
+            <p className="text-xs text-muted-foreground">La comunidad del drop</p>
+          </button>
+        </section>
+      )}
+    </div>
+  );
+}

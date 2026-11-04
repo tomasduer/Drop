@@ -172,7 +172,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
                 </div>
                 <p className="mt-2 truncate text-sm font-bold">{drop.title}</p>
                 <p className="truncate text-xs text-muted-foreground">{drop.artist}</p>
-                {drop.campaign_id === "lali" && <Button asChild size="sm" variant="outline" className="mt-2 w-full text-[11px]"><Link to="/drop">Continuar</Link></Button>}
+                <Button asChild size="sm" variant="outline" className="mt-2 w-full text-[11px]"><Link to="/drop" search={{ d: drop.campaign_id }}>Entrar</Link></Button>
               </article>
             ))}
           </div>

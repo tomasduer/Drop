@@ -1,3 +1,4 @@
+import { useCurrentDrop, useCurrentDropId } from "@/lib/drops";
 import { useEffect, useState } from "react";
 import { useDropAuth } from "./AuthProvider";
 import { Check, Lock, Phone, PhoneCall, PhoneOff, Sparkles, Gift, Clock } from "lucide-react";
@@ -150,10 +151,11 @@ const drops: DropNode[] = [
   },
 ];
 
-export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
-  const { state, profile } = useDropAuth();
-  const score=state.balances.find(b=>b.campaign_id===profile.active_drop)?.score ?? 0;
-  const dropMissions=state.missions.filter(m=>m.campaign_id===profile.active_drop && m.status==='verified');
+export function MapaView({ onGoMisiones, embedded = false }: { onGoMisiones: () => void; embedded?: boolean }) {
+  const { state } = useDropAuth();
+  const dropId = useCurrentDropId();
+  const score=state.balances.find(b=>b.campaign_id===dropId)?.score ?? 0;
+  const dropMissions=state.missions.filter(m=>m.campaign_id===dropId && m.status==='verified');
   const doneMissions=new Set(state.attempts.filter(a=>a.status==='completed').map(a=>a.mission_id));
   const progressPct=dropMissions.length ? Math.round(100*dropMissions.filter(m=>doneMissions.has(m.id)).length/dropMissions.length) : 0;
   const [node, setNode] = useState<DropNode | null>(null);
@@ -162,9 +164,29 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
   const [reminders, setReminders] = useState<number[]>([]);
 
   return (
-    <div className="space-y-5 px-4">
+    <div className={embedded ? "space-y-4" : "space-y-5 px-4"}>
+      {embedded && (
+        <div>
+          <h2 className="text-xl font-black">El recorrido</h2>
+          <p className="text-xs text-muted-foreground">Cada punto es una etapa del drop. Tocalos para ver qué pasa en cada lugar.</p>
+        </div>
+      )}
+      {embedded && (
+        <button
+          onClick={() => setCall(true)}
+          className="flex w-full items-center gap-3 rounded-2xl border border-primary/40 bg-card p-2 text-left transition-colors active:bg-primary/10"
+        >
+          <span className="grid h-12 w-12 shrink-0 animate-pulse place-items-center rounded-xl text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
+            <PhoneCall className="h-5 w-5" />
+          </span>
+          <span>
+            <span className="block text-[11px] uppercase tracking-widest text-muted-foreground">Llamada entrante</span>
+            <span className="block text-sm font-bold">Número desconocido · tocá para atender</span>
+          </span>
+        </button>
+      )}
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-border p-6">
+      {!embedded && <section className="relative overflow-hidden rounded-3xl border border-border p-6">
         <img decoding="async"
           src={heroPhone}
           alt="Teléfono rojo entre humo"
@@ -202,10 +224,10 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
             <span className="block text-sm font-bold">Número desconocido · tocá para atender</span>
           </span>
         </button>
-      </section>
+      </section>}
 
       {/* Progress */}
-      <section className="rounded-2xl border border-border bg-card p-4">
+      {!embedded && <section className="rounded-2xl border border-border bg-card p-4">
         <div className="mb-2 flex items-baseline justify-between">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">
             Tu progreso · {progressPct}% del drop
@@ -218,7 +240,7 @@ export function MapaView({ onGoMisiones }: { onGoMisiones: () => void }) {
             style={{ width: `${progressPct}%`, backgroundImage: "var(--gradient-drop)" }}
           />
         </div>
-      </section>
+      </section>}
 
       {/* Interactive map */}
       <section

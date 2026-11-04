@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDropAuth } from "./AuthProvider";
+import { useCurrentDrop } from "@/lib/drops";
 import { Heart, MessageCircle, Share2, Trophy, Send } from "lucide-react";
 import { toast } from "sonner";
 import stickerNvaa from "@/assets/sticker-nvaa.png.asset.json";
@@ -92,17 +93,40 @@ const stickers = [
   { src: PHOTOS.veil, label: "LALI en vivo" },
 ];
 
+// Feed de cada fandom (LALI tiene el suyo más arriba).
+const OTHER_FEEDS: Record<string, Post[]> = {
+  dillom: [
+    { kind: "achievement", user: "bauti.correa", time: "hace 20 min", achievement: "completó la trivia de Dillom 5/5", pts: 200 },
+    { kind: "post", user: "ivoperalta", time: "hace 1 h", text: "Escuché Por cesárea de punta a punta otra vez. Cada vez encuentro algo nuevo 🖤", likes: 312, comments: 41 },
+    { kind: "post", user: "facu.aguirre", time: "hace 3 h", text: "El acertijo de hoy estaba re difícil, lo saqué al tercer intento jaja", likes: 128, comments: 22 },
+  ],
+  maria: [
+    { kind: "achievement", user: "brenda.luna", time: "hace 3 semanas", achievement: "terminó #1 en el ranking final de Quimera", pts: 0 },
+    { kind: "post", user: "cami.brava", time: "hace 3 semanas", text: "Qué drop hermoso fue Quimera 💙 gracias a todas las que jugaron conmigo", likes: 980, comments: 133 },
+    { kind: "post", user: "male.figueroa", time: "hace 4 semanas", text: "Última trivia de Quimera completada. ¡Nos vemos en el próximo!", likes: 421, comments: 57 },
+  ],
+  tini: [
+    { kind: "post", user: "tati.rojas", time: "hace 2 h", text: "¿Alguien más vio la cuenta regresiva? Algo se viene con TINI 👀", likes: 655, comments: 98 },
+  ],
+};
+const OTHER_GROUPS: Record<string, typeof groups> = {};
+
 export function ComunidadView() {
   const { profile } = useDropAuth();
+  const drop = useCurrentDrop();
+  const isLali = drop.id === "lali";
+  const dropFeed = isLali ? feed : OTHER_FEEDS[drop.id] ?? [];
+  const dropGroups = isLali ? groups : OTHER_GROUPS[drop.id] ?? [{ name: drop.fandom, members: 1200 + drop.id.length * 731, img: drop.cover }];
   const [liked, setLiked] = useState<string[]>([]);
   const [joined, setJoined] = useState<string[]>(() => readLocal<string[]>("drop-grupos", []));
-  const [myPosts, setMyPosts] = useState<Post[]>(() => readLocal<Post[]>("drop-mis-posts", []));
+  const postsKey = isLali ? "drop-mis-posts" : `drop-mis-posts-${drop.id}`;
+  const [myPosts, setMyPosts] = useState<Post[]>(() => readLocal<Post[]>(isLali ? "drop-mis-posts" : `drop-mis-posts-${drop.id}`, []));
   const [draft, setDraft] = useState("");
   const [sticker, setSticker] = useState<string | null>(null);
   useEffect(() => writeLocal("drop-grupos", joined), [joined]);
-  useEffect(() => writeLocal("drop-mis-posts", myPosts.slice(0, 20)), [myPosts]);
+  useEffect(() => writeLocal(postsKey, myPosts.slice(0, 20)), [myPosts, postsKey]);
   const handle = (profile.username?.trim() || profile.display_name || "fan").replace(/^@/, "");
-  const allPosts = [...myPosts, ...feed];
+  const allPosts = [...myPosts, ...dropFeed];
 
   const publish = () => {
     if (!draft.trim() && !sticker) { toast.error("Escribí algo o elegí un sticker"); return; }
@@ -123,9 +147,10 @@ export function ComunidadView() {
   return (
     <div className="px-5">
       <div className="mb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-primary">{drop.fandom}</p>
         <h1 className="text-3xl font-black">Comunidad</h1>
         <p className="text-sm text-muted-foreground">
-          Lo que están encontrando los fans del drop.
+          {drop.status === "archived" ? `Lo que vivieron los fans de ${drop.artist} en ${drop.title}.` : `Lo que están compartiendo los fans de ${drop.artist}.`}
         </p>
       </div>
 
@@ -139,7 +164,7 @@ export function ComunidadView() {
           className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
         <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-          {stickers.map((s) => (
+          {(isLali ? stickers : [{ src: drop.cover, label: drop.title }]).map((s) => (
             <button
               key={s.label}
               onClick={() => setSticker(sticker === s.src ? null : s.src)}
@@ -166,7 +191,7 @@ export function ComunidadView() {
         Grupos
       </h2>
       <div className="mb-6 flex gap-3 overflow-x-auto pb-2">
-        {groups.map((g) => {
+        {dropGroups.map((g) => {
           const isIn = joined.includes(g.name);
           return (
             <button

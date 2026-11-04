@@ -19,7 +19,7 @@ const rewards = [
 ];
 const DROP_MISSIONS = ["lali-stream", "lali-trivia", "lali-order", "lali-qr", "lali-ar"];
 
-export function PasaporteView() {
+export function PasaporteView({ embedded = false }: { embedded?: boolean }) {
   const { state, mode } = useDropAuth();
   const isUser = mode === "user";
   const completed = state.attempts.filter((a) => a.status === "completed" && a.general_award > 0);
@@ -29,11 +29,11 @@ export function PasaporteView() {
   const vip = missionsDone >= DROP_MISSIONS.length;
   const unlockedCount = rewards.filter((r) => done >= r.need).length;
   return (
-    <div className="px-5">
+    <div className={embedded ? "" : "px-5"}>
       <div className="mb-4">
-        <h1 className="text-3xl font-black">Pasaporte</h1>
+        {embedded ? <h2 className="text-xl font-black">Recompensas</h2> : <h1 className="text-3xl font-black">Pasaporte</h1>}
         <p className="text-sm text-muted-foreground">
-          Tus recompensas del recorrido LALI.
+          {embedded ? "Completá misiones para desbloquear premios y el acceso VIP." : "Tus recompensas del recorrido LALI."}
         </p>
       </div>
 

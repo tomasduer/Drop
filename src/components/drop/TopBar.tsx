@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import logo from "@/assets/drop-logo-2026.webp.asset.json";
 import { Bell, BarChart3, X, PhoneCall, Trophy, Gift, Users, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -54,7 +56,11 @@ export function TopBar({
   dashboardOpen,
   onToggleDashboard,
   onOpenProfile,
+  back,
+  avatar,
 }: {
+  back?: string;
+  avatar?: string;
   title?: string;
   dashboardOpen?: boolean;
   onToggleDashboard?: () => void;
@@ -67,6 +73,18 @@ export function TopBar({
   return (
     <>
       <header className="sticky top-0 z-30 flex items-center justify-between bg-background/70 px-5 pb-3 pt-5 backdrop-blur-xl">
+        {back ? (
+          <div className="flex min-w-0 items-center gap-2">
+            <Link to="/explorar" aria-label={`Volver a ${back}`} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-card">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            {avatar && <img decoding="async" src={avatar} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />}
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Drop</p>
+              <p className="truncate text-sm font-black leading-tight">{title}</p>
+            </div>
+          </div>
+        ) : (
         <div className="flex items-center gap-2">
           <img decoding="async"
             src={logo.url}
@@ -77,6 +95,7 @@ export function TopBar({
             <span className="ml-2 text-sm font-medium text-muted-foreground">/ {title}</span>
           )}
         </div>
+        )}
         <div className="flex items-center gap-2">
           {onToggleDashboard && (
             <button

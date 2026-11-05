@@ -5,7 +5,6 @@ import { useDropContent } from "@/lib/drop-content";
 import eventCrowd from "@/assets/event-crowd.jpg";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
-import mariaHero from "@/assets/drop-photo-31.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
 import dillomIcon from "@/assets/dillom-icon.webp";
 import laliIcon from "@/assets/lali-icon.webp";
@@ -20,6 +19,7 @@ import airbagIcon from "@/assets/airbag-icon.webp";
 import arjonaCover from "@/assets/arjona-portada.webp";
 import arjonaHero from "@/assets/arjona-hero.webp";
 import arjonaIcon from "@/assets/arjona-icon.webp";
+import mariaIcon from "@/assets/maria-icon.webp";
 import arjonaRojo from "@/assets/arjona-rojo.webp";
 import arjonaRed from "@/assets/arjona-red.webp";
 import arjonaNoDijo from "@/assets/arjona-seco-no-dijo.webp";
@@ -148,7 +148,7 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "maria", kind: "album", artist: "María Becerra", title: "Quimera",
     tagline: "El drop que cerró a lo grande.",
     description: "La experiencia de Quimera ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
-    cover: mariaHero.url, hero: mariaCover.url, album: mariaCover.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",
+    cover: mariaIcon, hero: mariaCover.url, album: mariaCover.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",
     merch: [
       { id: "vinilo", name: "Vinilo Quimera", detail: "Edición limitada", price: 76000, image: mariaCover.url },
     ],

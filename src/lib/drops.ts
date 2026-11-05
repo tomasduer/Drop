@@ -20,6 +20,10 @@ import airbagIcon from "@/assets/airbag-icon.webp";
 import arjonaCover from "@/assets/arjona-portada.webp";
 import arjonaHero from "@/assets/arjona-hero.webp";
 import arjonaIcon from "@/assets/arjona-icon.webp";
+import arjonaRojo from "@/assets/arjona-rojo.webp";
+import arjonaRed from "@/assets/arjona-red.webp";
+import arjonaNoDijo from "@/assets/arjona-seco-no-dijo.webp";
+import type { MerchItem } from "@/lib/merch";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
 
@@ -52,6 +56,8 @@ export type DropInfo = {
   prizes?: { top: number; label: string }[];
   /** Fechas de un show con varias funciones, para mostrarlas en el inicio del drop. */
   showDates?: { label: string; dates: string[] };
+  /** Merch oficial del drop; la que tiene `top` es exclusiva para los primeros del ranking. */
+  merch?: MerchItem[];
 };
 
 // Contenido editorial de cada drop. El estado real sale de la tabla campaigns cuando está disponible.
@@ -89,6 +95,12 @@ export const DROP_CATALOG: DropInfo[] = [
     prizes: [
       { top: 10, label: "Meet & greet con Ricardo Arjona + dos entradas" },
       { top: 60, label: "Dos entradas para el Seco Tour" },
+    ],
+    merch: [
+      { id: "remera", name: "Remera Seco Tour", detail: "Con las 16 fechas en la espalda", price: 35000, image: arjonaRojo },
+      { id: "vinilo", name: "Vinilo Seco", detail: "Edición limitada, tapa roja", price: 80000, image: arjonaCover },
+      { id: "poster", name: "Póster firmado", detail: "Lo que el Seco no dijo · numerado", price: 25000, image: arjonaNoDijo, top: 60 },
+      { id: "buzo", name: "Buzo Arjonistas", detail: "Edición única para el top 10", price: 60000, image: arjonaRed, top: 10 },
     ],
   },
   {

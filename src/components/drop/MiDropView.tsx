@@ -19,6 +19,7 @@ import { DropSelector } from "./DropSelector";
 import { useDrops } from "@/lib/drops";
 import { useIsDropAdmin } from "@/lib/drop-content";
 import { achievements, dropProgress } from "@/lib/progress";
+import { getReservations, type MerchReservation } from "@/lib/merch";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
@@ -56,6 +57,8 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
   const [dropFilter, setDropFilter] = useState<SavedDropStatus | "todos">("todos");
   const [editing, setEditing] = useState(false);
   const [settings, setSettings] = useState(false);
+  const [merch, setMerch] = useState<MerchReservation[]>([]);
+  useEffect(() => { setMerch(getReservations()); }, []);
 
   useEffect(() => {
     if (mode !== "user") { setExtras(emptyProfileExtras); return; }
@@ -182,6 +185,20 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
           </div>
         )}
         {logros.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{logros.map((l) => <span key={l.id} className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-semibold">{l.icon} {l.title}</span>)}</div>}
+        {merch.length > 0 && (
+          <div className="mt-4">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Merch reservada</p>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {merch.map((m) => (
+                <Link key={`${m.dropId}-${m.id}`} to="/drop" search={{ d: m.dropId }} className="w-24 shrink-0">
+                  <img loading="lazy" decoding="async" src={m.image} alt="" className="h-24 w-24 rounded-xl object-cover" />
+                  <p className="mt-1 truncate text-xs font-bold">{m.name}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">{m.artist}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Mis DROPS: colección protagonista */}

@@ -48,6 +48,25 @@ function localPhotos(): Plugin {
   };
 }
 
+// En Cloudflare (Workers Builds) el build del servidor (entorno "nitro") no encuentra algunos paquetes
+// que sí están instalados (isbot, rou3…). Si la resolución normal de Vite falla, lo buscamos con la
+// resolución de Node, respetando los "exports" del paquete. Localmente nunca se usa.
+function nodeResolveFallback(): Plugin {
+  return {
+    name: "drop-node-resolve-fallback",
+    async resolveId(source, importer) {
+      if (!importer || source.startsWith("\0") || source.startsWith(".") || source.startsWith("/") || source.includes(":")) return null;
+      if (!/^(@[\w.-]+\/)?[\w.-]+(\/.*)?$/.test(source)) return null;
+      const { resolveModulePath } = await import("exsolve");
+      const from = importer.startsWith("/") ? importer : join(process.cwd(), "index.js");
+      const id = resolveModulePath(source, { from, try: true, conditions: ["workerd", "worker", "import", "module", "node", "default"] })
+        ?? resolveModulePath(source, { from: join(process.cwd(), "index.js"), try: true, conditions: ["workerd", "worker", "import", "module", "node", "default"] });
+      if (id) this.warn(`[drop] resolví "${source}" con la resolución de Node`);
+      return id ?? null;
+    },
+  };
+}
+
 // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
 // @cloudflare/vite-plugin builds from this — wrangler.jsonc main alone is insufficient.
 export default defineConfig({
@@ -55,7 +74,7 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    plugins: [localPhotos()],
+    plugins: [localPhotos(), nodeResolveFallback()],
     resolve: { alias: { isbot: ISBOT } },
   },
 });

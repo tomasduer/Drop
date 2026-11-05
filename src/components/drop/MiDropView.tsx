@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { CalendarDays, Disc3, Image as ImageIcon, MapPin, Pencil, Settings, Share2, Star, UserPlus, UserRound } from "lucide-react";
+import { CalendarDays, Disc3, Image as ImageIcon, MapPin, Mic2, Music, Pencil, Settings, Share2, Star, Ticket, UserPlus, UserRound, X, Zap } from "lucide-react";
+import { FavoritesPicker, getFavoriteSongs, setFavoriteSongs, type FavoriteSong } from "./FavoritesPicker";
 import { inviteFriends, shareStory } from "@/lib/share-card";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -60,6 +61,19 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
   const [settings, setSettings] = useState(false);
   const [merch, setMerch] = useState<MerchReservation[]>([]);
   useEffect(() => { setMerch(getReservations()); }, []);
+  const [picker, setPicker] = useState<"artist" | "song" | null>(null);
+  const [songs, setSongs] = useState<FavoriteSong[]>([]);
+  useEffect(() => { setSongs(getFavoriteSongs()); }, []);
+  const favArtists = profile?.favorite_artists ?? [];
+
+  /** Abre una pestaña del perfil y baja hasta ella. */
+  const openTab = (t: ProfileTab) => {
+    setTab(t);
+    requestAnimationFrame(() => document.getElementById("perfil-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const saveSongs = (list: FavoriteSong[]) => { setSongs(list); setFavoriteSongs(list); };
+  const saveArtists = (list: string[]) => void saveProfile({ favorite_artists: list });
 
   useEffect(() => {
     if (mode !== "user") { setExtras(emptyProfileExtras); return; }
@@ -143,11 +157,74 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
 
       {/* Resumen de actividad */}
       <section className="mt-5 grid grid-cols-4 gap-2">
-        <Stat value={`${extras.shows.length}`} label="Shows" />
-        <Stat value={`${myReviews.length}`} label="Reseñas" />
-        <Stat value={`${extras.savedDrops.length}`} label="DROPS" />
-        <Stat value={avgRating ?? "—"} label="Promedio" />
+        <Stat value={`${extras.shows.length}`} label="Shows" onClick={() => openTab("shows")} />
+        <Stat value={`${myReviews.length}`} label="Reseñas" onClick={() => openTab("resenas")} />
+        <Stat value={`${extras.savedDrops.length}`} label="DROPS" onClick={() => scrollTo("perfil-drops")} />
+        <Stat value={avgRating ?? "—"} label="Promedio" onClick={() => openTab("resenas")} />
       </section>
+
+      {/* Accesos rápidos para sumar cosas al perfil */}
+      <section className="mt-5">
+        <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-primary">Sumá a tu perfil</p>
+        <div className="grid grid-cols-3 gap-2">
+          <QuickAction icon={Star} label="Reseñar" onClick={() => openTab("albumes")} />
+          <QuickAction icon={Disc3} label="Álbum" onClick={() => openTab("albumes")} />
+          <QuickAction icon={Music} label="Canción" onClick={() => setPicker("song")} />
+          <QuickAction icon={Mic2} label="Artista" onClick={() => setPicker("artist")} />
+          <QuickAction icon={Zap} label="Drop" onClick={() => void navigate({ to: "/explorar" })} />
+          <QuickAction icon={Ticket} label="Show" onClick={() => void navigate({ to: "/explorar", hash: "shows" })} />
+        </div>
+      </section>
+
+      {(favArtists.length > 0 || songs.length > 0) && (
+        <section className="mt-5 space-y-3">
+          {favArtists.length > 0 && (
+            <div>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Artistas favoritos</p>
+              <div className="flex flex-wrap gap-2">
+                {favArtists.map((a) => (
+                  <span key={a} className="flex items-center gap-1 rounded-full border border-border bg-card py-1 pl-3 pr-1 text-xs font-bold">
+                    {a}
+                    <button type="button" aria-label={`Quitar ${a}`} onClick={() => saveArtists(favArtists.filter((x) => x !== a))} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground"><X className="h-3 w-3" /></button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {songs.length > 0 && (
+            <div>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Canciones favoritas</p>
+              <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+                {songs.map((t) => (
+                  <div key={t.id} className="relative w-24 shrink-0">
+                    <a href={t.link || undefined} target="_blank" rel="noreferrer">
+                      <img loading="lazy" decoding="async" src={t.cover} alt="" className="h-24 w-24 rounded-xl object-cover" />
+                      <p className="mt-1 truncate text-xs font-bold">{t.title}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">{t.artist}</p>
+                    </a>
+                    <button type="button" aria-label={`Quitar ${t.title}`} onClick={() => saveSongs(songs.filter((x) => x.id !== t.id))} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-background/80"><X className="h-3 w-3" /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      {picker && (
+        <FavoritesPicker
+          kind={picker}
+          onClose={() => setPicker(null)}
+          onPickArtist={(a) => {
+            if (favArtists.some((x) => x.toLowerCase() === a.name.toLowerCase())) { toast("Ya está en tus favoritos"); return; }
+            saveArtists([...favArtists, a.name]); setPicker(null); toast.success(`${a.name} está en tus favoritos`);
+          }}
+          onPickSong={(t) => {
+            if (songs.some((x) => x.id === t.id)) { toast("Ya está en tu perfil"); return; }
+            saveSongs([{ id: t.id, title: t.title, artist: t.artist, cover: t.cover, link: t.link }, ...songs]); setPicker(null); toast.success(`Sumaste "${t.title}"`);
+          }}
+        />
+      )}
 
       {/* Puntos generales: se usan en toda la plataforma */}
       <section className="mt-5 rounded-3xl p-4 text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
@@ -203,7 +280,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
       </section>
 
       {/* Mis DROPS: colección protagonista */}
-      <section className="mt-7">
+      <section id="perfil-drops" className="mt-7 scroll-mt-4">
         <div className="mb-3 flex items-end justify-between">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Tu colección</p>
@@ -252,7 +329,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
       </section>
 
       {/* Pestañas */}
-      <nav className="mt-7 flex gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1" aria-label="Secciones de Mi DROP">
+      <nav id="perfil-tabs" className="mt-7 scroll-mt-4 flex gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1" aria-label="Secciones de Mi DROP">
         {TABS.map((t) => (
           <Button key={t.id} variant={tab === t.id ? "default" : "ghost"} size="sm" onClick={() => setTab(t.id)} className="shrink-0 flex-1 text-xs">{t.label}</Button>
         ))}
@@ -380,8 +457,17 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
-  return <div className="rounded-2xl border border-border bg-card p-3 text-center"><p className="text-lg font-black tabular-nums">{value}</p><p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p></div>;
+function Stat({ value, label, onClick }: { value: string; label: string; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className="rounded-2xl border border-border bg-card p-3 text-center transition-colors active:bg-muted hover:border-primary/50"><p className="text-lg font-black tabular-nums">{value}</p><p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p></button>;
+}
+
+function QuickAction({ icon: Icon, label, onClick }: { icon: typeof Star; label: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="flex items-center gap-2 rounded-2xl border border-border bg-card px-3 py-2.5 text-left text-xs font-bold transition-colors active:bg-muted hover:border-primary/50">
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}><Icon className="h-3.5 w-3.5" /></span>
+      <span className="leading-tight">{label}</span>
+    </button>
+  );
 }
 
 function StatCard({ value, label }: { value: string; label: string }) {

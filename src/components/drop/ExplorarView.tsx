@@ -72,6 +72,12 @@ export function ExplorarView() {
   const toggleShow = useServerFn(showAttendanceAction);
   const [data, setData] = useState<ExploreData>(emptyExploreData);
   const [query, setQuery] = useState("");
+  // Desde el perfil, "Show" abre Explorar directo en los shows.
+  useEffect(() => {
+    if (window.location.hash !== "#shows") return;
+    const t = setTimeout(() => document.getElementById("shows")?.scrollIntoView({ behavior: "smooth", block: "start" }), 500);
+    return () => clearTimeout(t);
+  }, []);
   const [reading, setReading] = useState<CommunityReview | null>(null);
   const [savingDrop, setSavingDrop] = useState<string | null>(null);
   const fetchExternalShows = useServerFn(getExternalShows);
@@ -261,7 +267,7 @@ export function ExplorarView() {
       </section>
 
       {/* Shows cerca tuyo */}
-      <section className="mt-7">
+      <section id="shows" className="mt-7 scroll-mt-4">
         <div className="mb-1 flex items-end justify-between">
           <h2 className="text-xl font-black">Shows cerca tuyo</h2>
           <span className="text-xs font-bold text-primary">Ver todo</span>

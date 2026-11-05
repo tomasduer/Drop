@@ -37,3 +37,7 @@ export function toggleReservation(r: MerchReservation): boolean {
 }
 
 export const formatPrice = (n: number) => `$${n.toLocaleString("es-AR")}`;
+
+/** Identificador de la tienda de un artista en la URL (/tienda?a=ricardo-arjona). */
+export const artistSlug = (artist: string) =>
+  artist.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");

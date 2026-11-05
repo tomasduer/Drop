@@ -23,6 +23,13 @@ import arjonaIcon from "@/assets/arjona-icon.webp";
 import arjonaRojo from "@/assets/arjona-rojo.webp";
 import arjonaRed from "@/assets/arjona-red.webp";
 import arjonaNoDijo from "@/assets/arjona-seco-no-dijo.webp";
+import laliAuto from "@/assets/lali-auto.png.asset.json";
+import lnvTraje from "@/assets/lnv-traje.webp";
+import lnvPoster from "@/assets/lnv-poster.webp";
+import lnvGira from "@/assets/lnv-gira.webp";
+import pcCaras from "@/assets/pc-caras.webp";
+import airbagVivo from "@/assets/airbag-vivo.webp";
+import adelaGlitter from "@/assets/adela-glitter.webp";
 import type { MerchItem } from "@/lib/merch";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
@@ -67,24 +74,42 @@ export const DROP_CATALOG: DropInfo[] = [
     tagline: "Atendé la llamada. Resolvé el misterio.",
     description: "Una búsqueda del tesoro alrededor del nuevo álbum: llamadas misteriosas, fragmentos inéditos, afiches con QR en la calle y un listening party para los primeros 150.",
     cover: laliIcon, hero: laliCover.url, album: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
+    merch: [
+      { id: "remera", name: "Remera LALIVERSE", detail: "Con la tapa del álbum", price: 32000, image: laliCover.url },
+      { id: "vinilo", name: "Vinilo del álbum", detail: "Edición limitada en color", price: 78000, image: laliAuto.url },
+      { id: "kit", name: "Kit de la llamada", detail: "Teléfono de colección y postales firmadas", price: 45000, image: laliIcon, top: 50 },
+    ],
   },
   {
     id: "dillom-lnv", kind: "album", artist: "Dillom", title: "La nueva violencia",
     tagline: "Bienvenidos a la nueva violencia.",
     description: "Dillom vuelve con La nueva violencia y La gira violenta. Trivias diarias, acertijos y desafíos alrededor del disco. Sumá puntos y peleá el ranking del fandom.",
     cover: lnvIcon, hero: lnvCover, album: lnvCover, dates: "En curso · La gira violenta", status: "active", fandom: "La nueva violencia",
+    merch: [
+      { id: "remera", name: "Remera La nueva violencia", detail: "Estampa del traje", price: 30000, image: lnvTraje },
+      { id: "poster", name: "Póster de la gira", detail: "La gira violenta · 50 x 70 cm", price: 15000, image: lnvGira },
+      { id: "afiche", name: "Afiche firmado", detail: "Numerado, solo 20 copias", price: 22000, image: lnvPoster, top: 20 },
+    ],
   },
   {
     id: "dillom", kind: "album", artist: "Dillom", title: "Por cesárea",
     tagline: "El universo más oscuro del rap argentino.",
     description: "La experiencia de Por cesárea ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
     cover: dillomIcon, hero: dillomCover.url, album: dillomCover.url, dates: "Finalizado", status: "archived", fandom: "Comunidad Dillom",
+    merch: [
+      { id: "vinilo", name: "Vinilo Por cesárea", detail: "Reedición", price: 75000, image: pcCaras },
+    ],
   },
   {
     id: "airbag", kind: "album", artist: "Airbag", title: "El Club de la Pelea I",
     tagline: "Primera regla: no le cuentes a nadie.",
     description: "Entrá al club. Trivias de los 7 temas, acertijos y desafíos alrededor de El Club de la Pelea I. Sumá puntos y peleá el ranking con los fans de Airbag.",
     cover: airbagIcon, hero: airbagBanda, album: airbagCover, dates: "En curso", status: "active", fandom: "El Club",
+    merch: [
+      { id: "remera", name: "Remera El Club", detail: "El Club de la Pelea I", price: 30000, image: airbagCover },
+      { id: "vinilo", name: "Vinilo El Club de la Pelea I", detail: "Doble, edición limitada", price: 90000, image: airbagBanda },
+      { id: "pua", name: "Púas usadas en vivo", detail: "Set de 3, con certificado", price: 18000, image: airbagVivo, top: 30 },
+    ],
   },
   {
     id: "arjona-seco", kind: "show", artist: "Ricardo Arjona", title: "Seco Tour en el Movistar Arena",
@@ -108,6 +133,10 @@ export const DROP_CATALOG: DropInfo[] = [
     tagline: "Sideshow de Lollapalooza. Una sola noche.",
     description: "Adela presenta su nuevo álbum PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix. Activá el aviso y enterate primero cuando abran las misiones.",
     cover: adelaIcon, hero: adelaHero, album: adelaCover, dates: "Próximamente · Sideshow de Lollapalooza · Teatro Vorterix", status: "upcoming", fandom: "Primas",
+    merch: [
+      { id: "remera", name: "Remera PRIMA", detail: "Edición sideshow Vorterix", price: 28000, image: adelaCover },
+      { id: "tote", name: "Tote bag glitter", detail: "Brilla con las luces del show", price: 16000, image: adelaGlitter },
+    ],
   },
   {
     id: "tini", artist: "TINI", title: "Nueva era",
@@ -120,6 +149,9 @@ export const DROP_CATALOG: DropInfo[] = [
     tagline: "El drop que cerró a lo grande.",
     description: "La experiencia de Quimera ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
     cover: mariaHero.url, hero: mariaCover.url, album: mariaCover.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",
+    merch: [
+      { id: "vinilo", name: "Vinilo Quimera", detail: "Edición limitada", price: 76000, image: mariaCover.url },
+    ],
   },
 ];
 

@@ -1,12 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Activity, Compass, UserRound } from "lucide-react";
+import { Activity, Compass, ShoppingBag, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Navegación general: descubrir drops, seguir tu recorrido y tu perfil.
+// Navegación general: descubrir drops, seguir tu recorrido, la tienda de merch y tu perfil.
 // Dentro de un drop se usa la barra propia del artista (DropNav).
 const items = [
   { to: "/explorar" as const, label: "Explorar", icon: Compass },
   { to: "/actividad" as const, label: "Mi actividad", icon: Activity },
+  { to: "/tienda" as const, label: "Tienda", icon: ShoppingBag },
   { to: "/mi-drop" as const, label: "Mi perfil", icon: UserRound },
 ];
 

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getProfileExtras } from "@/lib/explore.functions";
 import { emptyProfileExtras, type ProfileExtras, type SavedDropStatus } from "@/lib/explore-data";
 import { PHOTOS } from "@/lib/fan-avatars";
+import { avatarFromFile } from "@/lib/avatar";
 import { ALBUMS } from "@/lib/albums";
 import { useDropAuth } from "./AuthProvider";
 import { AlbumsSection } from "./AlbumsSection";
@@ -387,11 +388,14 @@ function StatCard({ value, label }: { value: string; label: string }) {
   return <div className="rounded-2xl border border-border bg-card p-4"><p className="text-2xl font-black tabular-nums">{value}</p><p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p></div>;
 }
 
-function EditProfileDialog({ onClose, onSave }: { onClose: () => void; onSave: (patch: { display_name?: string; username?: string; bio?: string }) => Promise<void> }) {
+type ProfilePatch = { display_name?: string; username?: string; bio?: string; avatar_url?: string | null };
+
+function EditProfileDialog({ onClose, onSave }: { onClose: () => void; onSave: (patch: ProfilePatch) => Promise<void> }) {
   const { profile } = useDropAuth();
   const [name, setName] = useState(profile.display_name ?? "");
   const [username, setUsername] = useState(profile.username ?? "");
   const [bio, setBio] = useState(profile.bio ?? "");
+  const [avatar, setAvatar] = useState<string | null>(profile.avatar_url ?? null);
   const [saving, setSaving] = useState(false);
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -400,14 +404,31 @@ function EditProfileDialog({ onClose, onSave }: { onClose: () => void; onSave: (
           <DialogTitle>Editar perfil</DialogTitle>
           <DialogDescription>Así te ve la comunidad de DROP.</DialogDescription>
         </DialogHeader>
-        <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); setSaving(true); const patch: { display_name?: string; username?: string; bio?: string } = {};
+        <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); const patch: ProfilePatch = {};
           const n = name.trim(); const u = username.trim().replace(/^@/, "").toLowerCase(); const b = bio.trim();
           if (u && !/^[a-z0-9._-]{3,30}$/.test(u)) { toast.error("El usuario puede tener letras, números, punto o guiones (3 a 30)"); return; }
           if (n && n !== (profile.display_name ?? "")) patch.display_name = n;
           if (u !== (profile.username ?? "")) patch.username = u || undefined;
           if (b !== (profile.bio ?? "")) patch.bio = b;
+          if (avatar !== (profile.avatar_url ?? null)) patch.avatar_url = avatar;
           if (!Object.keys(patch).length) { onClose(); return; }
           setSaving(true); await onSave(patch); setSaving(false); }}>
+          <div className="flex items-center gap-3">
+            <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-border bg-muted">
+              {avatar ? <img src={avatar} alt="Tu foto de perfil" className="h-full w-full object-cover" /> : <UserRound className="h-7 w-7 text-muted-foreground" />}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <label className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-bold">
+                {avatar ? "Cambiar foto" : "Subir foto"}
+                <input type="file" accept="image/*" className="sr-only" onChange={async (e) => {
+                  const file = e.target.files?.[0]; e.target.value = "";
+                  if (!file) return;
+                  try { setAvatar(await avatarFromFile(file)); } catch { toast.error("No pudimos usar esa imagen. Probá con otra."); }
+                }} />
+              </label>
+              {avatar && <button type="button" onClick={() => setAvatar(null)} className="rounded-full px-3 py-1.5 text-xs font-bold text-muted-foreground">Quitar</button>}
+            </div>
+          </div>
           <label className="block space-y-1 text-sm font-bold">Nombre visible<Input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></label>
           <label className="block space-y-1 text-sm font-bold">Nombre de usuario<Input value={username} onChange={(e) => setUsername(e.target.value)} maxLength={30} placeholder="tu_usuario" /></label>
           <label className="block space-y-1 text-sm font-bold">Biografía <span className="font-normal text-muted-foreground">(opcional)</span><Textarea value={bio} onChange={(e) => setBio(e.target.value)} maxLength={200} rows={3} placeholder="Contá qué música te mueve" /></label>

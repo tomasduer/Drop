@@ -7,7 +7,12 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
+import { createRequire } from "node:module";
 import type { Plugin } from "vite";
+
+// En Cloudflare (Workers Builds) el build del servidor no encontraba "isbot" aunque está instalado.
+// Lo apuntamos a su archivo directamente para que la resolución no dependa del entorno.
+const ISBOT = createRequire(import.meta.url).resolve("isbot").replace(/index\.js$/, "index.mjs");
 
 // Fotos locales (rama sin Lovable): si existe src/assets/fotos/<nombre>.(webp|png|jpg|jpeg), se usa esa
 // en lugar de la URL alojada en Lovable. Así la app funciona fuera de Lovable sin tocar
@@ -51,5 +56,6 @@ export default defineConfig({
   },
   vite: {
     plugins: [localPhotos()],
+    resolve: { alias: { isbot: ISBOT } },
   },
 });

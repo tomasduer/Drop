@@ -15,3 +15,13 @@ if (process.env.WORKERS_CI || process.env.FORCE_CI_INSTALL) {
     console.log("Dependencias con estructura hoisted: nada que hacer.");
   }
 }
+
+// Diagnóstico para el log de Cloudflare.
+if (process.env.WORKERS_CI || process.env.FORCE_CI_INSTALL) {
+  try {
+    const { createRequire } = await import("node:module");
+    const req = createRequire(import.meta.url);
+    console.log("isbot ->", req.resolve("isbot", { paths: [process.cwd()] }));
+    console.log("isbot instalado:", existsSync("node_modules/isbot/index.mjs"), "| node", process.version, "| cwd", process.cwd());
+  } catch (e) { console.log("isbot NO se resuelve:", e.message); }
+}

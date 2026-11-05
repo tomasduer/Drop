@@ -10,8 +10,6 @@ import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData
 import { useDropAuth } from "./AuthProvider";
 import { useDrops, type DropInfo } from "@/lib/drops";
 import { ArtistLine } from "@/components/drop/ArtistLine";
-import logoViolet from "@/assets/drop-logo-negativo.webp";
-const logo = { url: logoViolet };
 import { CatalogResults } from "./Catalog";
 import { getExternalShows } from "@/lib/music.functions";
 import laliCover from "@/assets/album-cover.png.asset.json";
@@ -142,8 +140,7 @@ export function ExplorarView() {
   return (
     <div className="px-5 pb-4">
       <header className="pt-2">
-        <img decoding="async" src={logo.url} alt="DROP" className="h-10 w-24 object-contain object-left" />
-        <h1 className="mt-3 text-3xl font-black leading-tight">Elegí tu próximo drop</h1>
+        <h1 className="text-3xl font-black leading-tight">Elegí tu próximo drop</h1>
         <p className="mt-1 text-sm text-muted-foreground">Cada lanzamiento es un juego: misiones, ranking y recompensas con tus artistas. Podés sumarte a todos los que quieras.</p>
         <label className="mt-4 flex items-center gap-2 rounded-2xl border border-input bg-card px-4 py-3">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />

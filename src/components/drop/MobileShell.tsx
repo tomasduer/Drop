@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { PlansBar } from "./PlansMenu";
 
 export function MobileShell({ children }: { children: ReactNode }) {
   return (
@@ -7,6 +8,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
         className="relative mx-auto min-h-screen w-full max-w-[440px] overflow-hidden pb-40"
         style={{ backgroundImage: "var(--gradient-glow)" }}
       >
+        <PlansBar />
         {children}
       </div>
     </div>

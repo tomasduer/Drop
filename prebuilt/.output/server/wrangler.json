@@ -1,0 +1,27 @@
+{
+  "compatibility_date": "2025-09-24",
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "drop",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": "index.mjs",
+  "vars": {
+    "SUPABASE_URL": "https://ccugbmnrpzvvurnwhmut.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_M7C21iy9g8Eel0n6y32lKg_EOFLN77D"
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "../public"
+  },
+  "no_bundle": true,
+  "rules": [
+    {
+      "type": "ESModule",
+      "globs": [
+        "**/*.mjs",
+        "**/*.js"
+      ]
+    }
+  ]
+}

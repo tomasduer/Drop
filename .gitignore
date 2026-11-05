@@ -35,3 +35,6 @@ dist-ssr
 .env
 .env.local
 .env.lovable
+
+# Versión precompilada que publica Cloudflare (ver scripts/build.mjs)
+!/prebuilt/.output/

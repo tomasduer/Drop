@@ -400,7 +400,14 @@ function EditProfileDialog({ onClose, onSave }: { onClose: () => void; onSave: (
           <DialogTitle>Editar perfil</DialogTitle>
           <DialogDescription>Así te ve la comunidad de DROP.</DialogDescription>
         </DialogHeader>
-        <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); setSaving(true); await onSave({ display_name: name.trim() || profile.display_name, username: username.trim().replace(/^@/, ""), bio: bio.trim() }); setSaving(false); }}>
+        <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); setSaving(true); const patch: { display_name?: string; username?: string; bio?: string } = {};
+          const n = name.trim(); const u = username.trim().replace(/^@/, "").toLowerCase(); const b = bio.trim();
+          if (u && !/^[a-z0-9._-]{3,30}$/.test(u)) { toast.error("El usuario puede tener letras, números, punto o guiones (3 a 30)"); return; }
+          if (n && n !== (profile.display_name ?? "")) patch.display_name = n;
+          if (u !== (profile.username ?? "")) patch.username = u || undefined;
+          if (b !== (profile.bio ?? "")) patch.bio = b;
+          if (!Object.keys(patch).length) { onClose(); return; }
+          setSaving(true); await onSave(patch); setSaving(false); }}>
           <label className="block space-y-1 text-sm font-bold">Nombre visible<Input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></label>
           <label className="block space-y-1 text-sm font-bold">Nombre de usuario<Input value={username} onChange={(e) => setUsername(e.target.value)} maxLength={30} placeholder="tu_usuario" /></label>
           <label className="block space-y-1 text-sm font-bold">Biografía <span className="font-normal text-muted-foreground">(opcional)</span><Textarea value={bio} onChange={(e) => setBio(e.target.value)} maxLength={200} rows={3} placeholder="Contá qué música te mueve" /></label>

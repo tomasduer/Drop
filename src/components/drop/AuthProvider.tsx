@@ -114,7 +114,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!Object.keys(safe).length) return true;
     // username/bio se crean al aceptar el borrador; el tipo generado aún no las incluye.
     const { data, error } = await supabase.from("profiles").update(safe as never).eq("id", user.id).select("*").single();
-    if (error) { toast.error("No pudimos guardar tus cambios"); return false; }
+    if (error) {
+      toast.error(error.code === "23505" ? "Ese nombre de usuario ya está en uso" : "No pudimos guardar tus cambios");
+      return false;
+    }
     setProfile(data); return true;
   }
 

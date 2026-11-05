@@ -1,1 +1,0 @@
-import{u as t,j as r,N as e}from"./index-DSuKaVj7.js";import{W as m}from"./WelcomeView-DJMRPm-D.js";import"./button-BD9aftpc.js";import"./drop-logo-negativo-BgkkeCk8.js";import"./disc-3-CTRz3rRt.js";import"./arrow-right-CTjjG3UQ.js";function x(){const{mode:o}=t();return o==="user"||o==="guest"?r.jsx(e,{to:"/explorar",replace:!0}):r.jsx(m,{})}export{x as component};

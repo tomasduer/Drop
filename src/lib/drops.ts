@@ -153,10 +153,10 @@ export const DROP_CATALOG: DropInfo[] = [
     description: "Adela presenta su nuevo álbum PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix. Activá el aviso y enterate primero cuando abran las misiones.",
     cover: adelaIcon, hero: adelaHero, album: adelaCover, dates: "Próximamente · Sideshow de Lollapalooza · Teatro Vorterix", status: "upcoming", fandom: "Primas",
     merch: [
+      { id: "vinilo", name: "Vinilo PRIMA", detail: "Vinilo rosa, edición limitada", price: 80000, image: adelaVinilo },
       { id: "remera", name: "Remera PRIMA", detail: "Blanca, con PRIMA sobre el logo de Adela", price: 28000, image: adelaRemera },
       { id: "buzo", name: "Buzo Alas", detail: "Negro, con alas fucsia en la espalda", price: 60000, image: adelaBuzo },
       { id: "cd", name: "CD The Baddest Bitches Are In The USA", detail: "Edición física", price: 25000, image: adelaCd },
-      { id: "vinilo", name: "Vinilo PRIMA", detail: "Vinilo rosa, edición limitada", price: 80000, image: adelaVinilo },
       { id: "tote", name: "Tote bag glitter", detail: "Brilla con las luces del show", price: 16000, image: adelaGlitter },
     ],
   },

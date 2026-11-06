@@ -20,7 +20,6 @@ import arjonaCover from "@/assets/arjona-portada.webp";
 import arjonaHero from "@/assets/arjona-hero.webp";
 import arjonaIcon from "@/assets/arjona-icon.webp";
 import mariaIcon from "@/assets/maria-icon.webp";
-import arjonaRojo from "@/assets/arjona-rojo.webp";
 import arjonaRed from "@/assets/arjona-red.webp";
 import arjonaNoDijo from "@/assets/arjona-seco-no-dijo.webp";
 import lnvRemera from "@/assets/lnv-remera.webp";
@@ -28,6 +27,9 @@ import pcVinilo from "@/assets/pc-vinilo.webp";
 import airbagRemera from "@/assets/airbag-remera.webp";
 import airbagBuzo from "@/assets/airbag-buzo.webp";
 import airbagGorra from "@/assets/airbag-gorra.webp";
+import arjonaRemera from "@/assets/arjona-remera.webp";
+import arjonaTote from "@/assets/arjona-tote.webp";
+import arjonaVaso from "@/assets/arjona-vaso.webp";
 import laliCamiseta from "@/assets/lali-camiseta-33.webp";
 import laliRemeraDiva from "@/assets/lali-remera-diva.webp";
 import laliVinilo from "@/assets/lali-vinilo.webp";
@@ -134,8 +136,9 @@ export const DROP_CATALOG: DropInfo[] = [
       { top: 60, label: "Dos entradas para el Seco Tour" },
     ],
     merch: [
-      { id: "remera", name: "Remera Seco Tour", detail: "Con las 16 fechas en la espalda", price: 35000, image: arjonaRojo },
-      { id: "vinilo", name: "Vinilo Seco", detail: "Edición limitada, tapa roja", price: 80000, image: arjonaCover },
+      { id: "remera", name: "Remera Seco Tour", detail: "Blanca con manga negra y la foto de Seco", price: 35000, image: arjonaRemera },
+      { id: "tote", name: "Tote bag Seco", detail: "Con la ilustración de Seco y Arjona", price: 22000, image: arjonaTote },
+      { id: "vaso", name: "Vaso térmico Seco", detail: "Con los stickers del álbum", price: 28000, image: arjonaVaso },
       { id: "poster", name: "Póster firmado", detail: "Lo que el Seco no dijo · numerado", price: 25000, image: arjonaNoDijo, top: 60 },
       { id: "buzo", name: "Buzo Arjonistas", detail: "Edición única para el top 10", price: 60000, image: arjonaRed, top: 10 },
     ],

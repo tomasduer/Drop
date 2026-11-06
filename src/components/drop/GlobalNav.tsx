@@ -1,14 +1,15 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Activity, Compass, ShoppingBag, UserRound } from "lucide-react";
+import { Activity, ShoppingBag, Star, UserRound, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Navegación general: descubrir drops, seguir tu recorrido, la tienda de merch y tu perfil.
+// Navegación general: drops, reseñas y shows, la tienda de merch, tu actividad y tu perfil.
 // Dentro de un drop se usa la barra propia del artista (DropNav).
 const items = [
-  { to: "/explorar" as const, label: "Explorar", icon: Compass },
-  { to: "/actividad" as const, label: "Mi actividad", icon: Activity },
+  { to: "/explorar" as const, label: "Drops", icon: Zap },
+  { to: "/resenas" as const, label: "Reseñas", icon: Star },
   { to: "/tienda" as const, label: "Tienda", icon: ShoppingBag },
-  { to: "/mi-drop" as const, label: "Mi perfil", icon: UserRound },
+  { to: "/actividad" as const, label: "Actividad", icon: Activity },
+  { to: "/mi-drop" as const, label: "Perfil", icon: UserRound },
 ];
 
 export function GlobalNav() {
@@ -21,7 +22,7 @@ export function GlobalNav() {
           const isActive = path.startsWith(it.to);
           return (
             <Link key={it.label} to={it.to} aria-current={isActive ? "page" : undefined}
-              className={cn("flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-xs font-medium transition-colors", isActive ? "text-foreground" : "text-muted-foreground")}>
+              className={cn("flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-[11px] font-medium transition-colors", isActive ? "text-foreground" : "text-muted-foreground")}>
               <span className={cn("grid h-9 w-9 place-items-center rounded-xl transition-all", isActive && "text-primary-foreground shadow-[var(--shadow-glow)]")}
                 style={isActive ? { backgroundImage: "var(--gradient-drop)" } : undefined}>
                 <Icon className="h-4 w-4" />

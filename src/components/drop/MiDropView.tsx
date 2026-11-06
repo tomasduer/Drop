@@ -172,7 +172,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
           <QuickAction icon={Music} label="Canción" onClick={() => setPicker("song")} />
           <QuickAction icon={Mic2} label="Artista" onClick={() => setPicker("artist")} />
           <QuickAction icon={Zap} label="Drop" onClick={() => void navigate({ to: "/explorar" })} />
-          <QuickAction icon={Ticket} label="Show" onClick={() => void navigate({ to: "/explorar", hash: "shows" })} />
+          <QuickAction icon={Ticket} label="Show" onClick={() => void navigate({ to: "/resenas", hash: "shows" })} />
         </div>
       </section>
 
@@ -300,8 +300,8 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
         {extras.savedDrops.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
             <p className="text-sm font-bold">Tu colección está vacía</p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Guardá drops desde Explorar para reunir acá los lanzamientos que te interesan, participés o no en sus misiones.</p>
-            <Button asChild size="sm" className="mt-3"><Link to="/explorar">Ir a Explorar</Link></Button>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Guardá drops desde la pestaña Drops para reunir acá los lanzamientos que te interesan, participés o no en sus misiones.</p>
+            <Button asChild size="sm" className="mt-3"><Link to="/explorar">Ver drops</Link></Button>
           </div>
         ) : visibleDrops.length === 0 ? (
           <p className="py-4 text-center text-xs text-muted-foreground">No hay drops con ese estado.</p>
@@ -340,7 +340,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
           {extras.shows.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
               <p className="text-sm font-bold">Sin shows registrados</p>
-              <p className="mt-1 text-xs text-muted-foreground">Marcá "Asistí a este show" desde Explorar para armar tu historial de recitales y festivales.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Marcá "Asistí a este show" desde Reseñas para armar tu historial de recitales y festivales.</p>
             </div>
           ) : extras.shows.map((show) => (
             <article key={show.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">

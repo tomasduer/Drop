@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Bookmark, BookmarkCheck, CalendarDays, MapPin, Search, Star, TrendingUp } from "lucide-react";
+import { ArrowRight, Bookmark, BookmarkCheck, CalendarDays, MapPin, Search, Star, Ticket, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -64,7 +64,8 @@ function Stars({ value }: { value: number }) {
   return <span className="flex items-center gap-0.5 text-primary">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`h-3 w-3 ${value >= n ? "fill-current" : "text-muted-foreground"}`} />)}</span>;
 }
 
-export function ExplorarView() {
+export function ExplorarView({ section = "drops" }: { section?: "drops" | "resenas" }) {
+  const isDrops = section === "drops";
   const { mode, state, saveProfile } = useDropAuth();
   const navigate = useNavigate();
   const fetchExplore = useServerFn(getExploreData);
@@ -146,21 +147,34 @@ export function ExplorarView() {
   return (
     <div className="px-5 pb-4">
       <header className="pt-2">
-        <h1 className="text-3xl font-black leading-tight">Elegí tu próximo drop</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Cada lanzamiento es un juego: misiones, ranking y recompensas con tus artistas. Podés sumarte a todos los que quieras.</p>
+        <h1 className="text-3xl font-black leading-tight">{isDrops ? "Elegí tu próximo drop" : "Reseñas y shows"}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{isDrops
+          ? "Cada lanzamiento es un juego: misiones, ranking y recompensas con tus artistas. Podés sumarte a todos los que quieras."
+          : "Leé lo que opinan los fans, puntuá tus álbumes y encontrá los próximos shows."}</p>
         <label className="mt-4 flex items-center gap-2 rounded-2xl border border-input bg-card px-4 py-3">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Artistas, álbumes, shows, reseñas…"
+            placeholder={isDrops ? "Buscá un artista o un drop" : "Álbumes, artistas, shows, reseñas…"}
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </label>
+        {!isDrops && (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <Link to="/mi-drop" search={{ tab: "albumes" }} className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
+              <Star className="h-4 w-4" />Reseñar un álbum
+            </Link>
+            <a href="#shows" onClick={(e) => { e.preventDefault(); document.getElementById("shows")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex items-center justify-center gap-2 rounded-2xl border border-primary/40 py-3 text-sm font-black text-primary">
+              <Ticket className="h-4 w-4" />Ver shows
+            </a>
+          </div>
+        )}
       </header>
 
-      <CatalogResults query={query} />
+      {!isDrops && <CatalogResults query={query} />}
 
+      {isDrops && (<>
       {/* Drops activos */}
       {activeDrops.length > 0 && (
         <section className="mt-7">
@@ -234,14 +248,19 @@ export function ExplorarView() {
         </section>
       )}
       {visibleDrops.length === 0 && q && <p className="mt-6 text-sm text-muted-foreground">Ningún drop coincide con esa búsqueda.</p>}
+      <Link to="/resenas" className="mt-8 flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}><Star className="h-4 w-4" /></span>
+        <span className="min-w-0 flex-1"><span className="block text-sm font-black">Reseñas y shows</span><span className="block text-xs text-muted-foreground">Opiniones de fans, próximos recitales y artistas para descubrir.</span></span>
+        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+      </Link>
+      </>)}
 
-      <h2 className="mt-10 text-2xl font-black">Descubrí música</h2>
-      <p className="text-xs text-muted-foreground">Reseñas de fans, shows y artistas para escuchar.</p>
+      {!isDrops && (<>
 
       {/* Opiniones de la comunidad */}
       <section className="mt-7">
         <div className="mb-3 flex items-end justify-between">
-          <h2 className="text-xl font-black">Opiniones de la comunidad</h2>
+          <h2 className="text-xl font-black">Reseñas de la comunidad</h2>
           <Link to="/mi-drop" search={{ tab: "albumes" }} className="text-xs font-bold text-primary">Publicar</Link>
         </div>
         {visibleReviews.length === 0 ? (
@@ -270,8 +289,7 @@ export function ExplorarView() {
       <section id="shows" className="mt-7 scroll-mt-4">
         <div className="mb-1 flex items-end justify-between">
           <h2 className="text-xl font-black">Shows cerca tuyo</h2>
-          <span className="text-xs font-bold text-primary">Ver todo</span>
-        </div>
+                  </div>
         <p className="mb-3 text-xs text-muted-foreground">Próximas fechas de tus artistas.</p>
         {visibleShows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
@@ -344,6 +362,8 @@ export function ExplorarView() {
           ))}
         </div>
       </section>
+
+      </>)}
 
       {/* Lector de reseña completa */}
       {reading && (

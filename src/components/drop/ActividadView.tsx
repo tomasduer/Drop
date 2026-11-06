@@ -76,7 +76,7 @@ export function ActividadView() {
         <p className="mb-3 text-xs text-muted-foreground">Donde estás sumando puntos ahora.</p>
         <div className="space-y-2">
           {mine.map((p) => <DropRow key={p.drop.id} p={p} cta="Seguir" />)}
-          {mine.length === 0 && <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">Todavía no empezaste ningún drop. Elegí uno abajo o desde Explorar.</p>}
+          {mine.length === 0 && <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">Todavía no empezaste ningún drop. Elegí uno abajo o desde Drops.</p>}
         </div>
         {others.length > 0 && (
           <>

@@ -7,9 +7,9 @@ import { Onboarding } from "@/components/drop/Onboarding";
 export const Route = createFileRoute("/explorar")({
   head: () => ({
     meta: [
-      { title: "DROP · Explorar" },
+      { title: "DROP · Drops" },
       { name: "description", content: "Descubrí lanzamientos con DROP activo, opiniones de la comunidad, shows y artistas nuevos." },
-      { property: "og:title", content: "DROP · Explorar" },
+      { property: "og:title", content: "DROP · Drops" },
       { property: "og:description", content: "Descubrí lanzamientos, reseñas, shows y artistas en DROP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

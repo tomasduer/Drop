@@ -62,7 +62,7 @@ function DropUniverse() {
     <MobileShell>
       <DropThemeStyles />
       <TopBar
-        back="Explorar"
+        back="Drops"
         avatar={drop.cover}
         title={dashboard ? "Dashboard" : `${drop.artist} · ${drop.title}`}
         dashboardOpen={dashboard}

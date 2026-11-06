@@ -13,7 +13,7 @@ const KEY = "drop-onboarding-visto";
 // Fotos genéricas que ilustran cada idea (sin artistas).
 const slides: { image: string | null; title: string; points: { icon: typeof Compass; text: string }[] }[] = [
   { image: null, title: "La música se vive. Y también suma.", points: [{ icon: Sparkles, text: "Cada lanzamiento se convierte en un juego" }, { icon: Users, text: "Participá con miles de fans" }] },
-  { image: crowd, title: "Elegí tus drops", points: [{ icon: Compass, text: "En Explorar están todos los artistas" }, { icon: Users, text: "Sumate a los drops que quieras, a la vez" }] },
+  { image: crowd, title: "Elegí tus drops", points: [{ icon: Compass, text: "En Drops están todos los artistas" }, { icon: Users, text: "Sumate a los drops que quieras, a la vez" }] },
   { image: phone, title: "Completá misiones", points: [{ icon: Target, text: "Trivias, acertijos y desafíos diarios" }, { icon: Sparkles, text: "Cada misión te dice cuántos puntos da" }] },
   { image: street, title: "Salí a buscar", points: [{ icon: QrCode, text: "Escaneá afiches con QR en la calle" }, { icon: MapPin, text: "El mapa te muestra dónde está la acción" }] },
   { image: stage, title: "Subí en el ranking y ganá", points: [{ icon: Trophy, text: "Cada artista tiene su propio ranking" }, { icon: Gift, text: "Desbloqueá premios y experiencias" }, { icon: Archive, text: "Los drops que terminan quedan en el Archivo" }] },

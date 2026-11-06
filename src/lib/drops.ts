@@ -34,6 +34,9 @@ import adelaRemera from "@/assets/adela-remera.webp";
 import adelaBuzo from "@/assets/adela-buzo.webp";
 import adelaCd from "@/assets/adela-cd.webp";
 import adelaVinilo from "@/assets/adela-vinilo.webp";
+import mariaRemera from "@/assets/maria-remera.webp";
+import mariaGorra from "@/assets/maria-gorra.webp";
+import mariaAbanico from "@/assets/maria-abanico.webp";
 import laliCamiseta from "@/assets/lali-camiseta-33.webp";
 import laliRemeraDiva from "@/assets/lali-remera-diva.webp";
 import laliVinilo from "@/assets/lali-vinilo.webp";
@@ -172,7 +175,10 @@ export const DROP_CATALOG: DropInfo[] = [
     description: "La experiencia de Quimera ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
     cover: mariaIcon, hero: mariaCover.url, album: mariaCover.url, dates: "Finalizado hace 3 semanas", status: "archived", fandom: "Nenas de Argentina",
     merch: [
+      { id: "remera", name: "Remera Quimera", detail: "Negra, edición Movistar Arena", price: 32000, image: mariaRemera },
       { id: "vinilo", name: "Vinilo Quimera", detail: "Edición limitada", price: 76000, image: mariaCover.url },
+      { id: "gorra", name: "Gorra Quimera", detail: "Beige, con la B bordada y quimera atrás", price: 25000, image: mariaGorra },
+      { id: "abanico", name: "Abanico JOJO", detail: "Rojo, con el escorpión de Quimera", price: 12000, image: mariaAbanico },
     ],
   },
 ];

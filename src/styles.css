@@ -409,3 +409,8 @@ body::after {
 html[data-drop="maria"] { --texture-opacity: 0.05; }
 /* Letra a mano: un poco más de aire entre líneas. */
 html[data-drop="adela-prima"] :is(h1, h2, h3, .font-display) { line-height: 1.1; }
+
+/* Logo: versión negra en los drops de fondo claro. */
+.drop-logo-black { display: none; }
+html:is([data-drop="adela-prima"], [data-drop="maria"]) .drop-logo-white { display: none; }
+html:is([data-drop="adela-prima"], [data-drop="maria"]) .drop-logo-black { display: block; }

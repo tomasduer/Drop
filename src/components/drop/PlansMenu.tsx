@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Check, Crown, Gift, Menu, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
-import logo from "@/assets/drop-logo-negativo.webp";
+import { DropLogo } from "./DropLogo";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useDropAuth } from "./AuthProvider";
 
@@ -40,7 +40,7 @@ export function PlansBar() {
           className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-foreground transition-colors active:bg-muted">
           <Menu className="h-5 w-5" />
         </button>
-        <img decoding="async" src={logo} alt="DROP" className="h-8 w-20 object-contain object-left" />
+        <DropLogo className="h-8 w-20 object-contain object-left" />
       </div>
       <PlansSheet open={open} onOpenChange={setOpen} />
     </>

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import logoViolet from "@/assets/drop-logo-negativo.webp";
-const logo = { url: logoViolet };
+import { DropLogo } from "./DropLogo";
 import { Bell, BarChart3, X, PhoneCall, Trophy, Gift, Users, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -87,11 +86,7 @@ export function TopBar({
           </div>
         ) : (
         <div className="flex items-center gap-2">
-          <img decoding="async"
-            src={logo.url}
-            alt="DROP"
-            className="h-12 w-28 shrink-0 object-contain"
-          />
+          <DropLogo className="h-12 w-28 shrink-0 object-contain" />
           {title && (
             <span className="ml-2 text-sm font-medium text-muted-foreground">/ {title}</span>
           )}

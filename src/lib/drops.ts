@@ -30,6 +30,10 @@ import airbagGorra from "@/assets/airbag-gorra.webp";
 import arjonaRemera from "@/assets/arjona-remera.webp";
 import arjonaTote from "@/assets/arjona-tote.webp";
 import arjonaVaso from "@/assets/arjona-vaso.webp";
+import adelaRemera from "@/assets/adela-remera.webp";
+import adelaBuzo from "@/assets/adela-buzo.webp";
+import adelaCd from "@/assets/adela-cd.webp";
+import adelaVinilo from "@/assets/adela-vinilo.webp";
 import laliCamiseta from "@/assets/lali-camiseta-33.webp";
 import laliRemeraDiva from "@/assets/lali-remera-diva.webp";
 import laliVinilo from "@/assets/lali-vinilo.webp";
@@ -149,7 +153,10 @@ export const DROP_CATALOG: DropInfo[] = [
     description: "Adela presenta su nuevo álbum PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix. Activá el aviso y enterate primero cuando abran las misiones.",
     cover: adelaIcon, hero: adelaHero, album: adelaCover, dates: "Próximamente · Sideshow de Lollapalooza · Teatro Vorterix", status: "upcoming", fandom: "Primas",
     merch: [
-      { id: "remera", name: "Remera PRIMA", detail: "Edición sideshow Vorterix", price: 28000, image: adelaCover },
+      { id: "remera", name: "Remera PRIMA", detail: "Blanca, con PRIMA sobre el logo de Adela", price: 28000, image: adelaRemera },
+      { id: "buzo", name: "Buzo Alas", detail: "Negro, con alas fucsia en la espalda", price: 60000, image: adelaBuzo },
+      { id: "cd", name: "CD The Baddest Bitches Are In The USA", detail: "Edición física", price: 25000, image: adelaCd },
+      { id: "vinilo", name: "Vinilo PRIMA", detail: "Vinilo rosa, edición limitada", price: 80000, image: adelaVinilo },
       { id: "tote", name: "Tote bag glitter", detail: "Brilla con las luces del show", price: 16000, image: adelaGlitter },
     ],
   },

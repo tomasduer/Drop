@@ -23,6 +23,8 @@ import mariaIcon from "@/assets/maria-icon.webp";
 import arjonaRojo from "@/assets/arjona-rojo.webp";
 import arjonaRed from "@/assets/arjona-red.webp";
 import arjonaNoDijo from "@/assets/arjona-seco-no-dijo.webp";
+import lnvRemera from "@/assets/lnv-remera.webp";
+import pcVinilo from "@/assets/pc-vinilo.webp";
 import laliCamiseta from "@/assets/lali-camiseta-33.webp";
 import laliRemeraDiva from "@/assets/lali-remera-diva.webp";
 import laliVinilo from "@/assets/lali-vinilo.webp";
@@ -94,7 +96,7 @@ export const DROP_CATALOG: DropInfo[] = [
     description: "Dillom vuelve con La nueva violencia y La gira violenta. Trivias diarias, acertijos y desafíos alrededor del disco. Sumá puntos y peleá el ranking del fandom.",
     cover: lnvIcon, hero: lnvCover, album: lnvCover, dates: "En curso · La gira violenta", status: "active", fandom: "La nueva violencia",
     merch: [
-      { id: "remera", name: "Remera La nueva violencia", detail: "Estampa del traje", price: 30000, image: lnvTraje },
+      { id: "remera", name: "Remera La nueva violencia", detail: "Fucsia, con la cara de Dillom", price: 30000, image: lnvRemera },
       { id: "poster", name: "Póster de la gira", detail: "La gira violenta · 50 x 70 cm", price: 15000, image: lnvGira },
       { id: "afiche", name: "Afiche firmado", detail: "Numerado, solo 20 copias", price: 22000, image: lnvPoster, top: 20 },
     ],
@@ -105,7 +107,7 @@ export const DROP_CATALOG: DropInfo[] = [
     description: "La experiencia de Por cesárea ya terminó. Volvé a recorrer sus juegos, mirá el ranking final y tus logros.",
     cover: dillomIcon, hero: dillomCover.url, album: dillomCover.url, dates: "Finalizado", status: "archived", fandom: "Comunidad Dillom",
     merch: [
-      { id: "vinilo", name: "Vinilo Por cesárea", detail: "Reedición", price: 75000, image: pcCaras },
+      { id: "vinilo", name: "Vinilo Por cesárea", detail: "Edición limitada", price: 75000, image: pcVinilo },
     ],
   },
   {

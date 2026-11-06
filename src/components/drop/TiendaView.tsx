@@ -203,8 +203,12 @@ function HeroCarousel({ stores }: { stores: Store[] }) {
         })}
       </div>
       <div className="mt-3 flex items-center justify-center gap-3">
-        <div className="h-1 w-40 overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-foreground transition-all" style={{ width: `${((i + 1) / list.length) * 100}%` }} />
+        <div className="flex items-center gap-1.5">
+          {list.map((s, n) => (
+            <button key={s.slug} type="button" aria-label={`Ver destacado ${n + 1}`} aria-current={n === i}
+              onClick={() => ref.current?.scrollTo({ left: n * ref.current.clientWidth, behavior: "smooth" })}
+              className={`h-2 rounded-full transition-all duration-500 ease-out ${n === i ? "w-6 bg-foreground" : "w-2 bg-muted-foreground/40"}`} />
+          ))}
         </div>
         <span className="text-xs tabular-nums"><b>{String(i + 1).padStart(2, "0")}</b> <span className="text-muted-foreground">| {String(list.length).padStart(2, "0")}</span></span>
       </div>

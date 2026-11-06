@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { DropLogo } from "./DropLogo";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useDropAuth } from "./AuthProvider";
+import { NotificationsButton } from "./NotificationsMenu";
 
 // Planes para fans (B2C). Todavía no hay pagos: "Suscribirme" anota el interés en este
 // dispositivo y le avisamos al fan cuando abran las suscripciones.
@@ -35,12 +36,15 @@ export function PlansBar() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <div className="flex items-center gap-2 px-4 pt-3">
-        <button type="button" onClick={() => setOpen(true)} aria-label="Abrir menú de planes"
-          className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-foreground transition-colors active:bg-muted">
-          <Menu className="h-5 w-5" />
-        </button>
+      <div className="flex items-center justify-between gap-2 px-4 pt-3">
         <DropLogo className="h-8 w-20 object-contain object-left" />
+        <div className="flex items-center gap-2">
+          <NotificationsButton />
+          <button type="button" onClick={() => setOpen(true)} aria-label="Abrir menú de planes"
+            className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-foreground transition-colors active:bg-muted">
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </div>
       <PlansSheet open={open} onOpenChange={setOpen} />
     </>
@@ -64,7 +68,7 @@ function PlansSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-full max-w-[440px] overflow-y-auto px-3 sm:max-w-[440px]">
+      <SheetContent side="right" className="w-full max-w-[440px] overflow-y-auto px-3 sm:max-w-[440px]">
         <SheetHeader className="text-left">
           <SheetTitle className="text-2xl font-black">Planes DROP</SheetTitle>
           <SheetDescription>Jugar es gratis. Si querés ir más allá, elegí tu plan.</SheetDescription>

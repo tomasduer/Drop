@@ -1,4 +1,5 @@
 import { ListenButtons } from "./ListenButtons";
+import { Countdown } from "./Countdown";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -81,8 +82,8 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
       {/* Próximamente */}
       {drop.status === "upcoming" && (
         <section className="rounded-3xl border border-border bg-card p-5 text-center">
-          <p className="text-lg font-black">Muy pronto</p>
-          <p className="mt-1 text-sm text-muted-foreground">Las misiones, el ranking y las recompensas se habilitan cuando abra el drop.</p>
+          {drop.launchAt ? <Countdown to={drop.launchAt} /> : <p className="text-lg font-black">Muy pronto</p>}
+          <p className="mt-3 text-sm text-muted-foreground">Las misiones, el ranking y las recompensas se habilitan cuando abra el drop. Mientras tanto, pre-guardá el álbum en Spotify desde Misiones.</p>
           <Button className="mt-4 w-full" variant={remind ? "secondary" : "default"} onClick={() => {
             const next = !remind; setRemind(next);
             try { localStorage.setItem(`drop-aviso-${drop.id}`, next ? "1" : "0"); } catch { /* sin almacenamiento */ }

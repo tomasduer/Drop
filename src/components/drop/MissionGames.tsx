@@ -1,4 +1,5 @@
-import { connectSpotify, disconnectSpotify, isSpotifyConnected, recentPlays } from "@/lib/spotify";
+import { canSaveToLibrary, connectSpotify, disconnectSpotify, findAlbum, isAlbumSaved, isSpotifyConnected, recentPlays, saveAlbum, type SpotifyAlbum } from "@/lib/spotify";
+import { useCurrentDrop } from "@/lib/drops";
 import { useEffect, useRef, useState } from "react";
 import { searchCatalog } from "@/lib/music.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -18,10 +19,13 @@ import stencilWall from "@/assets/stencil-wall.png.asset.json";
 export type GameKind = "trivia" | "order" | "stream" | "scan" | "ar" | "clue";
 export function MissionGame({ kind, missionId, verified, onFinish }: { kind: GameKind; missionId: string; verified: boolean; onFinish: (p: number) => void }) {
   const { mode, refresh } = useDropAuth();
+  const drop = useCurrentDrop();
+  // Pre-guardado en un drop que todavía no abrió: se guarda en Spotify, los puntos llegan cuando abra.
+  if (missionId.endsWith('-presave') && drop.status !== 'active') return <PresaveMission onDone={() => toast.success(drop.status === 'upcoming' ? '¡Pre-guardado! Tus puntos se suman cuando abra el drop.' : '¡Guardado en tu Spotify!')} />;
   if (verified && mode === 'user') return <VerifiedGame missionId={missionId} kind={kind} onFinish={async (result) => { await refresh(); onFinish(result.general_award); }} />;
   if (kind === 'trivia' && mode === 'guest') return <GuestTrivia />;
   if (kind === 'order') return <OrderDemo />;
-  if (kind === 'stream' || kind === 'scan' || kind === 'ar') return <div className="space-y-3"><SimulatedExperience kind={kind} onDone={() => toast.success(mode === 'user' ? '¡Completado!' : '¡Completado! En modo invitado los puntos no se guardan.')} />{mode !== 'user' && <p className="text-center text-xs text-muted-foreground">Modo invitado: creá una cuenta para sumar estos puntos al ranking.</p>}</div>;
+  if (kind === 'stream' || kind === 'scan' || kind === 'ar') return <div className="space-y-3"><SimulatedExperience kind={kind} missionId={missionId} onDone={() => toast.success(mode === 'user' ? '¡Completado!' : '¡Completado! En modo invitado los puntos no se guardan.')} />{mode !== 'user' && <p className="text-center text-xs text-muted-foreground">Modo invitado: creá una cuenta para sumar estos puntos al ranking.</p>}</div>;
   return <div className="space-y-4 text-center">
     <img decoding="async" src={albumCover.url} alt="Arte de la experiencia" className="mx-auto h-24 w-24 rounded-2xl object-cover" />
     <Headphones className="mx-auto h-10 w-10 text-primary" />
@@ -70,7 +74,7 @@ function VerifiedGame({ missionId, kind, onFinish }: { missionId: string; kind: 
     {!attempt && !error && <p className="text-sm text-muted-foreground">Cargando intento…</p>}
     {attempt?.question && kind === 'trivia' && <><div className="flex justify-between text-xs font-bold text-primary"><span>Pregunta {attempt.index+1} / {attempt.total}</span><span>{seconds}s</span></div><p className="font-bold">{attempt.question.q}</p><div className="space-y-2">{attempt.question.options.map((option,index) => <Button key={option} variant="outline" disabled={busy} className="h-auto w-full justify-start whitespace-normal py-3 text-left" onClick={() => send('answer',{ attempt_id: attempt.id,index: attempt.index,answer: seconds === 0 ? -1 : index })}>{option}</Button>)}</div>{seconds===0 && <p className="text-xs text-muted-foreground">Tiempo agotado; la respuesta de esta pregunta no suma.</p>}</>}
     {attempt?.status === 'playing' && kind === 'clue' && <><label className="block text-sm">Código de la pista<input className="mt-2 w-full rounded-lg border border-input bg-background p-3" value={code} onChange={e=>setCode(e.target.value)} /></label><Button disabled={busy || !code.trim()} onClick={()=>send('check',{attempt_id:attempt.id,code})}>Verificar pista</Button></>}
-    {attempt?.status === 'playing' && (kind === 'stream' || kind === 'scan' || kind === 'ar') && <SimulatedExperience kind={kind} busy={busy} onDone={() => send('check',{ attempt_id: attempt.id })} />}
+    {attempt?.status === 'playing' && (kind === 'stream' || kind === 'scan' || kind === 'ar') && <SimulatedExperience kind={kind} missionId={missionId} busy={busy} onDone={() => send('check',{ attempt_id: attempt.id })} />}
     {attempt?.status === 'playing' && kind === 'order' && <>{sequence.map((id,i)=><div key={id} className="flex justify-between rounded-xl border border-border p-3"><span>Fragmento {id}</span><Button variant="outline" size="icon" aria-label="Subir fragmento" disabled={busy || i===0} onClick={()=>setSequence(s=>{const n=[...s];[n[i],n[i-1]]=[n[i-1],n[i]];return n;})}><ArrowUp /></Button></div>)}<Button disabled={busy} onClick={()=>send('check',{attempt_id:attempt.id,sequence})}>Confirmar orden</Button></>}
     {busy && <p className="text-xs text-muted-foreground">Validando…</p>}
   </div>;
@@ -81,7 +85,8 @@ function OrderDemo() {
 }
 
 /** Experiencias de streaming, QR y realidad aumentada simuladas dentro de la app. */
-function SimulatedExperience({ kind, busy, onDone }: { kind: 'stream' | 'scan' | 'ar'; busy?: boolean; onDone: () => void }) {
+function SimulatedExperience({ kind, missionId, busy, onDone }: { kind: 'stream' | 'scan' | 'ar'; missionId?: string; busy?: boolean; onDone: () => void }) {
+  if (missionId?.endsWith('-presave')) return <PresaveMission busy={busy} onDone={onDone} />;
   if (kind === 'stream') return <StreamSim busy={busy} onDone={onDone} />;
   if (kind === 'scan') return <ScanSim busy={busy} onDone={onDone} />;
   return <ArSim busy={busy} onDone={onDone} />;
@@ -181,6 +186,77 @@ function SpotifyStream({ busy, onDone }: { busy?: boolean; onDone: () => void })
           <Button variant="outline" disabled={loading} onClick={() => void check()}>{loading ? 'Revisando…' : 'Actualizar'}</Button>
         </div>}
     <button type="button" onClick={() => disconnectSpotify()} className="text-[11px] text-muted-foreground underline-offset-2 hover:underline">Desconectar Spotify</button>
+  </div>;
+}
+
+/** Misión: pre-guardar (o guardar, si ya salió) el álbum del drop en la biblioteca de Spotify del fan. */
+function PresaveMission({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
+  const drop = useCurrentDrop();
+  const albumName = drop.spotifyAlbum ?? drop.title;
+  const presaveKey = `drop-presave-${drop.id}`;
+  const [connected, setConnected] = useState(false);
+  const [scoped, setScoped] = useState(false);
+  const [album, setAlbum] = useState<SpotifyAlbum | null | undefined>(undefined);
+  const [saved, setSaved] = useState(false);
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const sync = () => { setConnected(isSpotifyConnected()); setScoped(canSaveToLibrary()); };
+    sync();
+    window.addEventListener('drop-spotify', sync);
+    return () => window.removeEventListener('drop-spotify', sync);
+  }, []);
+  useEffect(() => {
+    if (!connected || !scoped) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const found = await findAlbum(drop.artist, albumName);
+        if (cancelled) return;
+        setAlbum(found);
+        if (found) setSaved(await isAlbumSaved(found.id));
+        else { try { setSaved(localStorage.getItem(presaveKey) === '1'); } catch { /* sin almacenamiento */ } }
+      } catch (e) { if (!cancelled) setError(e instanceof Error ? e.message : 'No pudimos conectar con Spotify.'); }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected, scoped, drop.id]);
+
+  const save = async () => {
+    setWorking(true); setError(null);
+    try {
+      if (album) {
+        await saveAlbum(album.id);
+        if (!(await isAlbumSaved(album.id))) throw new Error('Spotify no confirmó el guardado. Probá de nuevo.');
+      } else {
+        try { localStorage.setItem(presaveKey, '1'); } catch { /* sin almacenamiento */ }
+      }
+      setSaved(true);
+    } catch (e) { setError(e instanceof Error ? e.message : 'No pudimos guardar el álbum.'); }
+    finally { setWorking(false); }
+  };
+
+  const reconnect = () => void connectSpotify(window.location.pathname + window.location.search);
+  const cover = album?.cover || drop.album;
+  return <div className="space-y-4 text-center">
+    <img decoding="async" src={cover} alt={`Portada de ${albumName}`} className="mx-auto h-40 w-40 rounded-2xl object-cover shadow-lg" />
+    <div><p className="font-black">{albumName}</p><p className="text-xs text-muted-foreground">{drop.artist}</p></div>
+    {!connected ? <>
+      <p className="text-sm text-muted-foreground">Conectá tu Spotify y {drop.status === 'upcoming' ? 'pre-guardá el álbum para tenerlo apenas salga' : 'guardá el álbum en tu biblioteca'}.</p>
+      <Button className="w-full bg-[#1DB954] text-black hover:bg-[#1ed760]" onClick={reconnect}>Conectar Spotify</Button>
+    </> : !scoped ? <>
+      <p className="text-sm text-muted-foreground">Para guardar el álbum, DROP necesita un permiso nuevo en tu Spotify.</p>
+      <Button className="w-full bg-[#1DB954] text-black hover:bg-[#1ed760]" onClick={reconnect}>Dar permiso en Spotify</Button>
+    </> : album === undefined && !error ? <p className="text-sm text-muted-foreground">Buscando el álbum en Spotify…</p>
+    : saved ? <>
+      <p className="flex items-center justify-center gap-1 text-sm font-bold text-primary"><Check className="h-4 w-4" />{album ? 'Ya está en tu biblioteca de Spotify' : 'Pre-guardado: lo vas a tener apenas salga'}</p>
+      {album?.url && <a href={album.url} target="_blank" rel="noreferrer" className="block text-xs font-bold text-muted-foreground underline-offset-2 hover:underline">Abrir en Spotify</a>}
+      <Button className="w-full" disabled={busy} onClick={onDone}>Sumar mis puntos</Button>
+    </> : <>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <Button className="w-full bg-[#1DB954] text-black hover:bg-[#1ed760]" disabled={working} onClick={() => void save()}>{working ? 'Guardando…' : album ? 'Guardar en mi Spotify' : 'Pre-guardar en Spotify'}</Button>
+    </>}
   </div>;
 }
 

@@ -65,6 +65,10 @@ export type DropInfo = {
   showDates?: { label: string; dates: string[] };
   /** Merch oficial del drop; la que tiene `top` es exclusiva para los primeros del ranking. */
   merch?: MerchItem[];
+  /** Nombre del álbum en Spotify, si no coincide con el título del drop (misión de pre-guardado). */
+  spotifyAlbum?: string;
+  /** Fecha y hora de apertura de un drop que viene (cuenta regresiva). */
+  launchAt?: string;
 };
 
 // Contenido editorial de cada drop. El estado real sale de la tabla campaigns cuando está disponible.
@@ -112,7 +116,7 @@ export const DROP_CATALOG: DropInfo[] = [
     ],
   },
   {
-    id: "arjona-seco", kind: "show", artist: "Ricardo Arjona", title: "Seco Tour en el Movistar Arena",
+    id: "arjona-seco", kind: "show", artist: "Ricardo Arjona", title: "Seco Tour en el Movistar Arena", spotifyAlbum: "Seco",
     tagline: "16 fechas en el Movistar Arena. Ganá entradas y un meet & greet.",
     description: "Ricardo Arjona llega al Movistar Arena con 16 fechas del Seco Tour, en mayo y julio. Jugá las misiones y subí en el ranking: los primeros 60 se ganan dos entradas y los primeros 10, además, un meet & greet con Arjona.",
     cover: arjonaIcon, hero: arjonaHero, album: arjonaCover, dates: "Seco Tour · Movistar Arena · mayo y julio 2027", status: "active", fandom: "Arjonistas",
@@ -129,7 +133,7 @@ export const DROP_CATALOG: DropInfo[] = [
     ],
   },
   {
-    id: "adela-prima", kind: "show", artist: "Adela", title: "PRIMA en el Teatro Vorterix",
+    id: "adela-prima", kind: "show", artist: "Adela", title: "PRIMA en el Teatro Vorterix", spotifyAlbum: "PRIMA", launchAt: "2027-03-18T21:00:00-03:00",
     tagline: "Sideshow de Lollapalooza. Una sola noche.",
     description: "Adela presenta su nuevo álbum PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix. Activá el aviso y enterate primero cuando abran las misiones.",
     cover: adelaIcon, hero: adelaHero, album: adelaCover, dates: "Próximamente · Sideshow de Lollapalooza · Teatro Vorterix", status: "upcoming", fandom: "Primas",
@@ -139,7 +143,7 @@ export const DROP_CATALOG: DropInfo[] = [
     ],
   },
   {
-    id: "tini", artist: "TINI", title: "Nueva era",
+    id: "tini", artist: "TINI", title: "Nueva era", launchAt: "2026-12-04T00:00:00-03:00",
     tagline: "Algo nuevo se viene.",
     description: "TINI prepara una nueva etapa. Activá el aviso y enterate primero cuando abra el drop.",
     cover: tiniIcon, hero: tiniCover.url, album: tiniCover.url, dates: "Próximamente", status: "upcoming", fandom: "Tinistas",

@@ -5,7 +5,7 @@ import logoViolet from "@/assets/drop-logo-negativo.webp";
 const logo = { url: logoViolet };
 const steps = [
   { icon: Map, title: "Elegí los drops de tus artistas" },
-  { icon: Trophy, title: "Jugá misiones y subí en el ranking" },
+  { icon: Trophy, title: "Completá misiones y subí en el ranking" },
   { icon: Disc3, title: "Desbloqueá premios y experiencias" },
 ];
 

@@ -25,6 +25,9 @@ import arjonaRed from "@/assets/arjona-red.webp";
 import arjonaNoDijo from "@/assets/arjona-seco-no-dijo.webp";
 import lnvRemera from "@/assets/lnv-remera.webp";
 import pcVinilo from "@/assets/pc-vinilo.webp";
+import airbagRemera from "@/assets/airbag-remera.webp";
+import airbagBuzo from "@/assets/airbag-buzo.webp";
+import airbagGorra from "@/assets/airbag-gorra.webp";
 import laliCamiseta from "@/assets/lali-camiseta-33.webp";
 import laliRemeraDiva from "@/assets/lali-remera-diva.webp";
 import laliVinilo from "@/assets/lali-vinilo.webp";
@@ -33,7 +36,6 @@ import lnvTraje from "@/assets/lnv-traje.webp";
 import lnvPoster from "@/assets/lnv-poster.webp";
 import lnvGira from "@/assets/lnv-gira.webp";
 import pcCaras from "@/assets/pc-caras.webp";
-import airbagVivo from "@/assets/airbag-vivo.webp";
 import adelaGlitter from "@/assets/adela-glitter.webp";
 import type { MerchItem } from "@/lib/merch";
 import airbagBanda from "@/assets/airbag-banda.webp";
@@ -116,9 +118,9 @@ export const DROP_CATALOG: DropInfo[] = [
     description: "Entrá al club. Trivias de los 7 temas, acertijos y desafíos alrededor de El Club de la Pelea I. Sumá puntos y peleá el ranking con los fans de Airbag.",
     cover: airbagIcon, hero: airbagBanda, album: airbagCover, dates: "En curso", status: "active", fandom: "El Club",
     merch: [
-      { id: "remera", name: "Remera El Club", detail: "El Club de la Pelea I", price: 30000, image: airbagCover },
-      { id: "vinilo", name: "Vinilo El Club de la Pelea I", detail: "Doble, edición limitada", price: 90000, image: airbagBanda },
-      { id: "pua", name: "Púas usadas en vivo", detail: "Set de 3, con certificado", price: 18000, image: airbagVivo, top: 30 },
+      { id: "remera", name: "Remera El Club", detail: "El Club de la Pelea II · Buenos Aires 2026", price: 30000, image: airbagRemera },
+      { id: "buzo", name: "Buzo Al final es el infierno", detail: "Negro, con calaveras y estampa en las mangas", price: 65000, image: airbagBuzo },
+      { id: "gorra", name: "Gorra El Club de la Pelea II", detail: "Negra, con el logo bordado", price: 25000, image: airbagGorra, top: 30 },
     ],
   },
   {

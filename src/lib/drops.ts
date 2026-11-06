@@ -24,6 +24,7 @@ import arjonaRojo from "@/assets/arjona-rojo.webp";
 import arjonaRed from "@/assets/arjona-red.webp";
 import arjonaNoDijo from "@/assets/arjona-seco-no-dijo.webp";
 import laliCamiseta from "@/assets/lali-camiseta-33.webp";
+import laliRemeraDiva from "@/assets/lali-remera-diva.webp";
 import laliVinilo from "@/assets/lali-vinilo.webp";
 import laliKit from "@/assets/lali-kit-llamada.webp";
 import lnvTraje from "@/assets/lnv-traje.webp";
@@ -81,7 +82,7 @@ export const DROP_CATALOG: DropInfo[] = [
     description: "Una búsqueda del tesoro alrededor del nuevo álbum: llamadas misteriosas, fragmentos inéditos, afiches con QR en la calle y un listening party para los primeros 150.",
     cover: laliIcon, hero: laliCover.url, album: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
     merch: [
-      { id: "remera", name: "Remera LALIVERSE", detail: "Con la tapa del álbum", price: 32000, image: laliCover.url },
+      { id: "remera", name: "Remera Diva", detail: "Negra, con tres fotos de LALI en vivo", price: 32000, image: laliRemeraDiva },
       { id: "camiseta-33", name: "Camiseta 33", detail: "Estilo fútbol, con el sol y el escudo del álbum", price: 55000, image: laliCamiseta },
       { id: "vinilo", name: "Vinilo del álbum", detail: "Vinilo negro, edición limitada", price: 78000, image: laliVinilo },
       { id: "kit", name: "Kit de la llamada", detail: "Tote bag con las letras del álbum, vinilo y postales firmadas", price: 150000, image: laliKit, top: 50 },

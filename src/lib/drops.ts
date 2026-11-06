@@ -23,7 +23,9 @@ import mariaIcon from "@/assets/maria-icon.webp";
 import arjonaRojo from "@/assets/arjona-rojo.webp";
 import arjonaRed from "@/assets/arjona-red.webp";
 import arjonaNoDijo from "@/assets/arjona-seco-no-dijo.webp";
-import laliAuto from "@/assets/lali-auto.png.asset.json";
+import laliCamiseta from "@/assets/lali-camiseta-33.webp";
+import laliVinilo from "@/assets/lali-vinilo.webp";
+import laliKit from "@/assets/lali-kit-llamada.webp";
 import lnvTraje from "@/assets/lnv-traje.webp";
 import lnvPoster from "@/assets/lnv-poster.webp";
 import lnvGira from "@/assets/lnv-gira.webp";
@@ -80,8 +82,9 @@ export const DROP_CATALOG: DropInfo[] = [
     cover: laliIcon, hero: laliCover.url, album: laliCover.url, dates: "En curso · cierra con el listening party", status: "active", fandom: "LALIVERSE",
     merch: [
       { id: "remera", name: "Remera LALIVERSE", detail: "Con la tapa del álbum", price: 32000, image: laliCover.url },
-      { id: "vinilo", name: "Vinilo del álbum", detail: "Edición limitada en color", price: 78000, image: laliAuto.url },
-      { id: "kit", name: "Kit de la llamada", detail: "Teléfono de colección y postales firmadas", price: 45000, image: laliIcon, top: 50 },
+      { id: "camiseta-33", name: "Camiseta 33", detail: "Estilo fútbol, con el sol y el escudo del álbum", price: 55000, image: laliCamiseta },
+      { id: "vinilo", name: "Vinilo del álbum", detail: "Vinilo negro, edición limitada", price: 78000, image: laliVinilo },
+      { id: "kit", name: "Kit de la llamada", detail: "Tote bag con las letras del álbum, vinilo y postales firmadas", price: 150000, image: laliKit, top: 50 },
     ],
   },
   {

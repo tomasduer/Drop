@@ -51,7 +51,7 @@ const dailyTemplates: Mission[] = [
       intro:
         "Cada reproducción completa del single cuenta. La app valida los plays a través de tu cuenta conectada, así que no hace falta que subas nada.",
       steps: [
-        "Conectá tu cuenta de Spotify desde tu Pasaporte",
+        "Conectá tu cuenta de Spotify desde la misión",
         "Reproducí 'Fanático' completo (mínimo 30 segundos)",
         "Volvé a la app: el contador se actualiza solo",
       ],

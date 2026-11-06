@@ -1,3 +1,4 @@
+import { connectSpotify, disconnectSpotify, isSpotifyConnected, recentPlays } from "@/lib/spotify";
 import { useEffect, useRef, useState } from "react";
 import { searchCatalog } from "@/lib/music.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -86,7 +87,7 @@ function SimulatedExperience({ kind, busy, onDone }: { kind: 'stream' | 'scan' |
   return <ArSim busy={busy} onDone={onDone} />;
 }
 
-function StreamSim({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
+function DemoStream({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
   const PLAYS = 3; const SECONDS = 6;
   const [plays, setPlays] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -122,6 +123,64 @@ function StreamSim({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
     {done
       ? <Button className="w-full" disabled={busy} onClick={onDone}>Sumar mis puntos</Button>
       : <Button className="w-full" onClick={() => setPlaying(p => !p)}>{playing ? <><Pause /> Pausar</> : <><Play /> Reproducir</>}</Button>}
+  </div>;
+}
+
+/** Misión de escucha: con Spotify conectado cuenta las reproducciones reales; si no, ofrece la demo. */
+function StreamSim({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
+  const [connected, setConnected] = useState(false);
+  const [demo, setDemo] = useState(false);
+  useEffect(() => {
+    const sync = () => setConnected(isSpotifyConnected());
+    sync();
+    window.addEventListener("drop-spotify", sync);
+    return () => window.removeEventListener("drop-spotify", sync);
+  }, []);
+  if (demo) return <div className="space-y-3"><DemoStream busy={busy} onDone={onDone} /><button type="button" onClick={() => setDemo(false)} className="w-full text-center text-xs font-bold text-muted-foreground">Volver a Spotify</button></div>;
+  if (connected) return <SpotifyStream busy={busy} onDone={onDone} />;
+  return <div className="space-y-4 text-center">
+    <img decoding="async" src={fanaticoSingle.url} alt="Portada de Fanático" className="mx-auto h-40 w-40 rounded-2xl object-cover shadow-lg" />
+    <div><p className="font-black">Escuchá "Fanático" 3 veces</p><p className="text-xs text-muted-foreground">Conectá tu Spotify y contamos tus reproducciones de verdad.</p></div>
+    <Button className="w-full bg-[#1DB954] text-black hover:bg-[#1ed760]" onClick={() => void connectSpotify(window.location.pathname + window.location.search)}>Conectar Spotify</Button>
+    <button type="button" onClick={() => setDemo(true)} className="text-xs font-bold text-muted-foreground underline-offset-2 hover:underline">Probar en modo demo</button>
+  </div>;
+}
+
+function SpotifyStream({ busy, onDone }: { busy?: boolean; onDone: () => void }) {
+  const PLAYS = 3;
+  const [plays, setPlays] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const check = async () => {
+    setLoading(true); setError(null);
+    try {
+      const since = Date.now() - 24 * 3600 * 1000;
+      const list = await recentPlays();
+      setPlays(list.filter((p) => /fan[aá]tico/i.test(p.name) && p.artists.some((a) => /lali/i.test(a)) && new Date(p.playedAt).getTime() >= since).length);
+    } catch (e) { setError(e instanceof Error ? e.message : "No pudimos leer tu Spotify."); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => {
+    void check();
+    const onFocus = () => void check();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const count = Math.min(plays ?? 0, PLAYS);
+  const done = count >= PLAYS;
+  return <div className="space-y-4 text-center">
+    <img decoding="async" src={fanaticoSingle.url} alt="Portada de Fanático" className="mx-auto h-40 w-40 rounded-2xl object-cover shadow-lg" />
+    <div><p className="font-black">Fanático</p><p className="text-xs text-muted-foreground">Contamos tus reproducciones en Spotify de las últimas 24 horas</p></div>
+    <div className="flex justify-center gap-2">{Array.from({ length: PLAYS }, (_, i) => <span key={i} className={`grid h-8 w-8 place-items-center rounded-full border text-xs font-bold ${i < count ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground'}`}>{i < count ? <Check className="h-4 w-4" /> : i + 1}</span>)}</div>
+    {error ? <p className="text-sm text-destructive">{error}</p> : <p className="text-sm text-muted-foreground">{plays === null ? 'Revisando tu Spotify…' : done ? '¡Listo! Spotify confirma tus 3 reproducciones.' : `Llevás ${count} de ${PLAYS}. Escuchala completa y volvé.`}</p>}
+    {done
+      ? <Button className="w-full" disabled={busy} onClick={onDone}>Sumar mis puntos</Button>
+      : <div className="grid grid-cols-2 gap-2">
+          <Button asChild className="bg-[#1DB954] text-black hover:bg-[#1ed760]"><a href="https://open.spotify.com/search/LALI%20Fan%C3%A1tico" target="_blank" rel="noreferrer"><Play /> Abrir Spotify</a></Button>
+          <Button variant="outline" disabled={loading} onClick={() => void check()}>{loading ? 'Revisando…' : 'Actualizar'}</Button>
+        </div>}
+    <button type="button" onClick={() => disconnectSpotify()} className="text-[11px] text-muted-foreground underline-offset-2 hover:underline">Desconectar Spotify</button>
   </div>;
 }
 

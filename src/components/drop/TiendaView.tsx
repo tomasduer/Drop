@@ -36,7 +36,7 @@ function useMerchRanks(drops: DropInfo[]) {
 export const isLocked = (item: MerchItem, rank: number | null | undefined) => item.top !== undefined && (rank == null || rank > item.top);
 
 /** Tienda: portada con destacados, artistas y su merch; ficha de producto, carrito y pedidos (demo). */
-export function TiendaView({ artist, view }: { artist?: string; view?: "carrito" | "pedidos" }) {
+export function TiendaView({ artist, view, payment }: { artist?: string; view?: "carrito" | "pedidos"; payment?: { status: "ok" | "pendiente" | "error"; ref: string } }) {
   const drops = useDrops();
   const ranks = useMerchRanks(drops);
   const [product, setProduct] = useState<Product | null>(null);
@@ -64,7 +64,7 @@ export function TiendaView({ artist, view }: { artist?: string; view?: "carrito"
 
   let body;
   if (view === "carrito") body = <CartView suggestions={products.filter((p) => !p.item.top).slice(0, 6)} onOpen={setProduct} onAddress={() => setAddressOpen(true)} />;
-  else if (view === "pedidos") body = <OrdersView />;
+  else if (view === "pedidos") body = <OrdersView payment={payment} />;
   else if (store) body = <ArtistStore store={store} ranks={ranks} onOpen={setProduct} />;
   else body = <StoreHome stores={stores} ranks={ranks} onOpen={setProduct} />;
 

@@ -6,7 +6,9 @@ export type CartLine = { dropId: string; itemId: string; artist: string; name: s
 export type Address = { name: string; street: string; city: string; zip: string; phone: string };
 export type Order = {
   id: string; at: string; lines: CartLine[]; subtotal: number; shipping: number; total: number;
-  delivery: "envio" | "retiro"; address: Address | null; status: "confirmado";
+  delivery: "envio" | "retiro"; address: Address | null;
+  /** confirmado = compra demo; el resto viene de Mercado Pago. */
+  status: "confirmado" | "esperando_pago" | "pagado" | "pendiente" | "rechazado";
 };
 
 const CART = "drop-carrito";
@@ -66,15 +68,23 @@ export const shippingFor = (subtotal: number, delivery: "envio" | "retiro") => (
 
 export function saveAddress(a: Address) { write(ADDRESS, a); }
 
-export function placeOrder(delivery: "envio" | "retiro"): Order {
+export const newOrderId = () => `DRP-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+
+export function placeOrder(delivery: "envio" | "retiro", opts: { id?: string; status?: Order["status"] } = {}): Order {
   const lines = getCart();
   const subtotal = cartSubtotal(lines);
   const shipping = shippingFor(subtotal, delivery);
   const order: Order = {
-    id: `DRP-${Date.now().toString(36).toUpperCase().slice(-6)}`, at: new Date().toISOString(), lines, subtotal, shipping,
-    total: subtotal + shipping, delivery, address: delivery === "envio" ? getAddress() : null, status: "confirmado",
+    id: opts.id ?? newOrderId(), at: new Date().toISOString(), lines, subtotal, shipping,
+    total: subtotal + shipping, delivery, address: delivery === "envio" ? getAddress() : null, status: opts.status ?? "confirmado",
   };
   write(ORDERS, [order, ...getOrders()]);
   write(CART, []);
   return order;
+}
+
+export function setOrderStatus(id: string, status: Order["status"]) {
+  const orders = getOrders();
+  if (!orders.some((o) => o.id === id)) return;
+  write(ORDERS, orders.map((o) => (o.id === id ? { ...o, status } : o)));
 }

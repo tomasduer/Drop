@@ -4,9 +4,11 @@ import { GlobalNav } from "@/components/drop/GlobalNav";
 import { TiendaView } from "@/components/drop/TiendaView";
 
 export const Route = createFileRoute("/tienda")({
-  validateSearch: (search: Record<string, unknown>): { a?: string; v?: "carrito" | "pedidos" } => ({
+  validateSearch: (search: Record<string, unknown>): { a?: string; v?: "carrito" | "pedidos"; pago?: "ok" | "pendiente" | "error"; ref?: string } => ({
     a: typeof search.a === "string" && /^[a-z0-9-]{1,60}$/.test(search.a) ? search.a : undefined,
     v: search.v === "carrito" || search.v === "pedidos" ? search.v : undefined,
+    pago: search.pago === "ok" || search.pago === "pendiente" || search.pago === "error" ? search.pago : undefined,
+    ref: typeof search.ref === "string" && /^DRP-[A-Z0-9]{4,12}$/.test(search.ref) ? search.ref : undefined,
   }),
   head: () => ({
     meta: [
@@ -22,11 +24,11 @@ export const Route = createFileRoute("/tienda")({
 });
 
 function Tienda() {
-  const { a, v } = Route.useSearch();
+  const { a, v, pago, ref } = Route.useSearch();
   return (
     <MobileShell>
       <main className="pt-2">
-        <TiendaView artist={a} view={v} />
+        <TiendaView artist={a} view={v} payment={pago && ref ? { status: pago, ref } : undefined} />
       </main>
       <GlobalNav />
     </MobileShell>

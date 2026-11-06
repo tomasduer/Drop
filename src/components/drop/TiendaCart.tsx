@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { startCheckout } from "@/lib/payments.functions";
 import { Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, CheckCircle2, CreditCard, Loader2, MapPin, Minus, Package, Plus, ShoppingCart, Store as StoreIcon, Trash2, Wallet } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { formatPrice } from "@/lib/merch";
 import {
-  FREE_SHIPPING_FROM, PICKUP_POINT, cartCount, cartSubtotal, placeOrder, saveAddress, setQty, shippingFor,
+  FREE_SHIPPING_FROM, PICKUP_POINT, cartCount, cartSubtotal, getCart, newOrderId, placeOrder, saveAddress, setOrderStatus, setQty, shippingFor,
   useAddress, useCart, useOrders, type Address, type Order,
 } from "@/lib/cart";
 import type { Product } from "./TiendaView";
@@ -111,32 +114,56 @@ export function CartView({ suggestions, onOpen, onAddress }: { suggestions: Prod
         </section>
       )}
 
-      {checkout && <CheckoutDialog total={subtotal + shipping} onClose={() => setCheckout(false)} onPaid={() => { setCheckout(false); setDone(placeOrder(delivery)); }} />}
+      {checkout && <CheckoutDialog total={subtotal + shipping} delivery={delivery} onClose={() => setCheckout(false)} onPaid={() => { setCheckout(false); setDone(placeOrder(delivery)); }} />}
     </div>
   );
 }
 
-function CheckoutDialog({ total, onClose, onPaid }: { total: number; onClose: () => void; onPaid: () => void }) {
-  const [method, setMethod] = useState<"tarjeta" | "mp">("tarjeta");
+function CheckoutDialog({ total, delivery, onClose, onPaid }: { total: number; delivery: "envio" | "retiro"; onClose: () => void; onPaid: () => void }) {
+  const [method, setMethod] = useState<"mp" | "tarjeta">("mp");
   const [paying, setPaying] = useState(false);
+  const start = useServerFn(startCheckout);
+
+  const pay = async () => {
+    setPaying(true);
+    if (method === "mp") {
+      const id = newOrderId();
+      try {
+        const r = await start({ data: { orderId: id, delivery, origin: window.location.origin, lines: getCart().map((l) => ({ dropId: l.dropId, itemId: l.itemId, qty: l.qty })) } });
+        if (r.mode === "mp") {
+          placeOrder(delivery, { id, status: "esperando_pago" });
+          window.location.href = r.url;
+          return;
+        }
+        toast.message("Mercado Pago todavía no está conectado", { description: "Hicimos la compra en modo demo." });
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "No pudimos iniciar el pago");
+        setPaying(false);
+        return;
+      }
+    }
+    setTimeout(onPaid, 900);
+  };
+
   return (
     <Dialog open onOpenChange={(o) => { if (!o && !paying) onClose(); }}>
       <DialogContent className="w-[calc(100%-2rem)] max-w-sm rounded-2xl">
         <DialogHeader>
           <DialogTitle>Pagar {formatPrice(total)}</DialogTitle>
-          <DialogDescription>Compra de demostración: no se cobra nada.</DialogDescription>
+          <DialogDescription>Elegí cómo querés pagar.</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          {([["tarjeta", "Tarjeta de crédito o débito", CreditCard], ["mp", "Billetera virtual", Wallet]] as const).map(([id, label, Icon]) => (
-            <button key={id} type="button" onClick={() => setMethod(id)} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm font-bold ${method === id ? "border-primary bg-primary/10" : "border-border"}`}>
-              <Icon className="h-4 w-4" />{label}
-              <span className={`ml-auto h-4 w-4 rounded-full border-2 ${method === id ? "border-primary bg-primary" : "border-border"}`} />
+          {([["mp", "Mercado Pago", "Tarjeta, dinero en cuenta o cuotas", Wallet], ["tarjeta", "Compra demo", "Simula la compra sin cobrar nada", CreditCard]] as const).map(([id, label, hint, Icon]) => (
+            <button key={id} type="button" onClick={() => setMethod(id)} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left ${method === id ? "border-primary bg-primary/10" : "border-border"}`}>
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 flex-1"><b className="block text-sm">{label}</b><span className="text-[11px] text-muted-foreground">{hint}</span></span>
+              <span className={`h-4 w-4 shrink-0 rounded-full border-2 ${method === id ? "border-primary bg-primary" : "border-border"}`} />
             </button>
           ))}
         </div>
-        <button type="button" disabled={paying} onClick={() => { setPaying(true); setTimeout(onPaid, 1200); }}
+        <button type="button" disabled={paying} onClick={() => void pay()}
           className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-black text-primary-foreground disabled:opacity-80" style={{ backgroundImage: "var(--gradient-drop)" }}>
-          {paying ? <><Loader2 className="h-4 w-4 animate-spin" />Procesando…</> : "Confirmar pago"}
+          {paying ? <><Loader2 className="h-4 w-4 animate-spin" />{method === "mp" ? "Abriendo Mercado Pago…" : "Procesando…"}</> : method === "mp" ? "Pagar con Mercado Pago" : "Confirmar compra demo"}
         </button>
       </DialogContent>
     </Dialog>
@@ -158,8 +185,25 @@ function OrderDone({ order }: { order: Order }) {
   );
 }
 
-export function OrdersView() {
+const STATUS: Record<Order["status"], { label: string; cls: string }> = {
+  confirmado: { label: "Confirmado (demo)", cls: "bg-primary/15 text-primary" },
+  pagado: { label: "Pagado", cls: "bg-emerald-500/15 text-emerald-400" },
+  esperando_pago: { label: "Esperando pago", cls: "bg-muted text-muted-foreground" },
+  pendiente: { label: "Pago pendiente", cls: "bg-amber-500/15 text-amber-400" },
+  rechazado: { label: "Pago rechazado", cls: "bg-red-500/15 text-red-400" },
+};
+
+export function OrdersView({ payment }: { payment?: { status: "ok" | "pendiente" | "error"; ref: string } }) {
   const orders = useOrders();
+  // Al volver de Mercado Pago, actualiza el estado del pedido.
+  useEffect(() => {
+    if (!payment) return;
+    setOrderStatus(payment.ref, payment.status === "ok" ? "pagado" : payment.status === "pendiente" ? "pendiente" : "rechazado");
+    if (payment.status === "ok") toast.success("¡Pago aprobado!", { description: `Pedido ${payment.ref}` });
+    else if (payment.status === "pendiente") toast.message("Tu pago está pendiente", { description: "Te avisamos cuando se acredite." });
+    else toast.error("El pago no se completó", { description: "Podés intentarlo de nuevo desde el carrito." });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payment?.ref, payment?.status]);
   return (
     <div>
       <BackHeader title="Mis pedidos" />
@@ -174,7 +218,7 @@ export function OrdersView() {
           <article key={o.id} className="rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center justify-between text-xs">
               <b>{o.id}</b>
-              <span className="rounded-full bg-primary/15 px-2 py-0.5 font-bold text-primary">Confirmado</span>
+              <span className={`rounded-full px-2 py-0.5 font-bold ${STATUS[o.status]?.cls ?? STATUS.confirmado.cls}`}>{STATUS[o.status]?.label ?? "Confirmado"}</span>
             </div>
             <p className="mt-0.5 text-[11px] text-muted-foreground">{new Date(o.at).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })} · {o.delivery === "envio" ? "Envío a domicilio" : "Retiro"}</p>
             <div className="mt-3 flex gap-2 overflow-x-auto">

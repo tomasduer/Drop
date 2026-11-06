@@ -1057,13 +1057,13 @@ export {
   Outlet as O,
   RouterProvider as R,
   Scripts as S,
-  createRootRouteWithContext as a,
-  createFileRoute as b,
+  useRouter as a,
+  createRootRouteWithContext as b,
   createRouter as c,
-  useRouterState as d,
+  createFileRoute as d,
   useSearch as e,
   useNavigate as f,
   lazyRouteComponent as l,
   renderRouterToStream as r,
-  useRouter as u
+  useRouterState as u
 };

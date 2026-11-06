@@ -8,13 +8,13 @@ import {
   getCatalogAlbum, getCatalogArtist, getExternalShows, searchCatalog, type ExternalShow,
   type CatalogAlbum, type CatalogAlbumDetail, type CatalogArtist, type CatalogArtistDetail, type CatalogSearch, type CatalogTrack,
 } from "@/lib/music.functions";
+import { ListenButtons } from "./ListenButtons";
 import { useMusicPlayer } from "./MusicPlayer";
 import { useDropAuth } from "./AuthProvider";
 import { AlbumReviewDialog } from "./AlbumReviewDialog";
 import { useAlbumActions } from "./useAlbumActions";
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-const spotifySearch = (q: string) => `https://open.spotify.com/search/${encodeURIComponent(q)}`;
 
 /** Resultados del catálogo musical para una búsqueda (artistas, álbumes, canciones). */
 export function CatalogResults({ query }: { query: string }) {
@@ -206,7 +206,8 @@ export function AlbumSheet({ id, onClose, onArtist }: { id: number | null; onClo
             {reviewing && libAlbum && listened.includes(libraryId) && (
               <AlbumReviewDialog album={libAlbum} review={reviews[libraryId]} onClose={() => setReviewing(false)} onSave={(review) => { storeReview(libAlbum, review); setReviewing(false); }} />
             )}
-            <a href={spotifySearch(`${album.artist} ${album.title}`)} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 text-xs font-bold text-primary"><ExternalLink className="h-3.5 w-3.5" /> Escuchar completo en Spotify</a>
+            <p className="mb-2 mt-4 text-center text-xs font-bold text-muted-foreground">Escuchalo completo en</p>
+            <ListenButtons query={`${album.artist} ${album.title}`} />
             <p className="mt-2 text-center text-[11px] text-muted-foreground">Vistas previas de 30 segundos · catálogo de Deezer</p>
           </div>
         )}
@@ -238,7 +239,8 @@ export function ArtistSheet({ id, onClose, onAlbum }: { id: number | null; onClo
               <DrawerTitle className="mt-2 text-2xl font-black">{artist.name}</DrawerTitle>
               <DrawerDescription className="flex items-center justify-center gap-1 text-xs"><Users className="h-3 w-3" />{artist.fans.toLocaleString("es-AR")} fans</DrawerDescription>
             </DrawerHeader>
-            <Button className="mb-3 w-full" onClick={() => artist.top[0] && play(artist.top[0], artist.top)}><Play /> Escuchar lo más popular</Button>
+            <Button className="mb-2 w-full" onClick={() => artist.top[0] && play(artist.top[0], artist.top)}><Play /> Escuchar lo más popular</Button>
+            <ListenButtons query={artist.name} className="mb-3" />
             <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Populares</p>
             <TrackList tracks={artist.top} showCover />
             {artist.albums.length > 0 && <>

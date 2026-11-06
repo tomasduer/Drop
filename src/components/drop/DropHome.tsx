@@ -1,3 +1,4 @@
+import { ListenButtons } from "./ListenButtons";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -58,6 +59,7 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
       </section>
 
       {drop.description && <p className="text-sm leading-relaxed text-muted-foreground">{drop.description}</p>}
+      {drop.kind !== "noticia" && <ListenButtons query={drop.kind === "show" ? drop.artist : `${drop.artist} ${drop.title}`} />}
 
       {/* Progreso del fan en este drop */}
       {drop.status !== "upcoming" && (

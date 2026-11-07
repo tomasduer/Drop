@@ -18,6 +18,7 @@ import { useDropAuth } from "./AuthProvider";
 import { AlbumsSection } from "./AlbumsSection";
 import { RewardsRedeem } from "./RewardsRedeem";
 import { DropSelector } from "./DropSelector";
+import { DropStatsSection } from "./DropStatsSection";
 import { useDrops } from "@/lib/drops";
 import { useIsDropAdmin } from "@/lib/drop-content";
 import { achievements, dropProgress } from "@/lib/progress";
@@ -230,9 +231,12 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
       <section className="mt-5 rounded-3xl p-4 text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
         <p className="text-[11px] font-bold uppercase tracking-widest opacity-80">Puntos generales DROP</p>
         <p className="text-3xl font-black tabular-nums">{generalPoints.toLocaleString("es-AR")}</p>
-        <p className="mt-1 text-xs opacity-90">Los sumás en cualquier drop y con tus álbumes, y los canjeás por premios. Los puntos de cada artista se ven dentro de su drop.</p>
+        <p className="mt-1 text-xs opacity-90">Los sumás en cualquier drop y con tus álbumes, y los canjeás por premios. Abajo ves los puntos que llevás en cada drop.</p>
         <Button size="sm" variant="secondary" className="mt-3" onClick={() => setTab("stats")}>Ver premios</Button>
       </section>
+
+      {/* Puntos y estadísticas de cada drop */}
+      <DropStatsSection progress={progress} />
 
       {/* Pasaporte: registro de experiencias */}
       <section className="mt-7">

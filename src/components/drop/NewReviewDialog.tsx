@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { Camera, Disc3, Loader2, MapPin, Music, Ticket, X } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -11,7 +10,8 @@ import type { CommunityReview, ReviewExtras, ReviewSong, ShowEvent } from "@/lib
 import { reviewPhotoFromFile } from "@/lib/review-photos";
 import { saveLocalReview } from "@/lib/local-reviews";
 import { useDropAuth } from "./AuthProvider";
-import { SongChip, SongSearch, StarPicker, toReviewSong } from "./ReviewParts";
+import { AlbumSearch, SongChip, SongSearch, StarPicker, toReviewSong } from "./ReviewParts";
+import type { CatalogAlbum } from "@/lib/music.functions";
 
 export type ReviewKind = "album" | "song" | "show";
 const input = "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring";
@@ -25,10 +25,11 @@ export function NewReviewDialog({ initialKind = "song", initialShow, shows, onCl
   onClose: () => void;
   onPublished: (review: CommunityReview) => void;
 }) {
-  const { mode, profile, user } = useDropAuth();
+  const { mode, profile, user, saveReview } = useDropAuth();
   const publish = useServerFn(publishReview);
   const [kind, setKind] = useState<ReviewKind>(initialKind);
   const [song, setSong] = useState<ReviewSong | null>(null);
+  const [album, setAlbum] = useState<CatalogAlbum | null>(null);
   const [show, setShow] = useState<ShowEvent | null>(initialShow ?? null);
   const [custom, setCustom] = useState(false);
   const [customArtist, setCustomArtist] = useState("");
@@ -65,13 +66,16 @@ export function NewReviewDialog({ initialKind = "song", initialShow, shows, onCl
 
   const showArtist = custom ? customArtist.trim() : show?.artist ?? "";
   const showTitle = custom ? customTitle.trim() : show?.title ?? "";
-  const ready = rating > 0 && (kind === "song" ? !!song : kind === "show" ? !!showArtist && !!showTitle : false);
+  const ready = rating > 0 && (kind === "song" ? !!song : kind === "show" ? !!showArtist && !!showTitle : !!album);
 
   async function submit() {
     if (!ready) return;
     setBusy(true);
     let review: Omit<CommunityReview, "id" | "user_id" | "author_name" | "created_at">;
-    if (kind === "song" && song) {
+    if (kind === "album" && album) {
+      review = { subject_type: "album", subject_id: `dz-${album.id}`, subject_title: album.title, subject_artist: album.artist, subject_image: album.cover || null, rating, text: text.trim() };
+      saveReview(`dz-${album.id}`, { rating, text: text.trim() });
+    } else if (kind === "song" && song) {
       review = { subject_type: "song", subject_id: `dz-${song.id}`, subject_title: song.title, subject_artist: song.artist, subject_image: song.cover || null, rating, text: text.trim(), extras: { song } };
     } else {
       const extras: ReviewExtras = {};
@@ -118,11 +122,16 @@ export function NewReviewDialog({ initialKind = "song", initialShow, shows, onCl
         </div>
 
         {kind === "album" && (
-          <div className="rounded-xl border border-dashed border-border p-4 text-center">
-            <p className="text-sm font-bold">Los álbumes se reseñan desde tu biblioteca</p>
-            <p className="mt-1 text-xs text-muted-foreground">Sumá el álbum, marcalo como escuchado y puntualo.</p>
-            <Button asChild size="sm" className="mt-3"><Link to="/mi-drop" search={{ tab: "albumes" }}>Ir a mis álbumes</Link></Button>
-          </div>
+          <section className="space-y-2">
+            <p className="text-sm font-bold">¿Qué álbum?</p>
+            {album ? (
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-2">
+                <img src={album.cover} alt="" className="h-12 w-12 rounded-lg object-cover" />
+                <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{album.title}</span><span className="block truncate text-[11px] text-muted-foreground">{album.artist}{album.year ? ` · ${album.year}` : ""}</span></span>
+                <button type="button" onClick={() => setAlbum(null)} aria-label="Cambiar álbum" className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground"><X className="h-4 w-4" /></button>
+              </div>
+            ) : <AlbumSearch onPick={setAlbum} />}
+          </section>
         )}
 
         {kind === "song" && (
@@ -189,17 +198,15 @@ export function NewReviewDialog({ initialKind = "song", initialShow, shows, onCl
           </section>
         )}
 
-        {kind !== "album" && (
-          <>
+        <>
             <StarPicker value={rating} onChange={setRating} />
             <div>
               <label htmlFor="nueva-resena" className="text-sm font-bold">Reseña <span className="font-normal text-muted-foreground">(opcional)</span></label>
-              <Textarea id="nueva-resena" value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} rows={3} className="mt-1" placeholder={kind === "show" ? "¿Cómo estuvo el show?" : "¿Qué te pareció la canción?"} />
+              <Textarea id="nueva-resena" value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} rows={3} className="mt-1" placeholder={kind === "show" ? "¿Cómo estuvo el show?" : kind === "album" ? "¿Qué te pareció el álbum?" : "¿Qué te pareció la canción?"} />
             </div>
             <Button disabled={!ready || busy} onClick={() => void submit()} className="h-11">{busy && <Loader2 className="animate-spin" />}Publicar reseña</Button>
-            {!ready && <p className="-mt-2 text-center text-[11px] text-muted-foreground">{kind === "song" && !song ? "Elegí una canción y puntuala." : kind === "show" && !(showArtist && showTitle) ? "Elegí el show y puntualo." : "Poné una puntuación para publicar."}</p>}
+            {!ready && <p className="-mt-2 text-center text-[11px] text-muted-foreground">{kind === "album" && !album ? "Elegí un álbum y puntualo." : kind === "song" && !song ? "Elegí una canción y puntuala." : kind === "show" && !(showArtist && showTitle) ? "Elegí el show y puntualo." : "Poné una puntuación para publicar."}</p>}
           </>
-        )}
       </DialogContent>
     </Dialog>
   );

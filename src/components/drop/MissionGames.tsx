@@ -15,6 +15,7 @@ import { guestQuestions, guestPracticeResult } from "@/lib/guest-practice";
 import { PHOTOS } from "@/lib/fan-avatars";
 import logo from "@/assets/drop-logo-2026.webp.asset.json";
 import stencilWall from "@/assets/stencil-wall.png.asset.json";
+import { FORMAT_INFO, ORDER_GAMES, type GameFormat } from "@/lib/game-styles";
 
 export type GameKind = "trivia" | "order" | "stream" | "scan" | "ar" | "clue";
 export function MissionGame({ kind, missionId, verified, onFinish }: { kind: GameKind; missionId: string; verified: boolean; onFinish: (p: number) => void }) {
@@ -24,7 +25,7 @@ export function MissionGame({ kind, missionId, verified, onFinish }: { kind: Gam
   if (missionId.endsWith('-presave') && drop.status !== 'active') return <PresaveMission onDone={() => toast.success(drop.status === 'upcoming' ? '¡Pre-guardado! Tus puntos se suman cuando abra el drop.' : '¡Guardado en tu Spotify!')} />;
   if (verified && mode === 'user') return <VerifiedGame missionId={missionId} kind={kind} onFinish={async (result) => { await refresh(); onFinish(result.general_award); }} />;
   if (kind === 'trivia' && mode === 'guest') return <GuestTrivia />;
-  if (kind === 'order') return <OrderDemo />;
+  if (kind === 'order') return <OrderDemo missionId={missionId} />;
   if (kind === 'stream' || kind === 'scan' || kind === 'ar') return <div className="space-y-3"><SimulatedExperience kind={kind} missionId={missionId} onDone={() => toast.success(mode === 'user' ? '¡Completado!' : '¡Completado! En modo invitado los puntos no se guardan.')} />{mode !== 'user' && <p className="text-center text-xs text-muted-foreground">Modo invitado: creá una cuenta para sumar estos puntos al ranking.</p>}</div>;
   return <div className="space-y-4 text-center">
     <img decoding="async" src={albumCover.url} alt="Arte de la experiencia" className="mx-auto h-24 w-24 rounded-2xl object-cover" />
@@ -56,7 +57,7 @@ function VerifiedGame({ missionId, kind, onFinish }: { missionId: string; kind: 
   const [error, setError] = useState('');
   const [seconds, setSeconds] = useState(20);
   const [code, setCode] = useState('');
-  const [sequence, setSequence] = useState([2,4,1,3]);
+  const [sequence, setSequence] = useState(() => orderGame(missionId).start);
   async function send(type: 'start' | 'answer' | 'check', payload: Record<string,string|number|number[]>) {
     setBusy(true); setError('');
     try { const result = await action({ data: { action: type, payload } }); setAttempt(result); if (result.status === 'completed') await onFinish(result); }
@@ -72,16 +73,51 @@ function VerifiedGame({ missionId, kind, onFinish }: { missionId: string; kind: 
   return <div className="space-y-4">
     {error && <div role="alert" className="text-sm text-destructive">{error}<Button variant="outline" onClick={() => send('start',{ mission_id: missionId })}>Retomar intento</Button></div>}
     {!attempt && !error && <p className="text-sm text-muted-foreground">Cargando intento…</p>}
-    {attempt?.question && kind === 'trivia' && <><div className="flex justify-between text-xs font-bold text-primary"><span>Pregunta {attempt.index+1} / {attempt.total}</span><span>{seconds}s</span></div><p className="font-bold">{attempt.question.q}</p><div className="space-y-2">{attempt.question.options.map((option,index) => <Button key={option} variant="outline" disabled={busy} className="h-auto w-full justify-start whitespace-normal py-3 text-left" onClick={() => send('answer',{ attempt_id: attempt.id,index: attempt.index,answer: seconds === 0 ? -1 : index })}>{option}</Button>)}</div>{seconds===0 && <p className="text-xs text-muted-foreground">Tiempo agotado; la respuesta de esta pregunta no suma.</p>}</>}
+    {attempt?.question && kind === 'trivia' && <TriviaQuestion attempt={attempt} seconds={seconds} busy={busy} onAnswer={(index) => send('answer',{ attempt_id: attempt.id,index: attempt.index,answer: seconds === 0 ? -1 : index })} />}
     {attempt?.status === 'playing' && kind === 'clue' && <><label className="block text-sm">Código de la pista<input className="mt-2 w-full rounded-lg border border-input bg-background p-3" value={code} onChange={e=>setCode(e.target.value)} /></label><Button disabled={busy || !code.trim()} onClick={()=>send('check',{attempt_id:attempt.id,code})}>Verificar pista</Button></>}
     {attempt?.status === 'playing' && (kind === 'stream' || kind === 'scan' || kind === 'ar') && <SimulatedExperience kind={kind} missionId={missionId} busy={busy} onDone={() => send('check',{ attempt_id: attempt.id })} />}
-    {attempt?.status === 'playing' && kind === 'order' && <>{sequence.map((id,i)=><div key={id} className="flex justify-between rounded-xl border border-border p-3"><span>Fragmento {id}</span><Button variant="outline" size="icon" aria-label="Subir fragmento" disabled={busy || i===0} onClick={()=>setSequence(s=>{const n=[...s];[n[i],n[i-1]]=[n[i-1],n[i]];return n;})}><ArrowUp /></Button></div>)}<Button disabled={busy} onClick={()=>send('check',{attempt_id:attempt.id,sequence})}>Confirmar orden</Button></>}
+    {attempt?.status === 'playing' && kind === 'order' && <><OrderBoard missionId={missionId} order={sequence} setOrder={setSequence} disabled={busy} />{attempt.checks > 0 && <p className="text-center text-xs text-muted-foreground">Ese orden no era. Te quedan intentos: probá de nuevo.</p>}<Button className="w-full" disabled={busy} onClick={()=>send('check',{attempt_id:attempt.id,sequence})}>Confirmar orden</Button></>}
     {busy && <p className="text-xs text-muted-foreground">Validando…</p>}
   </div>;
 }
-function OrderDemo() {
-  const [order,setOrder]=useState([2,4,1,3]);
-  return <div className="space-y-3"><p className="text-sm font-bold">Ordená los fragmentos · práctica</p>{order.map((id,index)=><div key={id} className="flex items-center gap-3 rounded-xl border border-border p-3"><span className="flex-1">Fragmento {id}</span>{([-1,1] as const).map(dir=><Button key={dir} size="icon" variant="outline" aria-label={dir===-1?'Subir':'Bajar'} disabled={index+dir<0||index+dir>=order.length} onClick={()=>setOrder(s=>{const n=[...s];[n[index],n[index+dir]]=[n[index+dir],n[index]];return n;})}>{dir===-1?<ArrowUp />:<ArrowDown />}</Button>)}</div>)}<Button className="w-full" onClick={()=>toast.message(order.every((id,i)=>id===i+1)?'Orden correcto · práctica sin puntos':'Probá otra secuencia')}>Confirmar orden</Button></div>;
+const orderGame = (missionId: string) => ORDER_GAMES[missionId] ?? ORDER_GAMES['lali-order'];
+
+/** Lista para ordenar con flechas: cada pieza muestra su nombre real (disco, tema o fragmento). */
+function OrderBoard({ missionId, order, setOrder, disabled }: { missionId: string; order: number[]; setOrder: (f: (s: number[]) => number[]) => void; disabled?: boolean }) {
+  const game = orderGame(missionId);
+  const move = (index: number, dir: -1 | 1) => setOrder((s) => { const n = [...s]; [n[index], n[index + dir]] = [n[index + dir], n[index]]; return n; });
+  return <div className="space-y-2">
+    <p className="text-sm font-bold">{game.prompt}</p>
+    {order.map((id, index) => <div key={id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-black text-primary">{index + 1}</span>
+      <span className="min-w-0 flex-1 text-sm font-semibold leading-snug">{game.items[id] ?? `Pieza ${id}`}</span>
+      {([-1, 1] as const).map((dir) => <Button key={dir} size="icon" variant="outline" aria-label={dir === -1 ? 'Subir' : 'Bajar'} disabled={disabled || index + dir < 0 || index + dir >= order.length} onClick={() => move(index, dir)}>{dir === -1 ? <ArrowUp /> : <ArrowDown />}</Button>)}
+    </div>)}
+  </div>;
+}
+
+/** Trivia validada: el formato (emoji, verdadero o falso, completá el título) cambia cómo se ve la pregunta. */
+function TriviaQuestion({ attempt, seconds, busy, onAnswer }: { attempt: AttemptResult; seconds: number; busy: boolean; onAnswer: (index: number) => void }) {
+  const question = attempt.question!;
+  const format = question.format as GameFormat | undefined;
+  const info = format ? FORMAT_INFO[format] : undefined;
+  const header = <div className="flex justify-between text-xs font-bold text-primary"><span>{info ? `${info.icon} ${info.name} · ` : ''}Pregunta {attempt.index + 1} / {attempt.total}</span><span>{seconds}s</span></div>;
+  const timeout = seconds === 0 && <p className="text-xs text-muted-foreground">Tiempo agotado; la respuesta de esta pregunta no suma.</p>;
+  if (format === 'vf') return <>{header}<p className="rounded-2xl border border-border bg-card p-5 text-center text-lg font-black leading-snug">{question.q}</p><div className="grid grid-cols-2 gap-3">{question.options.map((option, index) => <Button key={option} disabled={busy} className={`h-16 text-base font-black ${index === 0 ? 'bg-emerald-500 text-white hover:bg-emerald-500/90' : 'bg-rose-500 text-white hover:bg-rose-500/90'}`} onClick={() => onAnswer(index)}>{index === 0 ? '✓ ' : '✕ '}{option}</Button>)}</div>{timeout}</>;
+  return <>{header}
+    {format === 'emoji'
+      ? <><p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">{info!.prompt}</p><p className="py-2 text-center text-5xl leading-tight tracking-widest">{question.q}</p></>
+      : format === 'titulo'
+        ? <><p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">{info!.prompt}</p><p className="rounded-2xl border border-dashed border-primary/50 p-4 text-center text-xl font-black">{question.q.replace('___', '______')}</p></>
+        : <p className="font-bold">{question.q}</p>}
+    <div className="space-y-2">{question.options.map((option, index) => <Button key={option} variant="outline" disabled={busy} className="h-auto w-full justify-start whitespace-normal py-3 text-left" onClick={() => onAnswer(index)}>{option}</Button>)}</div>
+    {timeout}
+  </>;
+}
+
+function OrderDemo({ missionId }: { missionId: string }) {
+  const [order, setOrder] = useState(() => orderGame(missionId).start);
+  return <div className="space-y-3"><OrderBoard missionId={missionId} order={order} setOrder={setOrder} /><p className="text-center text-xs text-muted-foreground">Práctica · creá una cuenta para validar tu orden y sumar puntos.</p><Button className="w-full" onClick={() => toast.message('En modo invitado el orden no se valida. Creá una cuenta para jugar por puntos.')}>Confirmar orden</Button></div>;
 }
 
 /** Experiencias de streaming, QR y realidad aumentada simuladas dentro de la app. */

@@ -372,7 +372,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
             </div>
           ) : myReviews.map((r) => (
             <article key={r.id} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3">
-              {(ALBUMS.find((a) => a.id === r.subject_id)?.cover ?? r.subject_image) && <img loading="lazy" decoding="async" src={ALBUMS.find((a) => a.id === r.subject_id)?.cover ?? r.subject_image ?? undefined} alt={`Imagen de ${r.subject_title}`} className="h-14 w-14 shrink-0 rounded-xl object-cover" />}
+              {(("extras" in r ? r.extras?.photos?.[0] : undefined) ?? ALBUMS.find((a) => a.id === r.subject_id)?.cover ?? r.subject_image) && <img loading="lazy" decoding="async" src={("extras" in r ? r.extras?.photos?.[0] : undefined) ?? ALBUMS.find((a) => a.id === r.subject_id)?.cover ?? r.subject_image ?? undefined} alt={`Imagen de ${r.subject_title}`} className="h-14 w-14 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{r.subject_title}</p>
                 <p className="text-xs text-muted-foreground">{r.subject_artist}</p>

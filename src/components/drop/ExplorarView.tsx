@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Bookmark, BookmarkCheck, CalendarDays, MapPin, Search, Star, Ticket, TrendingUp, X } from "lucide-react";
+import { ArrowRight, Bookmark, BookmarkCheck, CalendarDays, Camera, MapPin, Music2, PenLine, Search, Star, Ticket, TrendingUp, X } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -34,10 +34,17 @@ import arjonaCover from "@/assets/arjona-portada.webp";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { ALBUMS } from "@/lib/albums";
+import { NewReviewDialog, type ReviewKind } from "./NewReviewDialog";
+import { ReviewViewer, REVIEW_TYPE_LABEL } from "./ReviewViewer";
+import { useLocalReviews } from "@/lib/local-reviews";
+import { DEMO_REVIEWS } from "@/lib/demo-reviews";
 import type { ShowEvent } from "@/lib/explore-data";
 
 const SHOW_IMAGES: Record<string, string> = { LALI: fanLali.url, "María Becerra": fanMaria.url, Dillom: dillomCover.url, Airbag: airbagBanda, "Ricardo Arjona": arjonaCover };
-const reviewImage = (r: CommunityReview) => (r.subject_type === "album" ? ALBUMS.find((a) => a.id === r.subject_id)?.cover : null) ?? r.subject_image;
+const reviewImage = (r: CommunityReview) =>
+  r.extras?.photos?.[0] ?? (r.subject_type === "album" ? ALBUMS.find((a) => a.id === r.subject_id)?.cover : null) ?? r.subject_image ?? (r.subject_type === "show" ? SHOW_IMAGES[r.subject_artist] ?? eventCrowd : null);
+const reviewKey = (r: CommunityReview) => `${r.user_id}:${r.subject_type}:${r.subject_id}`;
+type ReviewFilter = "todas" | "album" | "song" | "show";
 
 const COVERS: Record<string, string> = { lali: laliCover.url, maria: mariaCover.url, dillom: dillomCover.url, airbag: airbagCover, "dillom-lnv": lnvCover, "adela-prima": adelaCover, "arjona-seco": arjonaCover };
 
@@ -90,6 +97,9 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
     return () => clearTimeout(t);
   }, []);
   const [reading, setReading] = useState<CommunityReview | null>(null);
+  const [writing, setWriting] = useState<{ kind: ReviewKind; show?: ShowEvent } | null>(null);
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("todas");
+  const localReviews = useLocalReviews();
   const [savingDrop, setSavingDrop] = useState<string | null>(null);
   const fetchExternalShows = useServerFn(getExternalShows);
   const [externalShows, setExternalShows] = useState<ShowEvent[]>([]);
@@ -119,7 +129,16 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   const upcomingDrops = visibleDrops.filter((d) => d.status === "upcoming");
   const archivedDrops = visibleDrops.filter((d) => d.status === "archived");
   const myScore = (id: string) => state.balances.find((b) => b.campaign_id === id)?.score ?? 0;
-  const visibleReviews = data.reviews.filter((r) => match(r.subject_title, r.subject_artist, r.author_name, r.text));
+  const allReviews = useMemo(() => {
+    const seen = new Set<string>();
+    const merged = [...localReviews, ...data.reviews].filter((r) => { const k = reviewKey(r); if (seen.has(k)) return false; seen.add(k); return true; });
+    // Ejemplos de canciones y shows mientras la comunidad no publique de ese tipo.
+    const demos = DEMO_REVIEWS.filter((d) => !data.reviews.some((r) => r.subject_type === d.subject_type));
+    return [...merged, ...demos].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  }, [localReviews, data.reviews]);
+  const visibleReviews = allReviews
+    .filter((r) => reviewFilter === "todas" || r.subject_type === reviewFilter)
+    .filter((r) => match(r.subject_title, r.subject_artist, r.author_name, r.text, r.extras?.venue));
   const visibleShows = [...externalShows, ...data.shows]
     .filter((s) => match(s.title, s.artist, s.city, s.venue))
     .sort((a, b) => (a.event_date ?? "9").localeCompare(b.event_date ?? "9"));
@@ -272,24 +291,35 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
       <section className="mt-7">
         <div className="mb-3 flex items-end justify-between">
           <h2 className="text-xl font-black">Reseñas de la comunidad</h2>
-          <Link to="/mi-drop" search={{ tab: "albumes" }} className="text-xs font-bold text-primary">Publicar</Link>
+          <Button size="sm" onClick={() => setWriting({ kind: "song" })}><PenLine className="h-3.5 w-3.5" />Escribir reseña</Button>
+        </div>
+        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+          {([["todas", "Todas"], ["album", "Álbumes"], ["song", "Canciones"], ["show", "Shows"]] as const).map(([id, label]) => (
+            <Button key={id} size="sm" variant={reviewFilter === id ? "default" : "outline"} className="shrink-0 rounded-full text-[11px]" onClick={() => setReviewFilter(id)}>{label}</Button>
+          ))}
         </div>
         {visibleReviews.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
             <p className="text-sm font-bold">Todavía no hay reseñas de la comunidad</p>
-            <p className="mt-1 text-xs text-muted-foreground">Las opiniones publicadas por fans aparecen acá: álbumes, artistas y shows.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Las opiniones publicadas por fans aparecen acá: álbumes, canciones y shows.</p>
             {mode !== "user" && <p className="mt-2 text-xs text-primary">Creá una cuenta para publicar y leer reseñas.</p>}
           </div>
         ) : (
           <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
             {visibleReviews.map((r) => (
               <article key={r.id} className="w-44 shrink-0 rounded-2xl border border-border bg-card p-3">
-                {reviewImage(r) && <img decoding="async" src={reviewImage(r) ?? undefined} alt={`Imagen de ${r.subject_title}`} loading="lazy" className="mb-2 aspect-square w-full rounded-xl object-cover" />}
-                <p className="truncate text-sm font-bold">{r.subject_title}</p>
-                <p className="truncate text-xs text-muted-foreground">{r.subject_artist || r.subject_type}</p>
+                <button type="button" onClick={() => setReading(r)} className="relative mb-2 block w-full overflow-hidden rounded-xl" aria-label={`Ver reseña de ${r.subject_title}`}>
+                  {reviewImage(r) ? <img decoding="async" src={reviewImage(r) ?? undefined} alt={`Imagen de ${r.subject_title}`} loading="lazy" className={`w-full object-cover ${r.subject_type === "show" ? "aspect-[4/5]" : "aspect-square"}`} /> : <div className="grid aspect-square w-full place-items-center bg-muted"><Star className="h-6 w-6 text-muted-foreground" /></div>}
+                  <span className="absolute left-1.5 top-1.5 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide">{REVIEW_TYPE_LABEL[r.subject_type]}</span>
+                  {(r.extras?.photos?.length ?? 0) > 1 && <span className="absolute right-1.5 top-1.5 flex items-center gap-0.5 rounded-full bg-background/85 px-1.5 py-0.5 text-[10px] font-bold"><Camera className="h-3 w-3" />{r.extras?.photos?.length}</span>}
+                  {r.extras?.song && r.subject_type === "show" && <span className="absolute inset-x-1.5 bottom-1.5 flex items-center gap-1 truncate rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-semibold"><Music2 className="h-3 w-3 shrink-0 text-primary" /><span className="truncate">{r.extras.song.title}</span></span>}
+                </button>
+                <p className="truncate text-sm font-bold">{r.subject_type === "show" ? r.subject_artist : r.subject_title}</p>
+                <p className="truncate text-xs text-muted-foreground">{r.subject_type === "show" ? r.subject_title : r.subject_artist || REVIEW_TYPE_LABEL[r.subject_type]}</p>
+                {r.extras?.venue && <p className="flex items-center gap-1 truncate text-[11px] text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{r.extras.venue}</span></p>}
                 <div className="mt-1.5"><Stars value={r.rating} /></div>
                 <p className="mt-1 text-xs text-muted-foreground">por {r.author_name || "fan de DROP"}</p>
-                {r.text && <Button variant="link" size="sm" className="mt-1 h-auto px-0 text-xs" onClick={() => setReading(r)}>Leer reseña</Button>}
+                <Button variant="link" size="sm" className="mt-1 h-auto px-0 text-xs" onClick={() => setReading(r)}>{r.subject_type === "show" && r.extras?.photos?.length ? "Ver fotos y reseña" : "Leer reseña"}</Button>
               </article>
             ))}
           </div>
@@ -336,6 +366,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
                     >
                       {attended ? "Asistí ✓" : "Asistí a este show"}
                     </Button>}
+                    <Button variant="ghost" size="sm" className="mt-1 w-full text-xs" onClick={() => setWriting({ kind: "show", show })}><PenLine className="h-3.5 w-3.5" />Reseñar este show</Button>
                   </div>
                 </article>
               );
@@ -377,18 +408,20 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
       </>)}
 
       {/* Lector de reseña completa */}
-      {reading && (
-        <Dialog open onOpenChange={(open) => { if (!open) setReading(null); }}>
-          <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto rounded-lg">
-            <DialogHeader>
-              <DialogTitle>{reading.subject_title}</DialogTitle>
-              <DialogDescription>{reading.subject_artist} · reseña de {reading.author_name || "fan de DROP"}</DialogDescription>
-            </DialogHeader>
-            <Stars value={reading.rating} />
-            <p className="text-sm leading-relaxed">{reading.text}</p>
-            <p className="text-xs text-muted-foreground">{new Date(reading.created_at).toLocaleDateString("es-AR")}</p>
-          </DialogContent>
-        </Dialog>
+      {reading && <ReviewViewer review={reading} image={reviewImage(reading)} onClose={() => setReading(null)} />}
+
+      {writing && (
+        <NewReviewDialog
+          initialKind={writing.kind}
+          initialShow={writing.show}
+          shows={[...data.shows, ...externalShows]}
+          onClose={() => setWriting(null)}
+          onPublished={(r) => {
+            setWriting(null);
+            setReviewFilter(r.subject_type === "show" || r.subject_type === "song" ? r.subject_type : "todas");
+            if (mode === "user") setData((d) => ({ ...d, reviews: [r, ...d.reviews.filter((x) => reviewKey(x) !== reviewKey(r))] }));
+          }}
+        />
       )}
 
       {mode !== "user" && (

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ImagePlus, Loader2, Save } from "lucide-react";
+import { ArrowDown, ArrowUp, Eye, EyeOff, ImagePlus, Loader2, RotateCcw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useDropAuth } from "@/components/drop/AuthProvider";
-import { FONT_OPTIONS, themeCss, type DropContent, type DropTheme } from "@/lib/drop-content";
+import { FONT_OPTIONS, hasCustomTheme, themeCss, type DropContent, type DropTheme } from "@/lib/drop-content";
 import { DROP_CATALOG, KIND_LABEL, type DropKind } from "@/lib/drops";
+import { BLOCK_INFO, DEFAULT_LAYOUTS, HERO_INFO, normalizeLayout, type DropLayout, type HeroStyle } from "@/lib/drop-layout";
 import { db, inputCls, labelCls, slugify, STATUS_OPTIONS, uploadDropImage, type CampaignRow } from "./admin-db";
 
 type Form = {
@@ -36,7 +37,21 @@ export function DropEditor({ campaign, content, takenIds, onSaved }: {
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }));
   const setTheme = (patch: Partial<DropTheme>) => setF((p) => ({ ...p, theme: { ...p.theme, ...patch } }));
   const id = isNew ? f.id || slugify(`${f.artist}-${f.title}`) : f.id;
-  const hasTheme = Object.keys(f.theme).length > 0;
+  const hasTheme = hasCustomTheme(f.theme);
+  // Si nunca se tocó el armado, sigue al tipo del drop (cambiar el tipo cambia el formato).
+  const layout = f.theme.layout ? normalizeLayout(f.theme.layout, f.kind) : normalizeLayout(DEFAULT_LAYOUTS[f.kind], f.kind);
+  const setLayout = (next: DropLayout | undefined) => setF((p) => {
+    const { layout: _old, ...rest } = p.theme;
+    return { ...p, theme: next ? { ...rest, layout: next } : rest };
+  });
+  const move = (i: number, dir: -1 | 1) => {
+    const blocks = [...layout.blocks];
+    const j = i + dir;
+    if (j < 0 || j >= blocks.length) return;
+    [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+    setLayout({ ...layout, blocks });
+  };
+  const toggle = (i: number) => setLayout({ ...layout, blocks: layout.blocks.map((b, k) => (k === i ? (b.hidden ? { id: b.id } : { id: b.id, hidden: true }) : b)) });
 
   async function upload(field: (typeof IMAGE_FIELDS)[number]["key"], file?: File) {
     if (!file) return;
@@ -142,6 +157,38 @@ export function DropEditor({ campaign, content, takenIds, onSaved }: {
             </div>
           </div>
         </div>
+      </div>
+
+      <div>
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className={labelCls}>Estructura del inicio</p>
+          {f.theme.layout && (
+            <button type="button" onClick={() => setLayout(undefined)} className="inline-flex items-center gap-1 text-xs font-bold text-primary"><RotateCcw className="h-3.5 w-3.5" />Volver al formato de {KIND_LABEL[f.kind].toLowerCase()}</button>
+          )}
+        </div>
+        <p className="mb-3 text-xs text-muted-foreground">{f.theme.layout ? "Este drop tiene un armado propio." : `Usa el formato de ${KIND_LABEL[f.kind].toLowerCase()}. Si cambiás algo, queda armado a mano.`}</p>
+        <p className="mb-2 text-sm font-bold">Portada</p>
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {(Object.keys(HERO_INFO) as HeroStyle[]).map((h) => (
+            <button key={h} type="button" onClick={() => setLayout({ ...layout, hero: h })} aria-pressed={layout.hero === h}
+              className={`rounded-xl border p-2 text-left ${layout.hero === h ? "border-primary bg-primary/10" : "border-border"}`}>
+              <span className="block text-sm font-bold">{HERO_INFO[h].name}</span>
+              <span className="block text-[11px] leading-tight text-muted-foreground">{HERO_INFO[h].hint}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mb-2 text-sm font-bold">Bloques (en este orden)</p>
+        <ol className="space-y-1.5">
+          {layout.blocks.map((b, i) => (
+            <li key={b.id} className={`flex items-center gap-2 rounded-xl border border-border p-2 ${b.hidden ? "opacity-50" : ""}`}>
+              <span className="w-5 text-center text-xs font-bold tabular-nums text-muted-foreground">{b.hidden ? "–" : layout.blocks.slice(0, i + 1).filter((x) => !x.hidden).length}</span>
+              <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{BLOCK_INFO[b.id].name}</span><span className="block truncate text-[11px] text-muted-foreground">{BLOCK_INFO[b.id].hint}</span></span>
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir" className="grid h-8 w-8 place-items-center rounded-lg border border-border disabled:opacity-30"><ArrowUp className="h-4 w-4" /></button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === layout.blocks.length - 1} aria-label="Bajar" className="grid h-8 w-8 place-items-center rounded-lg border border-border disabled:opacity-30"><ArrowDown className="h-4 w-4" /></button>
+              <button type="button" onClick={() => toggle(i)} aria-label={b.hidden ? "Mostrar" : "Ocultar"} className="grid h-8 w-8 place-items-center rounded-lg border border-border">{b.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+            </li>
+          ))}
+        </ol>
       </div>
 
       <button onClick={() => void save()} disabled={busy === "save"} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-60">

@@ -1,16 +1,18 @@
 import { ListenButtons } from "./ListenButtons";
 import { FORMAT_INFO, formatOfDay, isDailyRotation } from "@/lib/game-styles";
 import { Countdown } from "./Countdown";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Bell, BellRing, Gift, Lock, Medal, ShoppingBag, Target, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { getRanking } from "@/lib/drop.functions";
-import { STATUS_LABEL, type DropInfo } from "@/lib/drops";
+import type { DropInfo } from "@/lib/drops";
+import { NEEDS_OPEN, resolveLayout, type BlockId } from "@/lib/drop-layout";
+import { DropHero } from "./DropHeroes";
+import { SetlistBlock, ShowDatesBlock, TracklistBlock } from "./DropBlocks";
 import { artistSlug } from "@/lib/merch";
-import { ArtistLine } from "@/components/drop/ArtistLine";
 import { useDropAuth } from "./AuthProvider";
 import { MapaView } from "./MapaView";
 import { PasaporteView } from "./PasaporteView";
@@ -47,27 +49,13 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
   const todayFormat = featured ? formatOfDay(featured.id) : undefined;
   const active = drop.status === "active";
 
-  return (
-    <div className="space-y-6 px-5">
-      {/* Portada del drop */}
-      <section className="relative -mx-5 -mt-2 overflow-hidden">
-        <img decoding="async" src={drop.hero} alt={drop.artist} className={`h-72 w-full object-cover ${drop.status === "archived" ? "grayscale-[60%]" : ""}`} />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute inset-x-5 bottom-4">
-          <span className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider ${active ? "bg-primary text-primary-foreground" : "bg-background/80 text-foreground"}`}>
-            {drop.status === "archived" ? "📼 Archivo" : STATUS_LABEL[drop.status]}
-          </span>
-          <p className="mt-2 text-sm font-bold text-primary"><ArtistLine drop={drop} /></p>
-          <h1 className="text-3xl font-black leading-tight">{drop.title}</h1>
-          {drop.tagline && <p className="mt-1 text-sm text-muted-foreground">{drop.tagline}</p>}
-        </div>
-      </section>
-
-      {drop.description && <p className="text-sm leading-relaxed text-muted-foreground">{drop.description}</p>}
-      {drop.kind !== "noticia" && <ListenButtons query={drop.kind === "show" ? drop.artist : `${drop.artist} ${drop.title}`} />}
-
-      {/* Progreso del fan en este drop */}
-      {drop.status !== "upcoming" && (
+  const layout = resolveLayout(drop);
+  const render = (id: BlockId): React.ReactNode => {
+    if (drop.status === "upcoming" && NEEDS_OPEN.includes(id)) return null;
+    switch (id) {
+      case "intro": return <>{drop.description && <p className="text-sm leading-relaxed text-muted-foreground">{drop.description}</p>}
+      {drop.kind !== "noticia" && <ListenButtons query={drop.kind === "show" ? drop.artist : `${drop.artist} ${drop.title}`} />}</>;
+      case "progreso": return drop.status !== "upcoming" && (
         <section className="rounded-3xl p-4 text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
           <p className="text-[11px] font-bold uppercase tracking-widest opacity-80">{drop.status === "archived" ? "Tu resultado final" : "Tu progreso en este drop"}</p>
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -81,10 +69,8 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
           </p>
           {mode !== "user" && <Button asChild size="sm" variant="secondary" className="mt-3 w-full"><Link to="/auth" search={{ mode: "signup" }}>Crear cuenta</Link></Button>}
         </section>
-      )}
-
-      {/* Próximamente */}
-      {drop.status === "upcoming" && (
+      );
+      case "proximamente": return drop.status === "upcoming" && (
         <section className="rounded-3xl border border-border bg-card p-5 text-center">
           {drop.launchAt ? <Countdown to={drop.launchAt} /> : <p className="text-lg font-black">Muy pronto</p>}
           <p className="mt-3 text-sm text-muted-foreground">Las misiones, el ranking y las recompensas se habilitan cuando abra el drop. Mientras tanto, pre-guardá el álbum en Spotify desde Misiones.</p>
@@ -94,10 +80,8 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
             toast.success(next ? `Te avisamos cuando abra el drop de ${drop.artist}` : "Aviso desactivado");
           }}>{remind ? <BellRing /> : <Bell />}{remind ? "Aviso activado" : "Avisarme cuando abra"}</Button>
         </section>
-      )}
-
-      {/* Misión destacada */}
-      {featured && drop.status !== "upcoming" && (
+      );
+      case "mision": return featured && drop.status !== "upcoming" && (
         <section>
           <h2 className="mb-3 text-xl font-black">{active ? "Tu próxima misión" : "Misiones del drop"}</h2>
           <button onClick={() => onGo("misiones")} className="relative block w-full overflow-hidden rounded-3xl border border-primary/40 text-left">
@@ -114,21 +98,8 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
           </button>
           <Button variant="outline" className="mt-3 w-full" onClick={() => onGo("misiones")}>Ver las {missions.length} misiones</Button>
         </section>
-      )}
-
-      {/* Fechas del show */}
-      {drop.showDates && (
-        <section>
-          <h2 className="text-xl font-black">Fechas</h2>
-          <p className="mb-3 text-sm text-muted-foreground">{drop.showDates.dates.length} funciones · {drop.showDates.label}</p>
-          <div className="flex flex-wrap gap-2">
-            {drop.showDates.dates.map((d) => <span key={d} className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold">{d}</span>)}
-          </div>
-        </section>
-      )}
-
-      {/* Premios por puesto en el ranking */}
-      {drop.prizes?.length && drop.status !== "upcoming" ? (
+      );
+      case "premios": return drop.prizes?.length && drop.status !== "upcoming" ? (
         <section>
           <h2 className="text-xl font-black">Premios del ranking</h2>
           <p className="mb-3 text-sm text-muted-foreground">{drop.status === "archived" ? "Lo que se ganaron los primeros del ranking." : "Cuando cierre el drop, los primeros del ranking se llevan:"}</p>
@@ -153,10 +124,8 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
           </div>
           {active && <Button variant="outline" className="mt-3 w-full" onClick={() => onGo("ranking")}><Trophy /> Ver el ranking</Button>}
         </section>
-      ) : null}
-
-      {/* Merch oficial */}
-      {drop.merch?.length ? (
+      ) : null;
+      case "merch": return drop.merch?.length ? (
         <Link to="/tienda" search={{ a: artistSlug(drop.artist) }} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
           <img src={drop.merch[0].image} alt="" loading="lazy" decoding="async" className="h-14 w-14 rounded-xl object-cover" />
           <div className="min-w-0 flex-1">
@@ -165,13 +134,9 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
           </div>
           <ShoppingBag className="h-5 w-5 text-primary" />
         </Link>
-      ) : null}
-
-      {/* Recorrido (mapa) */}
-      {drop.id === "lali" && <MapaView embedded onGoMisiones={() => onGo("misiones")} />}
-
-      {/* Recompensas */}
-      {drop.id === "lali" ? <PasaporteView embedded /> : drop.status !== "upcoming" && !drop.prizes?.length && (
+      ) : null;
+      case "recorrido": return drop.id === "lali" && <MapaView embedded onGoMisiones={() => onGo("misiones")} />;
+      case "recompensas": return drop.id === "lali" ? <PasaporteView embedded /> : drop.status !== "upcoming" && !drop.prizes?.length && (
         <section>
           <h2 className="text-xl font-black">Recompensas</h2>
           <p className="mb-3 text-sm text-muted-foreground">{drop.status === "archived" ? "Lo que se podía ganar en este drop." : "Completá misiones para desbloquearlas."}</p>
@@ -192,10 +157,8 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
             })}
           </div>
         </section>
-      )}
-
-      {/* Accesos */}
-      {drop.status !== "upcoming" && (
+      );
+      case "accesos": return drop.status !== "upcoming" && (
         <section className="grid grid-cols-2 gap-3">
           <button onClick={() => onGo("ranking")} className="rounded-2xl border border-border bg-card p-4 text-left">
             {drop.status === "archived" ? <Medal className="h-5 w-5 text-primary" /> : <Trophy className="h-5 w-5 text-primary" />}
@@ -208,8 +171,17 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
             <p className="text-xs text-muted-foreground">La comunidad del drop</p>
           </button>
         </section>
-      )}
+      );
+      case "fechas": return <ShowDatesBlock drop={drop} />;
+      case "tracklist": return <TracklistBlock drop={drop} pct={pct} />;
+      case "setlist": return <SetlistBlock drop={drop} />;
+    }
+  };
+
+  return (
+    <div className="space-y-6 px-5">
+      <DropHero drop={drop} style={layout.hero} />
+      {layout.blocks.filter((b) => !b.hidden).map((b) => <Fragment key={b.id}>{render(b.id)}</Fragment>)}
     </div>
   );
 }
-

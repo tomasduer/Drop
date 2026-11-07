@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, Bookmark, Heart, Loader2, MessageSquare, Music, Share2, Sparkles, Star, Target, TrendingUp, UserPlus, Users } from "lucide-react";
+import { Activity, Bookmark, Heart, Loader2, MapPin, MessageSquare, Music, Share2, Sparkles, Star, Target, TrendingUp, UserPlus, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getRanking } from "@/lib/drop.functions";
 import { useDrops, type DropInfo } from "@/lib/drops";
 import { useDropAuth } from "./AuthProvider";
+import { demoOverview, demoStats } from "@/lib/dashboard-demo";
 
 // Dashboard para administradoras. Las métricas salen de la base vía las RPC
 // drop_admin_overview / drop_admin_stats (supabase/demo/17-dashboard-admin.sql).
@@ -18,16 +19,26 @@ type Stats = {
   missions: { id: string; title: string; kind: string; completions: number; fans: number }[];
   daily: { day: string; completions: number }[];
   top: { display_name: string; avatar_url: string | null; score: number; missions: number }[];
+  // Solo en modo demo:
+  zones?: { zone: string; pct: number }[];
+  social?: { reach: number; ugc: number };
+  streams?: number;
 };
+const DEMO_KEY = "drop-dashboard-demo";
 
 type Rpc = (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
 const rpc: Rpc = (fn, args) => (supabase.rpc as unknown as Rpc)(fn, args);
 const n = (v: number) => v.toLocaleString("es-AR");
+/** Números grandes abreviados para que entren en las tarjetas (20,9 M). */
+const big = (v: number) => (v >= 100_000 ? v.toLocaleString("es-AR", { notation: "compact", maximumFractionDigits: 1 }) : n(v));
 const STATUS: Record<DropInfo["status"], string> = { active: "Activo", upcoming: "Próximo", archived: "Finalizado" };
 
 export function DashboardView() {
   const drops = useDrops();
   const [sel, setSel] = useState<string>("todos");
+  const [demo, setDemoState] = useState(true);
+  useEffect(() => { try { if (localStorage.getItem(DEMO_KEY) === "0") setDemoState(false); } catch { /* */ } }, []);
+  const setDemo = (v: boolean) => { setDemoState(v); try { localStorage.setItem(DEMO_KEY, v ? "1" : "0"); } catch { /* */ } };
   const drop = drops.find((d) => d.id === sel);
 
   return (
@@ -36,6 +47,10 @@ export function DashboardView() {
         <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Solo administradoras</p>
         <h2 className="text-2xl font-black">Dashboard analítico</h2>
         <p className="text-sm text-muted-foreground">{drop ? `${drop.artist} · ${drop.title}` : "Resumen de todos los drops"}</p>
+        <div className="mt-3 inline-flex rounded-full border border-border bg-card p-0.5 text-[11px] font-bold" role="group" aria-label="Origen de los datos">
+          <button type="button" onClick={() => setDemo(true)} aria-pressed={demo} className={`rounded-full px-3 py-1 ${demo ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Datos de demo</button>
+          <button type="button" onClick={() => setDemo(false)} aria-pressed={!demo} className={`rounded-full px-3 py-1 ${!demo ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Datos reales</button>
+        </div>
       </div>
 
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1" role="tablist" aria-label="Elegir drop">
@@ -47,7 +62,7 @@ export function DashboardView() {
         ))}
       </div>
 
-      {drop ? <DropDetail key={drop.id} drop={drop} /> : <AllDrops drops={drops} onPick={setSel} />}
+      {drop ? <DropDetail key={`${drop.id}-${demo}`} drop={drop} demo={demo} /> : <AllDrops key={String(demo)} drops={drops} onPick={setSel} demo={demo} />}
     </div>
   );
 }
@@ -62,12 +77,13 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 }
 
 /** Tabla comparativa de todos los drops. */
-function AllDrops({ drops, onPick }: { drops: DropInfo[]; onPick: (id: string) => void }) {
+function AllDrops({ drops, onPick, demo }: { drops: DropInfo[]; onPick: (id: string) => void; demo: boolean }) {
   const fetchRanking = useServerFn(getRanking);
   const [rows, setRows] = useState<Overview[] | null>(null);
   const [partial, setPartial] = useState(false);
 
   useEffect(() => {
+    if (demo) { setRows(demoOverview(drops)); return; }
     let alive = true;
     void rpc("drop_admin_overview").then(async ({ data, error }) => {
       if (!alive) return;
@@ -94,8 +110,8 @@ function AllDrops({ drops, onPick }: { drops: DropInfo[]; onPick: (id: string) =
     <>
       <section className="grid grid-cols-3 gap-2">
         <Kpi icon={Users} label="Participaciones" value={n(total.participants)} />
-        <Kpi icon={Target} label="Misiones hechas" value={n(total.completions)} />
-        <Kpi icon={Sparkles} label="Puntos" value={n(total.points)} />
+        <Kpi icon={Target} label="Misiones hechas" value={big(total.completions)} />
+        <Kpi icon={Sparkles} label="Puntos" value={big(total.points)} />
       </section>
       <section className="space-y-2">
         {list.map(({ d, r }) => (
@@ -117,13 +133,14 @@ function AllDrops({ drops, onPick }: { drops: DropInfo[]; onPick: (id: string) =
 }
 
 /** Métricas de un drop. */
-function DropDetail({ drop }: { drop: DropInfo }) {
+function DropDetail({ drop, demo }: { drop: DropInfo; demo: boolean }) {
   const { state } = useDropAuth();
   const fetchRanking = useServerFn(getRanking);
   const [stats, setStats] = useState<Stats | null>(null);
   const [partial, setPartial] = useState(false);
 
   useEffect(() => {
+    if (demo) { setStats(demoStats(drop, state.missions.filter((m) => m.campaign_id === drop.id && m.status === "verified").map((m) => ({ id: m.id, title: m.title, kind: m.kind })))); return; }
     let alive = true;
     void rpc("drop_admin_stats", { p_campaign: drop.id }).then(async ({ data, error }) => {
       if (!alive) return;
@@ -154,7 +171,7 @@ function DropDetail({ drop }: { drop: DropInfo }) {
         <Kpi icon={Activity} label="Activos últimos 7 días" value={v(stats.active_7d)} />
         <Kpi icon={UserPlus} label="Nuevos últimos 7 días" value={v(stats.new_7d)} />
         <Kpi icon={Target} label="Misiones completadas" value={v(stats.completions)} />
-        <Kpi icon={Sparkles} label="Puntos repartidos" value={v(stats.points)} sub={stats.participants > 0 ? `${n(avg)} por fan` : undefined} />
+        <Kpi icon={Sparkles} label="Puntos repartidos" value={stats.points < 0 ? "—" : big(stats.points)} sub={stats.participants > 0 ? `${n(avg)} por fan` : undefined} />
         <Kpi icon={Bookmark} label="Lo guardaron" value={v(stats.saves)} />
       </section>
 
@@ -162,14 +179,13 @@ function DropDetail({ drop }: { drop: DropInfo }) {
         <Card icon={TrendingUp} title="Misiones completadas · últimos 14 días">
           <div className="flex h-28 items-end gap-1">
             {stats.daily.map((d) => (
-              <div key={d.day} className="flex flex-1 flex-col items-center justify-end gap-1" title={`${new Date(d.day + "T12:00:00").toLocaleDateString("es-AR")}: ${d.completions}`}>
-                <span className="text-[9px] font-bold tabular-nums text-muted-foreground">{d.completions || ""}</span>
+              <div key={d.day} className="flex h-full flex-1 flex-col items-center justify-end" title={`${new Date(d.day + "T12:00:00").toLocaleDateString("es-AR")}: ${d.completions}`}>
                 <div className="w-full rounded-t" style={{ height: `${Math.max(3, (d.completions / maxDaily) * 100)}%`, backgroundImage: "var(--gradient-drop)", opacity: d.completions ? 1 : 0.25 }} />
               </div>
             ))}
           </div>
           <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
-            <span>{new Date(stats.daily[0].day + "T12:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "short" })}</span><span>hoy</span>
+            <span>{new Date(stats.daily[0].day + "T12:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "short" })}</span><span>{n(stats.daily.reduce((s, d) => s + d.completions, 0))} en total</span><span>hoy</span>
           </div>
         </Card>
       )}
@@ -194,6 +210,19 @@ function DropDetail({ drop }: { drop: DropInfo }) {
         )}
       </Card>
 
+      {stats.zones && (
+        <Card icon={MapPin} title="Participación por zona">
+          <div className="space-y-2">
+            {stats.zones.map((z) => (
+              <div key={z.zone}>
+                <div className="mb-1 flex justify-between text-xs"><span>{z.zone}</span><span className="font-bold text-primary">{z.pct}%</span></div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full" style={{ width: `${z.pct}%`, backgroundImage: "var(--gradient-drop)" }} /></div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
       <Card icon={Star} title="Top 10 superfans">
         {stats.top.length === 0 ? <p className="text-xs text-muted-foreground">Todavía nadie sumó puntos en este drop.</p> : (
           <div className="space-y-2">
@@ -215,14 +244,14 @@ function DropDetail({ drop }: { drop: DropInfo }) {
         <Kpi icon={Heart} label="Me gusta" value={v(stats.likes)} />
       </section>
 
-      <details className="rounded-2xl border border-dashed border-border bg-card/50 p-4">
-        <summary className="cursor-pointer text-xs font-bold text-muted-foreground">Próximas integraciones (datos de ejemplo)</summary>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <Kpi icon={Share2} label="Alcance en redes" value="4.2M" sub="ejemplo" />
-          <Kpi icon={Music} label="Streams verificados" value="1.4M" sub="ejemplo" />
-        </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">Redes y streaming se van a poder medir cuando conectemos esas plataformas.</p>
-      </details>
+      {stats.social ? (
+        <section className="grid grid-cols-2 gap-2">
+          <Kpi icon={Share2} label="Alcance en redes" value={big(stats.social.reach)} sub={`${n(stats.social.ugc)} contenidos de fans`} />
+          <Kpi icon={Music} label="Streams verificados" value={big(stats.streams ?? 0)} />
+        </section>
+      ) : (
+        <p className="rounded-2xl border border-dashed border-border bg-card/50 p-3 text-[11px] text-muted-foreground">Redes y streaming se van a poder medir cuando conectemos esas plataformas.</p>
+      )}
 
       {partial && <PartialNote />}
     </>
@@ -233,7 +262,7 @@ function Kpi({ icon: Icon, label, value, sub }: { icon: LucideIcon; label: strin
   return (
     <div className="rounded-2xl border border-border bg-card p-3">
       <span className="mb-2 grid h-7 w-7 place-items-center rounded-lg text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}><Icon className="h-3.5 w-3.5" /></span>
-      <p className="text-xl font-black tabular-nums leading-tight">{value}</p>
+      <p className="truncate text-xl font-black tabular-nums leading-tight">{value}</p>
       <p className="text-[11px] text-muted-foreground">{label}</p>
       {sub && <p className="text-[10px] text-primary">{sub}</p>}
     </div>

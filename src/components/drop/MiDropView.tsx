@@ -19,6 +19,7 @@ import { AlbumsSection } from "./AlbumsSection";
 import { RewardsRedeem } from "./RewardsRedeem";
 import { DropSelector } from "./DropSelector";
 import { DropStatsSection } from "./DropStatsSection";
+import { PlanCard } from "./PlansMenu";
 import { useDrops } from "@/lib/drops";
 import { useIsDropAdmin } from "@/lib/drop-content";
 import { achievements, dropProgress } from "@/lib/progress";
@@ -154,6 +155,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
           <Button size="sm" onClick={() => void shareStory({ name: profile.display_name, username, points: generalPoints, campaignPoints, missions: state.attempts.filter((a) => a.status === "completed").length, avatarUrl: profile.avatar_url })}><ImageIcon className="h-3.5 w-3.5" />Compartir en historias</Button>
           <Button variant="secondary" size="sm" onClick={() => void inviteFriends(username)}><UserPlus className="h-3.5 w-3.5" />Invitar amigos</Button>
         </div>
+        <PlanCard />
       </header>
 
       {/* Resumen de actividad */}

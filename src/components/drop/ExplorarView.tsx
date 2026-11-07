@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Bookmark, BookmarkCheck, CalendarDays, MapPin, Search, Star, Ticket, TrendingUp } from "lucide-react";
+import { ArrowRight, Bookmark, BookmarkCheck, CalendarDays, MapPin, Search, Star, Ticket, TrendingUp, X } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData
 import { useDropAuth } from "./AuthProvider";
 import { useDrops, type DropInfo } from "@/lib/drops";
 import { ArtistLine } from "@/components/drop/ArtistLine";
-import { CatalogResults, GenreSheet, type MusicGenre } from "./Catalog";
+import { CatalogResults, type MusicGenre } from "./Catalog";
 import { getExternalShows } from "@/lib/music.functions";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
@@ -165,8 +165,8 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={isDrops ? "Buscá un artista o un drop" : "Álbumes, artistas, shows, reseñas…"}
+            onChange={(e) => { setQuery(e.target.value); setOpenGenre(null); }}
+            placeholder={openGenre ? `Género: ${openGenre.name}` : isDrops ? "Buscá un artista o un drop" : "Álbumes, artistas, shows, reseñas…"}
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </label>
@@ -182,7 +182,8 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
         )}
       </header>
 
-      {!isDrops && <CatalogResults query={query} />}
+      {openGenre && <button type="button" onClick={() => setOpenGenre(null)} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-black text-primary-foreground">Género: {openGenre.name} <X className="h-3.5 w-3.5" /></button>}
+      {(!isDrops || openGenre) && <CatalogResults query={query} genre={openGenre} onSearch={(name) => { setOpenGenre(null); setQuery(name); }} />}
 
       {isDrops && (<>
       {/* Drops activos */}
@@ -348,7 +349,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
         <h2 className="mb-3 text-xl font-black">Explorar por género</h2>
         <div className="grid grid-cols-2 gap-3">
           {visibleGenres.map((genre) => (
-            <button key={genre.name} onClick={() => setOpenGenre(genre)} className="relative h-24 overflow-hidden rounded-2xl border border-border text-left">
+            <button key={genre.name} onClick={() => { setOpenGenre(genre); setQuery(""); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="relative h-24 overflow-hidden rounded-2xl border border-border text-left">
               <img decoding="async" src={genre.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-60" />
               <span className="absolute inset-0" style={{ backgroundImage: "linear-gradient(180deg, transparent 30%, oklch(0 0 0 / 0.75)), var(--gradient-drop-soft)" }} />
               <span className="absolute bottom-2 left-3 right-3">
@@ -359,7 +360,6 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
           ))}
         </div>
       </section>
-      <GenreSheet genre={openGenre} onClose={() => setOpenGenre(null)} onSearch={(name) => { setQuery(name); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
 
       {/* Artistas para descubrir */}
       <section className="mt-7">

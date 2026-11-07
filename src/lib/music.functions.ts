@@ -62,26 +62,39 @@ export const getCatalogArtist = createServerFn({ method: 'POST' })
     return { ...artist(a), top: (top.data ?? []).map((t: unknown) => track(t)), albums: (albums.data ?? []).map((x: unknown) => album(x, a)) };
   });
 
-// Artistas de un género: primero la lista curada (busca cada nombre y se queda con el artista que
-// coincide), después los artistas destacados de ese género en Deezer. No busca la palabra del
-// género en los nombres: "Pop" no trae artistas o discos que se llamen "pop".
+// Catálogo de un género: artistas, álbumes y canciones de música de ese género (no de cosas que
+// tengan la palabra del género en el nombre). Parte de una lista curada de artistas y suma el
+// ranking de ese género en Deezer (/editorial/{id}/charts) cuando existe.
 const norm = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
-export const getGenreArtists = createServerFn({ method: 'POST' })
+const safe = async <T,>(p: Promise<T>, fallback: T): Promise<T> => { try { return await p; } catch { return fallback; } };
+export const getGenreCatalog = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => z.object({ names: z.array(z.string().trim().min(1).max(60)).max(24), deezerGenre: z.number().int().positive().optional() }).parse(input))
-  .handler(async ({ data }): Promise<CatalogArtist[]> => {
-    const curated = await Promise.all(data.names.map(async (name) => {
-      try {
-        const r = await get(`/search/artist?q=${encodeURIComponent(name)}&limit=5`);
-        const list: CatalogArtist[] = (r.data ?? []).map(artist);
+  .handler(async ({ data }): Promise<CatalogSearch> => {
+    const [resolved, chart] = await Promise.all([
+      Promise.all(data.names.map((name) => safe((async () => {
+        const list: CatalogArtist[] = ((await get(`/search/artist?q=${encodeURIComponent(name)}&limit=5`)).data ?? []).map(artist);
         return list.find((a) => norm(a.name) === norm(name)) ?? list[0] ?? null;
-      } catch { return null; }
-    }));
-    let extra: CatalogArtist[] = [];
-    if (data.deezerGenre) {
-      try { extra = ((await get(`/genre/${data.deezerGenre}/artists`)).data ?? []).map(artist); } catch { extra = []; }
-    }
-    const seen = new Set<number>();
-    return [...curated, ...extra].filter((a): a is CatalogArtist => !!a && !seen.has(a.id) && !!seen.add(a.id)).slice(0, 30);
+      })(), null as CatalogArtist | null))),
+      data.deezerGenre ? safe(get(`/editorial/${data.deezerGenre}/charts`), null) : Promise.resolve(null),
+    ]);
+    const curated = resolved.filter((a): a is CatalogArtist => !!a);
+    // Para no hacer demasiados pedidos, álbumes y canciones salen de los primeros 6 artistas.
+    const firsts = curated.slice(0, 6);
+    const [albumLists, trackLists] = await Promise.all([
+      Promise.all(firsts.map((a) => safe(get(`/artist/${a.id}/albums?limit=4`).then((r) => (r.data ?? []).map((x: unknown) => album(x, a)) as CatalogAlbum[]), [] as CatalogAlbum[]))),
+      Promise.all(firsts.map((a) => safe(get(`/artist/${a.id}/top?limit=3`).then((r) => (r.data ?? []).map((t: unknown) => track(t)) as CatalogTrack[]), [] as CatalogTrack[]))),
+    ]);
+    // Intercala (uno de cada artista) para que no quede todo de uno solo.
+    const interleave = <T,>(lists: T[][], per: number) => { const out: T[] = []; for (let i = 0; i < per; i++) for (const l of lists) if (l[i]) out.push(l[i]); return out; };
+    const uniq = <T extends { id: number }>(xs: T[]) => { const seen = new Set<number>(); return xs.filter((x) => !seen.has(x.id) && !!seen.add(x.id)); };
+    const chartArtists: CatalogArtist[] = (chart?.artists?.data ?? []).map(artist);
+    const chartAlbums: CatalogAlbum[] = (chart?.albums?.data ?? []).map((x: unknown) => album(x));
+    const chartTracks: CatalogTrack[] = (chart?.tracks?.data ?? []).map((t: unknown) => track(t));
+    return {
+      artists: uniq([...curated, ...chartArtists]).slice(0, 20),
+      albums: uniq([...interleave(albumLists.map((l) => l.filter((x) => x.type === 'album')), 2), ...chartAlbums]).slice(0, 14),
+      tracks: uniq([...interleave(trackLists, 2), ...chartTracks]).filter((t) => t.preview).slice(0, 14),
+    };
   });
 
 // Agenda de shows de Ticketmaster (Discovery API). Necesita el secreto TICKETMASTER_API_KEY en Cloudflare.
@@ -114,10 +127,12 @@ async function ticketmaster(keyword: string, size: number): Promise<ExternalShow
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 export const getExternalShows = createServerFn({ method: 'POST' })
-  .inputValidator((input: unknown) => z.object({ q: z.string().trim().max(80).optional() }).parse(input ?? {}))
+  .inputValidator((input: unknown) => z.object({ q: z.string().trim().max(80).optional(), artists: z.array(z.string().trim().min(2).max(60)).max(6).optional() }).parse(input ?? {}))
   .handler(async ({ data }): Promise<ExternalShow[]> => {
     try {
-      const lists = data.q && data.q.length >= 2
+      const lists = data.artists?.length
+        ? await Promise.all(data.artists.map((a) => ticketmaster(a, 4)))
+        : data.q && data.q.length >= 2
         ? [await ticketmaster(data.q, 10)]
         : await Promise.all(DEFAULT_SHOW_ARTISTS.map((a) => ticketmaster(a, 5)));
       const seen = new Set<string>();

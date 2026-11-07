@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
-  getCatalogAlbum, getCatalogArtist, getExternalShows, getGenreArtists, searchCatalog, type ExternalShow,
+  getCatalogAlbum, getCatalogArtist, getExternalShows, getGenreCatalog, searchCatalog, type ExternalShow,
   type CatalogAlbum, type CatalogAlbumDetail, type CatalogArtist, type CatalogArtistDetail, type CatalogSearch, type CatalogTrack,
 } from "@/lib/music.functions";
 import { ListenButtons } from "./ListenButtons";
@@ -16,9 +16,10 @@ import { useAlbumActions } from "./useAlbumActions";
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
-/** Resultados del catálogo musical para una búsqueda (artistas, álbumes, canciones). */
-export function CatalogResults({ query }: { query: string }) {
+/** Resultados del catálogo musical para una búsqueda o un género (artistas, álbumes, canciones, shows). */
+export function CatalogResults({ query, genre, onSearch }: { query: string; genre?: MusicGenre | null; onSearch?: (artistName: string) => void }) {
   const search = useServerFn(searchCatalog);
+  const searchGenre = useServerFn(getGenreCatalog);
   const searchShows = useServerFn(getExternalShows);
   const [shows, setShows] = useState<ExternalShow[]>([]);
   const [data, setData] = useState<CatalogSearch | null>(null);
@@ -28,6 +29,20 @@ export function CatalogResults({ query }: { query: string }) {
   const [artist, setArtist] = useState<number | null>(null);
 
   useEffect(() => {
+    if (!genre) return;
+    let cancelled = false;
+    setLoading(true); setError(false); setData(null); setShows([]);
+    searchShows({ data: { artists: genre.artists.slice(0, 6) } }).then((r) => { if (!cancelled) setShows(r); }).catch(() => { if (!cancelled) setShows([]); });
+    searchGenre({ data: { names: genre.artists, deezerGenre: genre.deezerGenre } })
+      .then((r) => { if (!cancelled) setData(r); })
+      .catch(() => { if (!cancelled) setError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [genre?.name]);
+
+  useEffect(() => {
+    if (genre) return;
     const q = query.trim();
     if (q.length < 2) { setData(null); setShows([]); return; }
     let cancelled = false;
@@ -41,15 +56,19 @@ export function CatalogResults({ query }: { query: string }) {
     }, 350);
     return () => { cancelled = true; clearTimeout(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [query, genre?.name]);
 
-  if (query.trim().length < 2) return null;
+  if (!genre && query.trim().length < 2) return null;
   return (
     <section className="mt-6 space-y-5">
-      <h2 className="text-xl font-black">En el catálogo</h2>
+      <h2 className="text-xl font-black">{genre ? `${genre.name} en el catálogo` : "En el catálogo"}</h2>
+      {genre && <p className="-mt-4 text-xs text-muted-foreground">Artistas que hacen {genre.name.toLowerCase()}, sus discos y canciones.</p>}
+      {genre && onSearch && (error || (data && data.artists.length === 0)) && <div className="flex flex-wrap gap-2">
+        {genre.artists.map((n) => <Button key={n} variant="outline" size="sm" className="rounded-full" onClick={() => onSearch(n)}>{n}</Button>)}
+      </div>}
       {loading && !data && <p className="text-sm text-muted-foreground">Buscando…</p>}
       {error && <p className="text-sm text-muted-foreground">No pudimos conectar con el catálogo. Probá de nuevo en un rato.</p>}
-      {data && data.artists.length + data.albums.length + data.tracks.length === 0 && <p className="text-sm text-muted-foreground">Sin resultados para “{query}”.</p>}
+      {data && data.artists.length + data.albums.length + data.tracks.length === 0 && <p className="text-sm text-muted-foreground">{genre ? "No encontramos música de este género." : `Sin resultados para “${query}”.`}</p>}
       {data && data.artists.length > 0 && (
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Artistas</p>
@@ -98,51 +117,6 @@ export function CatalogResults({ query }: { query: string }) {
 }
 
 export type MusicGenre = { name: string; detail: string; image: string; artists: string[]; deezerGenre?: number };
-
-/** Artistas que hacen música de un género (no los que tienen el género en el nombre). */
-export function GenreSheet({ genre, onClose, onSearch }: { genre: MusicGenre | null; onClose: () => void; onSearch: (artistName: string) => void }) {
-  const load = useServerFn(getGenreArtists);
-  const [artists, setArtists] = useState<CatalogArtist[] | null>(null);
-  const [error, setError] = useState(false);
-  const [album, setAlbum] = useState<number | null>(null);
-  const [artist, setArtist] = useState<number | null>(null);
-  useEffect(() => {
-    if (!genre) return;
-    let cancelled = false;
-    setArtists(null); setError(false);
-    load({ data: { names: genre.artists, deezerGenre: genre.deezerGenre } })
-      .then((r) => { if (!cancelled) setArtists(r); })
-      .catch(() => { if (!cancelled) setError(true); });
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [genre?.name]);
-  return (<>
-    <Drawer open={genre !== null && artist === null && album === null} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DrawerContent className="mx-auto max-h-[90dvh] max-w-[440px]">
-        {genre && <div className="overflow-y-auto px-4 pb-8">
-          <DrawerHeader className="px-0">
-            <div className="relative -mx-4 -mt-2 mb-2 h-28 overflow-hidden">
-              <img src={genre.image} alt="" className="h-full w-full object-cover opacity-70" />
-              <span className="absolute inset-0" style={{ backgroundImage: "linear-gradient(180deg, transparent 20%, var(--background))" }} />
-            </div>
-            <DrawerTitle className="text-2xl font-black">{genre.name}</DrawerTitle>
-            <DrawerDescription>Artistas que hacen {genre.name.toLowerCase()}. Tocá uno para escucharlo.</DrawerDescription>
-          </DrawerHeader>
-
-          {!artists && !error && <div className="grid grid-cols-3 gap-4">{genre.artists.slice(0, 9).map((n) => <div key={n} className="text-center"><div className="mx-auto h-20 w-20 animate-pulse rounded-full bg-muted" /><p className="mt-1 truncate text-xs text-muted-foreground">{n}</p></div>)}</div>}
-          {(error || (artists && artists.length === 0)) && <div className="flex flex-wrap gap-2">
-            {genre.artists.map((n) => <Button key={n} variant="outline" size="sm" className="rounded-full" onClick={() => { onClose(); onSearch(n); }}>{n}</Button>)}
-          </div>}
-          {artists && artists.length > 0 && <div className="grid grid-cols-3 gap-x-3 gap-y-4">
-            {artists.map((a) => <ArtistChip key={a.id} artist={a} onOpen={() => setArtist(a.id)} wide />)}
-          </div>}
-        </div>}
-      </DrawerContent>
-    </Drawer>
-    <AlbumSheet id={album} onClose={() => setAlbum(null)} onArtist={(id) => { setAlbum(null); setArtist(id); }} />
-    <ArtistSheet id={artist} onClose={() => setArtist(null)} onAlbum={(id) => { setArtist(null); setAlbum(id); }} />
-  </>);
-}
 
 function ArtistChip({ artist, onOpen, wide }: { artist: CatalogArtist; onOpen: () => void; wide?: boolean }) {
   return (

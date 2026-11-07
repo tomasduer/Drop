@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Music2, Pause, Play, Search, Star, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
-import { searchCatalog, type CatalogTrack } from "@/lib/music.functions";
+import { searchCatalog, type CatalogAlbum, type CatalogTrack } from "@/lib/music.functions";
 import type { ReviewSong } from "@/lib/explore-data";
 import { useMusicPlayer } from "./MusicPlayer";
 
@@ -40,6 +40,46 @@ export function SongSearch({ onPick, placeholder = "Buscá una canción o artist
         <button key={t.id} type="button" onClick={() => { onPick(t); setQ(""); setTracks([]); }} className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-2 text-left transition-colors hover:border-primary/50">
           <img src={t.cover} alt="" loading="lazy" className="h-10 w-10 rounded-lg object-cover" />
           <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{t.title}</span><span className="block truncate text-[11px] text-muted-foreground">{t.artist} · {t.album}</span></span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Buscador de álbumes del catálogo, embebido en un formulario. */
+export function AlbumSearch({ onPick }: { onPick: (a: CatalogAlbum) => void }) {
+  const search = useServerFn(searchCatalog);
+  const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [albums, setAlbums] = useState<CatalogAlbum[]>([]);
+  useEffect(() => {
+    const text = q.trim();
+    if (text.length < 2) { setAlbums([]); return; }
+    let cancelled = false;
+    setLoading(true); setFailed(false);
+    const t = setTimeout(() => {
+      search({ data: { q: text } })
+        .then((r) => { if (!cancelled) setAlbums(r.albums.slice(0, 6)); })
+        .catch(() => { if (!cancelled) setFailed(true); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    }, 350);
+    return () => { cancelled = true; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
+  return (
+    <div className="space-y-2">
+      <label className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscá un álbum o artista" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+        {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+      </label>
+      {failed && <p className="text-center text-xs text-muted-foreground">No pudimos buscar en el catálogo. Probá de nuevo.</p>}
+      {!loading && !failed && q.trim().length >= 2 && albums.length === 0 && <p className="text-center text-xs text-muted-foreground">No encontramos álbumes.</p>}
+      {albums.map((a) => (
+        <button key={a.id} type="button" onClick={() => { onPick(a); setQ(""); setAlbums([]); }} className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-2 text-left transition-colors hover:border-primary/50">
+          <img src={a.cover} alt="" loading="lazy" className="h-10 w-10 rounded-lg object-cover" />
+          <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{a.title}</span><span className="block truncate text-[11px] text-muted-foreground">{a.artist}{a.year ? ` · ${a.year}` : ""}</span></span>
         </button>
       ))}
     </div>

@@ -191,9 +191,9 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
         </label>
         {!isDrops && (
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <Link to="/mi-drop" search={{ tab: "albumes" }} className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
-              <Star className="h-4 w-4" />Reseñar un álbum
-            </Link>
+            <button type="button" onClick={() => setWriting({ kind: "album" })} className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
+              <Star className="h-4 w-4" />Escribir reseña
+            </button>
             <a href="#shows" onClick={(e) => { e.preventDefault(); document.getElementById("shows")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex items-center justify-center gap-2 rounded-2xl border border-primary/40 py-3 text-sm font-black text-primary">
               <Ticket className="h-4 w-4" />Ver shows
             </a>
@@ -291,7 +291,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
       <section className="mt-7">
         <div className="mb-3 flex items-end justify-between">
           <h2 className="text-xl font-black">Reseñas de la comunidad</h2>
-          <Button size="sm" onClick={() => setWriting({ kind: "song" })}><PenLine className="h-3.5 w-3.5" />Escribir reseña</Button>
+          <Button size="sm" onClick={() => setWriting({ kind: "album" })}><PenLine className="h-3.5 w-3.5" />Escribir reseña</Button>
         </div>
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
           {([["todas", "Todas"], ["album", "Álbumes"], ["song", "Canciones"], ["show", "Shows"]] as const).map(([id, label]) => (
@@ -418,7 +418,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
           onClose={() => setWriting(null)}
           onPublished={(r) => {
             setWriting(null);
-            setReviewFilter(r.subject_type === "show" || r.subject_type === "song" ? r.subject_type : "todas");
+            setReviewFilter(r.subject_type === "show" || r.subject_type === "song" || r.subject_type === "album" ? r.subject_type : "todas");
             if (mode === "user") setData((d) => ({ ...d, reviews: [r, ...d.reviews.filter((x) => reviewKey(x) !== reviewKey(r))] }));
           }}
         />

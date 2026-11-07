@@ -36,14 +36,16 @@ export function MissionGame({ kind, missionId, verified, onFinish }: { kind: Gam
 }
 function GuestTrivia() {
   const [answers, setAnswers] = useState<number[]>([]);
+  const [shown, setShown] = useState<AnswerFeedbackData | null>(null);
   const question = guestQuestions[answers.length];
   const result = guestPracticeResult(answers);
+  if (shown) return <div className="space-y-4"><AnswerFeedback data={shown} last={answers.length >= guestQuestions.length} onNext={() => setShown(null)} /></div>;
   return <div className="space-y-4">
     <p className="text-sm font-bold">Trivia de práctica · sin puntos ni ranking</p>
     {question ? <>
       <p className="text-xs text-muted-foreground">Pregunta {answers.length + 1} / {guestQuestions.length}</p>
       <p className="font-bold">{question.question}</p>
-      {question.options.map((option, index) => <Button key={option} variant="outline" className="h-auto w-full justify-start whitespace-normal py-3 text-left" onClick={() => setAnswers(previous => [...previous, index])}>{option}</Button>)}
+      {question.options.map((option, index) => <Button key={option} variant="outline" className="h-auto w-full justify-start whitespace-normal py-3 text-left" onClick={() => { setShown({ q: question.question, options: question.options, answer: index, correct: question.answer, right: index === question.answer }); setAnswers(previous => [...previous, index]); }}>{option}</Button>)}
     </> : <>
       <p role="status" className="font-bold">Resultado: {result.correct} / {result.total} respuestas correctas</p>
       <Button className="w-full" onClick={() => setAnswers([])}>Volver a jugar</Button>
@@ -57,10 +59,21 @@ function VerifiedGame({ missionId, kind, onFinish }: { missionId: string; kind: 
   const [error, setError] = useState('');
   const [seconds, setSeconds] = useState(20);
   const [code, setCode] = useState('');
+  const [feedback, setFeedback] = useState<(AnswerFeedbackData & { next: AttemptResult }) | null>(null);
+  async function advance() {
+    if (!feedback) return;
+    const next = feedback.next; setFeedback(null); setAttempt(next);
+    if (next.status === 'completed') { setBusy(true); try { await onFinish(next); } finally { setBusy(false); } }
+  }
   const [sequence, setSequence] = useState(() => orderGame(missionId).start);
   async function send(type: 'start' | 'answer' | 'check', payload: Record<string,string|number|number[]>) {
     setBusy(true); setError('');
-    try { const result = await action({ data: { action: type, payload } }); setAttempt(result); if (result.status === 'completed') await onFinish(result); }
+    try {
+      const result = await action({ data: { action: type, payload } });
+      // Trivia: primero mostramos si estuvo bien y cuál era la correcta; después seguimos.
+      if (type === 'answer' && result.feedback) { setFeedback({ ...result.feedback, next: result }); return; }
+      setAttempt(result); if (result.status === 'completed') await onFinish(result);
+    }
     catch (e) { setError(e instanceof Error ? e.message : 'No pudimos validar la respuesta.'); }
     finally { setBusy(false); }
   }
@@ -73,13 +86,44 @@ function VerifiedGame({ missionId, kind, onFinish }: { missionId: string; kind: 
   return <div className="space-y-4">
     {error && <div role="alert" className="text-sm text-destructive">{error}<Button variant="outline" onClick={() => send('start',{ mission_id: missionId })}>Retomar intento</Button></div>}
     {!attempt && !error && <p className="text-sm text-muted-foreground">Cargando intento…</p>}
-    {attempt?.question && kind === 'trivia' && <TriviaQuestion attempt={attempt} seconds={seconds} busy={busy} onAnswer={(index) => send('answer',{ attempt_id: attempt.id,index: attempt.index,answer: seconds === 0 ? -1 : index })} />}
+    {feedback && <AnswerFeedback data={feedback} last={feedback.next.status === 'completed'} onNext={() => void advance()} />}
+    {!feedback && attempt?.question && kind === 'trivia' && <TriviaQuestion attempt={attempt} seconds={seconds} busy={busy} onAnswer={(index) => send('answer',{ attempt_id: attempt.id,index: attempt.index,answer: seconds === 0 ? -1 : index })} />}
     {attempt?.status === 'playing' && kind === 'clue' && <><label className="block text-sm">Código de la pista<input className="mt-2 w-full rounded-lg border border-input bg-background p-3" value={code} onChange={e=>setCode(e.target.value)} /></label><Button disabled={busy || !code.trim()} onClick={()=>send('check',{attempt_id:attempt.id,code})}>Verificar pista</Button></>}
     {attempt?.status === 'playing' && (kind === 'stream' || kind === 'scan' || kind === 'ar') && <SimulatedExperience kind={kind} missionId={missionId} busy={busy} onDone={() => send('check',{ attempt_id: attempt.id })} />}
     {attempt?.status === 'playing' && kind === 'order' && <><OrderBoard missionId={missionId} order={sequence} setOrder={setSequence} disabled={busy} />{attempt.checks > 0 && <p className="text-center text-xs text-muted-foreground">Ese orden no era. Te quedan intentos: probá de nuevo.</p>}<Button className="w-full" disabled={busy} onClick={()=>send('check',{attempt_id:attempt.id,sequence})}>Confirmar orden</Button></>}
     {busy && <p className="text-xs text-muted-foreground">Validando…</p>}
   </div>;
 }
+export type AnswerFeedbackData = { q: string; options: string[]; answer: number; correct: number; right: boolean };
+
+/** Corrección después de cada pregunta: si te equivocaste, te muestra cuál era la correcta. */
+function AnswerFeedback({ data, last, onNext }: { data: AnswerFeedbackData; last: boolean; onNext: () => void }) {
+  const correctText = data.options[data.correct];
+  // El reloj de la próxima pregunta ya corre (con 3 s de margen): avanzamos solos.
+  const [left, setLeft] = useState(3);
+  useEffect(() => {
+    if (last) return;
+    if (left <= 0) { onNext(); return; }
+    const t = setTimeout(() => setLeft((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [left, last]);
+  return <div className="space-y-3" role="status">
+    <div className={`rounded-2xl p-4 text-center ${data.right ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`}>
+      <p className="text-lg font-black">{data.right ? '¡Correcto!' : data.answer === -1 ? 'Se acabó el tiempo' : 'Incorrecto'}</p>
+      {!data.right && <p className="mt-1 text-sm text-foreground">La respuesta correcta era <span className="font-black">{correctText}</span></p>}
+    </div>
+    <p className="text-center text-sm font-bold">{data.q}</p>
+    <div className="space-y-2">{data.options.map((option, index) => {
+      const isCorrect = index === data.correct; const isMine = index === data.answer;
+      return <div key={option} className={`flex items-center justify-between rounded-xl border px-3 py-2.5 text-sm ${isCorrect ? 'border-emerald-500 bg-emerald-500/10 font-bold' : isMine ? 'border-rose-500 bg-rose-500/10 line-through' : 'border-border text-muted-foreground'}`}>
+        <span>{option}</span>{isCorrect ? <Check className="h-4 w-4 text-emerald-400" /> : isMine ? <span className="text-xs font-bold text-rose-400">Tu respuesta</span> : null}
+      </div>;
+    })}</div>
+    <Button className="w-full" onClick={onNext}>{last ? 'Ver resultado' : `Siguiente pregunta (${Math.max(left, 0)})`}</Button>
+  </div>;
+}
+
 const orderGame = (missionId: string) => ORDER_GAMES[missionId] ?? ORDER_GAMES['lali-order'];
 
 /** Lista para ordenar con flechas: cada pieza muestra su nombre real (disco, tema o fragmento). */

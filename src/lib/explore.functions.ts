@@ -96,13 +96,19 @@ export const saveDropAction = createServerFn({ method: 'POST' }).middleware([req
   });
 
 const reviewInput = z.object({
-  subject_type: z.enum(['album', 'artist', 'show']),
+  subject_type: z.enum(['album', 'artist', 'show', 'song']),
   subject_id: z.string().min(1).max(120),
   subject_title: z.string().min(1).max(160),
   subject_artist: z.string().max(160).default(''),
   subject_image: z.string().max(500).nullable().default(null),
   rating: z.number().int().min(1).max(5),
   text: z.string().max(1000).default(''),
+  extras: z.object({
+    photos: z.array(z.string().startsWith('data:image/').max(400_000)).max(4).optional(),
+    venue: z.string().max(160).optional(),
+    date: z.string().max(40).optional(),
+    song: z.object({ id: z.number(), title: z.string().max(200), artist: z.string().max(200), cover: z.string().max(500), link: z.string().max(500).optional() }).optional(),
+  }).optional(),
 });
 
 export const publishReview = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
@@ -110,8 +116,11 @@ export const publishReview = createServerFn({ method: 'POST' }).middleware([requ
   .handler(async ({ data, context }) => {
     const db = context.supabase as unknown as AnyClient;
     const { data: profile } = await db.from('profiles').select('display_name').eq('id', context.userId).single();
+    // extras solo se manda si hay algo, así las reseñas de álbumes andan aunque falte la columna.
+    const { extras, ...base } = data;
+    const row = extras && Object.keys(extras).length ? { ...base, extras } : base;
     const { error } = await db.from('reviews').upsert(
-      { ...data, user_id: context.userId, author_name: profile?.display_name ?? '' },
+      { ...row, user_id: context.userId, author_name: profile?.display_name ?? '' },
       { onConflict: 'user_id,subject_type,subject_id' },
     );
     if (error) throw new Error('No pudimos publicar tu reseña.');
@@ -119,7 +128,7 @@ export const publishReview = createServerFn({ method: 'POST' }).middleware([requ
   });
 
 export const deleteReview = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ subject_type: z.enum(['album', 'artist', 'show']), subject_id: z.string().min(1) }).parse(input))
+  .inputValidator((input: unknown) => z.object({ subject_type: z.enum(['album', 'artist', 'show', 'song']), subject_id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
     const db = context.supabase as unknown as AnyClient;
     const { error } = await db.from('reviews').delete().eq('user_id', context.userId).eq('subject_type', data.subject_type).eq('subject_id', data.subject_id);

@@ -2,7 +2,7 @@ export type CommunityReview = {
   id: string;
   user_id: string;
   author_name: string;
-  subject_type: "album" | "artist" | "show";
+  subject_type: "album" | "artist" | "show" | "song";
   subject_id: string;
   subject_title: string;
   subject_artist: string;
@@ -10,7 +10,13 @@ export type CommunityReview = {
   rating: number;
   text: string;
   created_at: string;
+  extras?: ReviewExtras | null;
 };
+
+/** Canción asociada a una reseña (la reseñada, o la que suena de fondo en un show). */
+export type ReviewSong = { id: number; title: string; artist: string; cover: string; link?: string };
+/** Datos extra de una reseña de show o canción. */
+export type ReviewExtras = { photos?: string[]; venue?: string; date?: string; song?: ReviewSong };
 
 export type ShowEvent = {
   id: string;

@@ -3,11 +3,13 @@ import { Eye, EyeOff, Loader2, Mail, ArrowRight } from "lucide-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import logoViolet from "@/assets/drop-logo-negativo.webp";
 const logo = { url: logoViolet };
 import { supabase } from "@/integrations/supabase/client";
 import { useDropAuth } from "./AuthProvider";
 
+const TERMS_KEY = "drop-terminos-aceptados";
 const input = "h-12 w-full rounded-lg border border-input bg-card px-4 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring";
 const errorText = (message: string) =>
   /invalid login/i.test(message) ? "Email o contraseña incorrectos." :
@@ -27,9 +29,19 @@ export function ConnectView() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [terms, setTerms] = useState(false);
+  const [termsMissing, setTermsMissing] = useState(false);
   const navigate = useNavigate();
   useEffect(() => { setMode(search.mode === "signup" ? "signup" : "login"); }, [search.mode]);
   useEffect(() => { if (access === "user") void navigate({ to: "/explorar", replace: true }); }, [access, navigate]);
+  // Si ya aceptó en este dispositivo, la casilla aparece tildada.
+  useEffect(() => { try { if (localStorage.getItem(TERMS_KEY)) setTerms(true); } catch { /* sin almacenamiento */ } }, []);
+  /** Devuelve true si aceptó los términos; si no, muestra el aviso. */
+  const requireTerms = () => {
+    if (terms) { try { localStorage.setItem(TERMS_KEY, new Date().toISOString()); } catch { /* sin almacenamiento */ } return true; }
+    setTermsMissing(true); setError("Para continuar tenés que aceptar los términos y condiciones.");
+    return false;
+  };
   const switchMode = (next: typeof mode) => { setMode(next); setNotice(""); setError(""); setPassword(""); };
 
   async function submit(event: React.FormEvent) {
@@ -37,6 +49,7 @@ export function ConnectView() {
     setError(""); setNotice("");
     const mail = email.trim();
     if (!/^\S+@\S+\.\S+$/.test(mail)) { setError("Ingresá un email válido."); return; }
+    if (mode !== "forgot" && !requireTerms()) return;
     if (mode !== "forgot" && password.length < (mode === "signup" ? 8 : 1)) { setError(mode === "signup" ? "La contraseña debe tener al menos 8 caracteres." : "Ingresá tu contraseña."); return; }
     setBusy(true);
     if (mode === "forgot") {
@@ -58,7 +71,9 @@ export function ConnectView() {
   }
 
   async function google() {
-    setError(""); setBusy(true);
+    setError("");
+    if (!requireTerms()) return;
+    setBusy(true);
     // Login de Google directo con Supabase (sin depender de Lovable).
     const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + "/auth" } });
     if (error) { setError("No pudimos conectar con Google. Probá de nuevo."); setBusy(false); return; }
@@ -71,7 +86,11 @@ export function ConnectView() {
       <h1 className="mt-5 text-3xl font-black leading-tight">{mode === "signup" ? "Creá tu cuenta." : mode === "forgot" ? "Recuperá tu acceso." : "Tu música. Tu DROP."}</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mode === "signup" ? "Guardá tus puntos, álbumes y drops en todos tus dispositivos." : mode === "forgot" ? "Te enviamos un enlace para elegir una nueva contraseña." : "Entrá a tu cuenta y seguí viviendo la música."}</p>
       {mode !== "forgot" && <>
-        <Button type="button" disabled={busy} onClick={google} className="mt-7 h-12 w-full gap-3 border border-border bg-white font-bold text-neutral-900 shadow-sm hover:bg-white/90"><GoogleIcon />Continuar con Google</Button>
+        <label className={`mt-6 flex items-start gap-3 rounded-lg border p-3 text-xs leading-relaxed transition-colors ${termsMissing && !terms ? "border-destructive bg-destructive/10" : "border-border bg-card"}`}>
+          <Checkbox checked={terms} onCheckedChange={(v) => { const ok = v === true; setTerms(ok); if (ok) { setTermsMissing(false); setError(""); } }} className="mt-0.5 h-5 w-5" aria-label="Acepto los términos y condiciones" />
+          <span>Acepto los <a href="/terminos" target="_blank" rel="noreferrer" className="font-semibold text-primary underline">términos y condiciones</a> y la <a href="/privacidad" target="_blank" rel="noreferrer" className="font-semibold text-primary underline">política de privacidad</a> de DROP.</span>
+        </label>
+        <Button type="button" disabled={busy} onClick={google} className="mt-4 h-12 w-full gap-3 border border-border bg-white font-bold text-neutral-900 shadow-sm hover:bg-white/90"><GoogleIcon />Continuar con Google</Button>
         <p className="mt-2 text-center text-xs text-muted-foreground">Es lo más rápido: un toque y entrás.</p>
         <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />o con tu email<span className="h-px flex-1 bg-border" /></div>
       </>}
@@ -85,9 +104,9 @@ export function ConnectView() {
         <Button type="submit" disabled={busy} variant={mode === "forgot" ? "default" : "outline"} className="h-12 w-full font-bold">{busy ? <Loader2 className="animate-spin" /> : <ArrowRight />}{mode === "signup" ? "Crear cuenta" : mode === "forgot" ? "Enviar enlace" : "Iniciar sesión"}</Button>
       </form>
       <div className="mt-5 text-center"><p className="text-xs text-muted-foreground">{mode === "login" ? "¿Todavía no tenés cuenta?" : "¿Ya tenés una cuenta?"}</p><Button disabled={busy} variant="link" onClick={() => switchMode(mode === "login" ? "signup" : "login")}>{mode === "login" ? "Crear una cuenta nueva" : "Iniciar sesión"}</Button></div>
-      {mode === "login" && <Button disabled={busy} variant="outline" className="mt-4 h-12 w-full" onClick={() => { void navigate({ to: "/invitado" }); }}>Ingresar sin cuenta <ArrowRight /></Button>}
+      {mode === "login" && <Button disabled={busy} variant="outline" className="mt-4 h-12 w-full" onClick={() => { if (requireTerms()) void navigate({ to: "/invitado" }); }}>Ingresar sin cuenta <ArrowRight /></Button>}
       {mode === "login" && <p className="mt-2 text-center text-xs text-muted-foreground">En modo invitado tus puntos no se guardan.</p>}
-      <a href="/privacidad" className="mt-6 text-center text-xs text-muted-foreground underline">Política de privacidad</a>
+      <p className="mt-6 text-center text-xs text-muted-foreground"><a href="/terminos" className="underline">Términos y condiciones</a> · <a href="/privacidad" className="underline">Política de privacidad</a></p>
     </div>
   </div>;
 }

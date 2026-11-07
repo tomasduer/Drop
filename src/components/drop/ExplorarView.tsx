@@ -49,24 +49,24 @@ const FALLBACK_DROPS: DropCard[] = [
 
 const DISCOVER = ["LALI", "María Becerra", "TINI", "Dillom", "Emilia", "Nicki Nicole", "Milo J", "Trueno", "Bizarrap", "Duki"];
 
-// Cada género lleva su lista de artistas (locales e internacionales) y, si existe, el género de Deezer.
+// Cada género lleva su lista de artistas (primero los internacionales, después los locales) y, si existe, el género de Deezer.
 const GENRES: MusicGenre[] = [
   { name: "Pop", detail: "LALI · María Becerra · TINI", image: generoPop, deezerGenre: 132,
-    artists: ["LALI", "María Becerra", "TINI", "Miranda!", "Emilia", "Katy Perry", "Taylor Swift", "Dua Lipa", "Ariana Grande", "Sabrina Carpenter", "Olivia Rodrigo", "Shakira"] },
+    artists: ["Taylor Swift", "Katy Perry", "Dua Lipa", "Ariana Grande", "Sabrina Carpenter", "Olivia Rodrigo", "Shakira", "LALI", "María Becerra", "TINI", "Miranda!", "Emilia"] },
   { name: "Urbano", detail: "Duki · Lit Killah · Tiago PZK · Rusherking", image: generoUrbano,
-    artists: ["Duki", "Lit Killah", "Tiago PZK", "Rusherking", "Bizarrap", "Nicki Nicole", "Paulo Londra", "FMK", "Bad Bunny", "Karol G", "J Balvin", "Feid"] },
+    artists: ["Bad Bunny", "Karol G", "J Balvin", "Feid", "Duki", "Bizarrap", "Nicki Nicole", "Paulo Londra", "Tiago PZK", "Lit Killah", "Rusherking", "FMK"] },
   { name: "Rock", detail: "Airbag · Ciro y Los Persas", image: generoRock, deezerGenre: 152,
-    artists: ["Airbag", "Ciro y Los Persas", "Soda Stereo", "Divididos", "La Renga", "Babasónicos", "Patricio Rey y sus Redonditos de Ricota", "Foo Fighters", "Arctic Monkeys", "Queen", "Guns N' Roses", "Red Hot Chili Peppers"] },
+    artists: ["Queen", "Foo Fighters", "Arctic Monkeys", "Red Hot Chili Peppers", "Guns N' Roses", "Soda Stereo", "Airbag", "Divididos", "La Renga", "Babasónicos", "Ciro y Los Persas", "Patricio Rey y sus Redonditos de Ricota"] },
   { name: "Indie", detail: "Silvestre y la Naranja · El Zar · Conociendo Rusia", image: generoIndie, deezerGenre: 85,
-    artists: ["Silvestre y la Naranja", "El Zar", "Conociendo Rusia", "Usted Señálemelo", "Bandalos Chinos", "Juan Ingaramo", "Tame Impala", "The Strokes", "Phoebe Bridgers", "Mac DeMarco", "Arcade Fire", "Vampire Weekend"] },
+    artists: ["Tame Impala", "The Strokes", "Phoebe Bridgers", "Mac DeMarco", "Arcade Fire", "Vampire Weekend", "Conociendo Rusia", "Bandalos Chinos", "Usted Señálemelo", "Silvestre y la Naranja", "El Zar", "Juan Ingaramo"] },
   { name: "Electrónica", detail: "Hernán Cattáneo · Nick Warren", image: generoElectronica, deezerGenre: 106,
-    artists: ["Hernán Cattáneo", "Nick Warren", "Fred again..", "Peggy Gou", "Charlotte de Witte", "Calvin Harris", "David Guetta", "Martin Garrix", "Daft Punk", "Bicep", "Disclosure", "Kygo"] },
+    artists: ["Daft Punk", "Calvin Harris", "David Guetta", "Martin Garrix", "Fred again..", "Peggy Gou", "Charlotte de Witte", "Kygo", "Disclosure", "Bicep", "Nick Warren", "Hernán Cattáneo"] },
   { name: "Hip-hop", detail: "Trueno · Wos · Milo J", image: generoHiphop, deezerGenre: 116,
-    artists: ["Trueno", "Wos", "Milo J", "Dillom", "Kendrick Lamar", "Drake", "Eminem", "Travis Scott", "Kanye West", "J. Cole", "Tyler, The Creator", "Mac Miller"] },
+    artists: ["Kendrick Lamar", "Drake", "Eminem", "Travis Scott", "Kanye West", "J. Cole", "Tyler, The Creator", "Mac Miller", "Trueno", "Wos", "Milo J", "Dillom"] },
   { name: "R&B", detail: "Nathy Peluso · NAFTA", image: generoRnb, deezerGenre: 165,
-    artists: ["Nathy Peluso", "NAFTA", "SZA", "The Weeknd", "Frank Ocean", "Beyoncé", "Daniel Caesar", "H.E.R.", "Usher", "Alicia Keys", "Giveon", "Summer Walker"] },
+    artists: ["The Weeknd", "SZA", "Beyoncé", "Frank Ocean", "Alicia Keys", "Usher", "Daniel Caesar", "H.E.R.", "Giveon", "Summer Walker", "Nathy Peluso", "NAFTA"] },
   { name: "Pop punk", detail: "Simple Plan · Eruca Sativa", image: generoPoppunk,
-    artists: ["Simple Plan", "Eruca Sativa", "Blink-182", "Green Day", "Paramore", "Avril Lavigne", "Sum 41", "Fall Out Boy", "My Chemical Romance", "Good Charlotte", "All Time Low", "Yellowcard"] },
+    artists: ["Green Day", "Blink-182", "Paramore", "Avril Lavigne", "Simple Plan", "Sum 41", "Fall Out Boy", "My Chemical Romance", "Good Charlotte", "All Time Low", "Yellowcard", "Eruca Sativa"] },
 ];
 
 function Stars({ value }: { value: number }) {

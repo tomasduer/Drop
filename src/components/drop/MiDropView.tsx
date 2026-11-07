@@ -454,7 +454,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
               {mode === "user" ? "Cerrar sesión" : "Salir del modo invitado"}
             </Button>
             <Button variant="ghost" onClick={() => { try { localStorage.removeItem("drop-onboarding-visto"); } catch { /* */ } void navigate({ to: "/explorar" }); }}>Ver cómo funciona DROP</Button>
-            {isAdmin && <Button variant="outline" onClick={() => void navigate({ to: "/admin" })}>Panel de drops (admin)</Button>}
+            {isAdmin && <Button variant="outline" onClick={() => void navigate({ to: "/admin" })}>Panel de administración: drops y dashboard</Button>}
             <a href="/privacidad" className="text-center text-xs text-muted-foreground underline">Política de privacidad</a>
           </DialogContent>
         </Dialog>

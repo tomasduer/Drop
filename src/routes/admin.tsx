@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ShieldAlert } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, BarChart3, LayoutGrid, ShieldAlert } from "lucide-react";
+import { DashboardView } from "@/components/drop/DashboardView";
 import { useDropAuth } from "@/components/drop/AuthProvider";
 import { AdminPanel } from "@/components/drop/admin/AdminPanel";
 import { useIsDropAdmin } from "@/lib/drop-content";
@@ -12,12 +14,13 @@ export const Route = createFileRoute("/admin")({
 function AdminPage() {
   const { mode, user } = useDropAuth();
   const isAdmin = useIsDropAdmin(mode === "user" ? user?.id : null);
+  const [view, setView] = useState<"drops" | "dashboard">("drops");
 
   return (
     <div className="mx-auto min-h-screen max-w-3xl px-4 pb-24 pt-6">
       <Link to="/explorar" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Volver a la app</Link>
       <h1 className="mt-3 text-3xl font-black">Panel de drops</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Creá y editá drops, sus fotos, su estética y sus misiones sin tocar código.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Solo para administradoras: creá y editá drops, y mirá cómo les va en el dashboard.</p>
 
       {mode === "loading" || (mode === "user" && isAdmin === null) ? (
         <p className="mt-8 text-sm text-muted-foreground">Cargando…</p>
@@ -30,7 +33,17 @@ function AdminPage() {
           Pedí que agreguen esta cuenta como admin: <b>{user?.email}</b>
         </Notice>
       ) : (
-        <AdminPanel />
+        <>
+          <nav className="mt-5 grid grid-cols-2 gap-1 rounded-2xl border border-border bg-card p-1" aria-label="Secciones del panel">
+            {([["drops", "Drops", LayoutGrid], ["dashboard", "Dashboard", BarChart3]] as const).map(([id, label, Icon]) => (
+              <button key={id} type="button" onClick={() => setView(id)} aria-current={view === id ? "page" : undefined}
+                className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-colors ${view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                <Icon className="h-4 w-4" />{label}
+              </button>
+            ))}
+          </nav>
+          {view === "drops" ? <AdminPanel /> : <div className="-mx-4 mt-4"><DashboardView /></div>}
+        </>
       )}
     </div>
   );

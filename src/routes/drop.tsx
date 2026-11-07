@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { MobileShell } from "@/components/drop/MobileShell";
 import { TopBar } from "@/components/drop/TopBar";
 import { DropNav, DROP_TABS, type DropTab } from "@/components/drop/DropNav";
@@ -7,7 +7,6 @@ import { DropHome } from "@/components/drop/DropHome";
 import { MisionesView } from "@/components/drop/MisionesView";
 import { RankingView } from "@/components/drop/RankingView";
 import { ComunidadView } from "@/components/drop/ComunidadView";
-import { DashboardView } from "@/components/drop/DashboardView";
 import { useDropAuth } from "@/components/drop/AuthProvider";
 import { useCurrentDrop } from "@/lib/drops";
 import { DropThemeStyles } from "@/components/drop/DropThemeStyles";
@@ -39,16 +38,15 @@ function DropUniverse() {
   const tab = searchTab ?? "inicio";
   const drop = useCurrentDrop();
   const { mode, saveProfile } = useDropAuth();
-  const [dashboard, setDashboard] = useState(false);
   const navigate = useNavigate();
-  const goTab = (t: DropTab) => { setDashboard(false); void navigate({ to: "/drop", search: { d: drop.id, tab: t } }); };
+  const goTab = (t: DropTab) => { void navigate({ to: "/drop", search: { d: drop.id, tab: t } }); };
 
   // Cada drop pinta la app con la estética de su álbum (ver styles.css, html[data-drop]).
   useEffect(() => {
     document.documentElement.dataset.drop = drop.id;
     return () => { delete document.documentElement.dataset.drop; };
   }, [drop.id]);
-  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }, [tab, dashboard, d]);
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }, [tab, d]);
   // Recordamos el último drop visitado (no limita: podés participar en todos).
   useEffect(() => { if (mode === "user") void saveProfile({ active_drop: drop.id }); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [drop.id, mode]);
 
@@ -58,20 +56,14 @@ function DropUniverse() {
       <TopBar
         back="Drops"
         avatar={drop.cover}
-        title={dashboard ? "Dashboard" : `${drop.artist} · ${drop.title}`}
-        dashboardOpen={dashboard}
-        onToggleDashboard={() => setDashboard((v) => !v)}
+        title={`${drop.artist} · ${drop.title}`}
         onOpenProfile={() => void navigate({ to: "/mi-drop" })}
       />
       <main className="pt-2">
-        {dashboard ? <DashboardView /> : (
-          <>
-            {tab === "inicio" && <DropHome drop={drop} onGo={goTab} />}
-            {tab === "misiones" && <MisionesView />}
-            {tab === "ranking" && <RankingView />}
-            {tab === "comunidad" && <ComunidadView />}
-          </>
-        )}
+        {tab === "inicio" && <DropHome drop={drop} onGo={goTab} />}
+        {tab === "misiones" && <MisionesView />}
+        {tab === "ranking" && <RankingView />}
+        {tab === "comunidad" && <ComunidadView />}
       </main>
       <DropNav tab={tab} onChange={goTab} />
     </MobileShell>

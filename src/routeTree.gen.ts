@@ -22,6 +22,7 @@ import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as ResenasRouteImport } from './routes/resenas'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SpotifyRouteImport } from './routes/spotify'
+import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as TiendaRouteImport } from './routes/tienda'
 
 const IndexRoute = IndexRouteImport.update({
@@ -89,6 +90,11 @@ const SpotifyRoute = SpotifyRouteImport.update({
   path: '/spotify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TerminosRoute = TerminosRouteImport.update({
+  id: '/terminos',
+  path: '/terminos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TiendaRoute = TiendaRouteImport.update({
   id: '/tienda',
   path: '/tienda',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/resenas': typeof ResenasRoute
   '/reset-password': typeof ResetPasswordRoute
   '/spotify': typeof SpotifyRoute
+  '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
 }
 export interface FileRoutesByTo {
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/resenas': typeof ResenasRoute
   '/reset-password': typeof ResetPasswordRoute
   '/spotify': typeof SpotifyRoute
+  '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
 }
 export interface FileRoutesById {
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/resenas': typeof ResenasRoute
   '/reset-password': typeof ResetPasswordRoute
   '/spotify': typeof SpotifyRoute
+  '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/resenas'
     | '/reset-password'
     | '/spotify'
+    | '/terminos'
     | '/tienda'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/resenas'
     | '/reset-password'
     | '/spotify'
+    | '/terminos'
     | '/tienda'
   id:
     | '__root__'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/resenas'
     | '/reset-password'
     | '/spotify'
+    | '/terminos'
     | '/tienda'
   fileRoutesById: FileRoutesById
 }
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   ResenasRoute: typeof ResenasRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SpotifyRoute: typeof SpotifyRoute
+  TerminosRoute: typeof TerminosRoute
   TiendaRoute: typeof TiendaRoute
 }
 
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpotifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terminos': {
+      id: '/terminos'
+      path: '/terminos'
+      fullPath: '/terminos'
+      preLoaderRoute: typeof TerminosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tienda': {
       id: '/tienda'
       path: '/tienda'
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResenasRoute: ResenasRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SpotifyRoute: SpotifyRoute,
+  TerminosRoute: TerminosRoute,
   TiendaRoute: TiendaRoute,
 }
 export const routeTree = rootRouteImport

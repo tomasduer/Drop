@@ -291,7 +291,6 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
       <section className="mt-7">
         <div className="mb-3 flex items-end justify-between">
           <h2 className="text-xl font-black">Reseñas de la comunidad</h2>
-          <Button size="sm" onClick={() => setWriting({ kind: "album" })}><PenLine className="h-3.5 w-3.5" />Escribir reseña</Button>
         </div>
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
           {([["todas", "Todas"], ["album", "Álbumes"], ["song", "Canciones"], ["show", "Shows"]] as const).map(([id, label]) => (

@@ -21,7 +21,7 @@ export function ReviewViewer({ review, image, onClose }: { review: CommunityRevi
 
   return (
     <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto rounded-2xl p-0">
+      <DialogContent className="block max-h-[92dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto overflow-x-hidden rounded-2xl p-0">
         {photos.length > 0 ? (
           <div className="relative">
             <div className="flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto rounded-t-2xl" onScroll={(e) => { const el = e.currentTarget; setIndex(Math.round(el.scrollLeft / el.clientWidth)); }}>

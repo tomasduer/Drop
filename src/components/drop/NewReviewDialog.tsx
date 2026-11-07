@@ -106,7 +106,7 @@ export function NewReviewDialog({ initialKind = "song", initialShow, shows, onCl
 
   return (
     <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl">
+      <DialogContent className="flex max-h-[90dvh] w-[calc(100%-2rem)] max-w-md flex-col gap-5 overflow-y-auto overflow-x-hidden rounded-2xl [&>*]:min-w-0">
         <DialogHeader>
           <DialogTitle>Escribir una reseña</DialogTitle>
           <DialogDescription>Contale a la comunidad qué te pareció.</DialogDescription>
@@ -145,15 +145,15 @@ export function NewReviewDialog({ initialKind = "song", initialShow, shows, onCl
           <section className="space-y-4">
             <div>
               <p className="mb-2 text-sm font-bold">¿A qué show fuiste?</p>
-              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              <div className="flex gap-2 overflow-x-auto pb-1">
                 {shows.slice(0, 12).map((s) => (
-                  <button key={s.id} type="button" onClick={() => pickShow(s)} className={`w-32 shrink-0 rounded-xl border p-2 text-left text-xs ${!custom && show?.id === s.id ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-                    <span className="block truncate font-bold">{s.artist}</span>
-                    <span className="block truncate text-[11px] text-muted-foreground">{s.title}</span>
+                  <button key={s.id} type="button" onClick={() => pickShow(s)} aria-pressed={!custom && show?.id === s.id} className={`w-36 shrink-0 overflow-hidden rounded-xl border text-left text-xs transition-colors ${!custom && show?.id === s.id ? "border-primary ring-1 ring-primary" : "border-border bg-card"}`}>
+                    {s.image_url && <img src={s.image_url} alt="" loading="lazy" className="h-16 w-full object-cover" />}
+                    <span className="block p-2"><span className="block truncate font-bold">{s.artist}</span><span className="block truncate text-[11px] text-muted-foreground">{s.title}</span>{s.event_date && <span className="block text-[10px] text-muted-foreground">{new Date(s.event_date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })}</span>}</span>
                   </button>
                 ))}
-                <button type="button" onClick={() => { setCustom(true); setShow(null); }} className={`w-32 shrink-0 rounded-xl border p-2 text-left text-xs ${custom ? "border-primary bg-primary/10" : "border-dashed border-border"}`}>
-                  <span className="block font-bold">Otro show</span><span className="block text-[11px] text-muted-foreground">Escribilo vos</span>
+                <button type="button" onClick={() => { setCustom(true); setShow(null); setVenue(""); setDate(""); }} aria-pressed={custom} className={`grid w-36 shrink-0 place-items-center rounded-xl border p-2 text-center text-xs ${custom ? "border-primary ring-1 ring-primary" : "border-dashed border-border"}`}>
+                  <span><span className="block font-bold">Otro show</span><span className="block text-[11px] text-muted-foreground">Escribilo vos</span></span>
                 </button>
               </div>
               {custom && (
@@ -164,12 +164,12 @@ export function NewReviewDialog({ initialKind = "song", initialShow, shows, onCl
               )}
             </div>
 
-            <div className="grid grid-cols-[1fr_auto] gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_9rem] gap-2">
               <label className="text-xs font-semibold">Lugar
-                <span className="relative mt-1 block"><MapPin className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" /><input value={venue} onChange={(e) => setVenue(e.target.value)} maxLength={160} placeholder="Estadio, ciudad" className={`${input} pl-9`} /></span>
+                <span className="relative mt-1 block min-w-0"><MapPin className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" /><input value={venue} onChange={(e) => setVenue(e.target.value)} maxLength={160} placeholder="Estadio, ciudad" className={`${input} pl-9`} /></span>
               </label>
               <label className="text-xs font-semibold">Fecha
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={`${input} mt-1 w-36`} />
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={`${input} mt-1 block`} />
               </label>
             </div>
 

@@ -10,7 +10,7 @@ import { emptyExploreData, type CommunityReview, type DropCard, type ExploreData
 import { useDropAuth } from "./AuthProvider";
 import { useDrops, type DropInfo } from "@/lib/drops";
 import { ArtistLine } from "@/components/drop/ArtistLine";
-import { CatalogResults } from "./Catalog";
+import { CatalogResults, GenreSheet, type MusicGenre } from "./Catalog";
 import { getExternalShows } from "@/lib/music.functions";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
@@ -49,15 +49,24 @@ const FALLBACK_DROPS: DropCard[] = [
 
 const DISCOVER = ["LALI", "María Becerra", "TINI", "Dillom", "Emilia", "Nicki Nicole", "Milo J", "Trueno", "Bizarrap", "Duki"];
 
-const GENRES = [
-  { name: "Pop", detail: "LALI · María Becerra · TINI", image: generoPop },
-  { name: "Urbano", detail: "Duki · Lit Killah · Tiago PZK · Rusherking", image: generoUrbano },
-  { name: "Rock", detail: "Airbag · Ciro y Los Persas", image: generoRock },
-  { name: "Indie", detail: "Silvestre y la Naranja · El Zar · Conociendo Rusia", image: generoIndie },
-  { name: "Electrónica", detail: "Hernán Cattáneo · Nick Warren", image: generoElectronica },
-  { name: "Hip-hop", detail: "Trueno · Wos · Milo J", image: generoHiphop },
-  { name: "R&B", detail: "Nathy Peluso · NAFTA", image: generoRnb },
-  { name: "Pop punk", detail: "Simple Plan · Eruca Sativa", image: generoPoppunk },
+// Cada género lleva su lista de artistas (locales e internacionales) y, si existe, el género de Deezer.
+const GENRES: MusicGenre[] = [
+  { name: "Pop", detail: "LALI · María Becerra · TINI", image: generoPop, deezerGenre: 132,
+    artists: ["LALI", "María Becerra", "TINI", "Miranda!", "Emilia", "Katy Perry", "Taylor Swift", "Dua Lipa", "Ariana Grande", "Sabrina Carpenter", "Olivia Rodrigo", "Shakira"] },
+  { name: "Urbano", detail: "Duki · Lit Killah · Tiago PZK · Rusherking", image: generoUrbano,
+    artists: ["Duki", "Lit Killah", "Tiago PZK", "Rusherking", "Bizarrap", "Nicki Nicole", "Paulo Londra", "FMK", "Bad Bunny", "Karol G", "J Balvin", "Feid"] },
+  { name: "Rock", detail: "Airbag · Ciro y Los Persas", image: generoRock, deezerGenre: 152,
+    artists: ["Airbag", "Ciro y Los Persas", "Soda Stereo", "Divididos", "La Renga", "Babasónicos", "Patricio Rey y sus Redonditos de Ricota", "Foo Fighters", "Arctic Monkeys", "Queen", "Guns N' Roses", "Red Hot Chili Peppers"] },
+  { name: "Indie", detail: "Silvestre y la Naranja · El Zar · Conociendo Rusia", image: generoIndie, deezerGenre: 85,
+    artists: ["Silvestre y la Naranja", "El Zar", "Conociendo Rusia", "Usted Señálemelo", "Bandalos Chinos", "Juan Ingaramo", "Tame Impala", "The Strokes", "Phoebe Bridgers", "Mac DeMarco", "Arcade Fire", "Vampire Weekend"] },
+  { name: "Electrónica", detail: "Hernán Cattáneo · Nick Warren", image: generoElectronica, deezerGenre: 106,
+    artists: ["Hernán Cattáneo", "Nick Warren", "Fred again..", "Peggy Gou", "Charlotte de Witte", "Calvin Harris", "David Guetta", "Martin Garrix", "Daft Punk", "Bicep", "Disclosure", "Kygo"] },
+  { name: "Hip-hop", detail: "Trueno · Wos · Milo J", image: generoHiphop, deezerGenre: 116,
+    artists: ["Trueno", "Wos", "Milo J", "Dillom", "Kendrick Lamar", "Drake", "Eminem", "Travis Scott", "Kanye West", "J. Cole", "Tyler, The Creator", "Mac Miller"] },
+  { name: "R&B", detail: "Nathy Peluso · NAFTA", image: generoRnb, deezerGenre: 165,
+    artists: ["Nathy Peluso", "NAFTA", "SZA", "The Weeknd", "Frank Ocean", "Beyoncé", "Daniel Caesar", "H.E.R.", "Usher", "Alicia Keys", "Giveon", "Summer Walker"] },
+  { name: "Pop punk", detail: "Simple Plan · Eruca Sativa", image: generoPoppunk,
+    artists: ["Simple Plan", "Eruca Sativa", "Blink-182", "Green Day", "Paramore", "Avril Lavigne", "Sum 41", "Fall Out Boy", "My Chemical Romance", "Good Charlotte", "All Time Low", "Yellowcard"] },
 ];
 
 function Stars({ value }: { value: number }) {
@@ -73,6 +82,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   const toggleShow = useServerFn(showAttendanceAction);
   const [data, setData] = useState<ExploreData>(emptyExploreData);
   const [query, setQuery] = useState("");
+  const [openGenre, setOpenGenre] = useState<MusicGenre | null>(null);
   // Desde el perfil, "Show" abre Explorar directo en los shows.
   useEffect(() => {
     if (window.location.hash !== "#shows") return;
@@ -338,7 +348,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
         <h2 className="mb-3 text-xl font-black">Explorar por género</h2>
         <div className="grid grid-cols-2 gap-3">
           {visibleGenres.map((genre) => (
-            <button key={genre.name} onClick={() => { setQuery(genre.name); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="relative h-24 overflow-hidden rounded-2xl border border-border text-left">
+            <button key={genre.name} onClick={() => setOpenGenre(genre)} className="relative h-24 overflow-hidden rounded-2xl border border-border text-left">
               <img decoding="async" src={genre.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-60" />
               <span className="absolute inset-0" style={{ backgroundImage: "linear-gradient(180deg, transparent 30%, oklch(0 0 0 / 0.75)), var(--gradient-drop-soft)" }} />
               <span className="absolute bottom-2 left-3 right-3">
@@ -349,6 +359,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
           ))}
         </div>
       </section>
+      <GenreSheet genre={openGenre} onClose={() => setOpenGenre(null)} onSearch={(name) => { setQuery(name); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
 
       {/* Artistas para descubrir */}
       <section className="mt-7">

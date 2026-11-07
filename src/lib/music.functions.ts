@@ -66,14 +66,17 @@ export const getCatalogArtist = createServerFn({ method: 'POST' })
 // tengan la palabra del género en el nombre). Parte de una lista curada de artistas y suma el
 // ranking de ese género en Deezer (/editorial/{id}/charts) cuando existe.
 const norm = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const hasPhoto = (a: CatalogArtist) => !!a.picture && !a.picture.includes('/artist//');
 const safe = async <T,>(p: Promise<T>, fallback: T): Promise<T> => { try { return await p; } catch { return fallback; } };
 export const getGenreCatalog = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => z.object({ names: z.array(z.string().trim().min(1).max(60)).max(24), deezerGenre: z.number().int().positive().optional() }).parse(input))
   .handler(async ({ data }): Promise<CatalogSearch> => {
     const [resolved, chart] = await Promise.all([
       Promise.all(data.names.map((name) => safe((async () => {
-        const list: CatalogArtist[] = ((await get(`/search/artist?q=${encodeURIComponent(name)}&limit=5`)).data ?? []).map(artist);
-        return list.find((a) => norm(a.name) === norm(name)) ?? list[0] ?? null;
+        // Solo el artista con el nombre exacto y foto propia (si hay homónimos, el de más fans).
+        // Nada de "el primer resultado": así no aparecen artistas equivocados con fotos raras.
+        const list: CatalogArtist[] = ((await get(`/search/artist?q=${encodeURIComponent(name)}&limit=10`)).data ?? []).map(artist);
+        return list.filter((a) => norm(a.name) === norm(name) && hasPhoto(a)).sort((a, b) => b.fans - a.fans)[0] ?? null;
       })(), null as CatalogArtist | null))),
       data.deezerGenre ? safe(get(`/editorial/${data.deezerGenre}/charts`), null) : Promise.resolve(null),
     ]);
@@ -87,7 +90,7 @@ export const getGenreCatalog = createServerFn({ method: 'POST' })
     // Intercala (uno de cada artista) para que no quede todo de uno solo.
     const interleave = <T,>(lists: T[][], per: number) => { const out: T[] = []; for (let i = 0; i < per; i++) for (const l of lists) if (l[i]) out.push(l[i]); return out; };
     const uniq = <T extends { id: number }>(xs: T[]) => { const seen = new Set<number>(); return xs.filter((x) => !seen.has(x.id) && !!seen.add(x.id)); };
-    const chartArtists: CatalogArtist[] = (chart?.artists?.data ?? []).map(artist);
+    const chartArtists: CatalogArtist[] = (chart?.artists?.data ?? []).map(artist).filter(hasPhoto);
     const chartAlbums: CatalogAlbum[] = (chart?.albums?.data ?? []).map((x: unknown) => album(x));
     const chartTracks: CatalogTrack[] = (chart?.tracks?.data ?? []).map((t: unknown) => track(t));
     return {

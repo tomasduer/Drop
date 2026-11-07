@@ -62,6 +62,28 @@ export const getCatalogArtist = createServerFn({ method: 'POST' })
     return { ...artist(a), top: (top.data ?? []).map((t: unknown) => track(t)), albums: (albums.data ?? []).map((x: unknown) => album(x, a)) };
   });
 
+// Artistas de un género: primero la lista curada (busca cada nombre y se queda con el artista que
+// coincide), después los artistas destacados de ese género en Deezer. No busca la palabra del
+// género en los nombres: "Pop" no trae artistas o discos que se llamen "pop".
+const norm = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+export const getGenreArtists = createServerFn({ method: 'POST' })
+  .inputValidator((input: unknown) => z.object({ names: z.array(z.string().trim().min(1).max(60)).max(24), deezerGenre: z.number().int().positive().optional() }).parse(input))
+  .handler(async ({ data }): Promise<CatalogArtist[]> => {
+    const curated = await Promise.all(data.names.map(async (name) => {
+      try {
+        const r = await get(`/search/artist?q=${encodeURIComponent(name)}&limit=5`);
+        const list: CatalogArtist[] = (r.data ?? []).map(artist);
+        return list.find((a) => norm(a.name) === norm(name)) ?? list[0] ?? null;
+      } catch { return null; }
+    }));
+    let extra: CatalogArtist[] = [];
+    if (data.deezerGenre) {
+      try { extra = ((await get(`/genre/${data.deezerGenre}/artists`)).data ?? []).map(artist); } catch { extra = []; }
+    }
+    const seen = new Set<number>();
+    return [...curated, ...extra].filter((a): a is CatalogArtist => !!a && !seen.has(a.id) && !!seen.add(a.id)).slice(0, 30);
+  });
+
 // Agenda de shows de Ticketmaster (Discovery API). Necesita el secreto TICKETMASTER_API_KEY en Cloudflare.
 export type ExternalShow = { id: string; title: string; artist: string; event_date: string | null; city: string; venue: string; image_url: string | null; url: string };
 export const DEFAULT_SHOW_ARTISTS = ['LALI', 'María Becerra', 'TINI', 'Dillom'];

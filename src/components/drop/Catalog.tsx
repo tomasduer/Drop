@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
-  getCatalogAlbum, getCatalogArtist, getExternalShows, searchCatalog, type ExternalShow,
+  getCatalogAlbum, getCatalogArtist, getExternalShows, getGenreArtists, searchCatalog, type ExternalShow,
   type CatalogAlbum, type CatalogAlbumDetail, type CatalogArtist, type CatalogArtistDetail, type CatalogSearch, type CatalogTrack,
 } from "@/lib/music.functions";
 import { ListenButtons } from "./ListenButtons";
@@ -97,9 +97,56 @@ export function CatalogResults({ query }: { query: string }) {
   );
 }
 
-function ArtistChip({ artist, onOpen }: { artist: CatalogArtist; onOpen: () => void }) {
+export type MusicGenre = { name: string; detail: string; image: string; artists: string[]; deezerGenre?: number };
+
+/** Artistas que hacen música de un género (no los que tienen el género en el nombre). */
+export function GenreSheet({ genre, onClose, onSearch }: { genre: MusicGenre | null; onClose: () => void; onSearch: (artistName: string) => void }) {
+  const load = useServerFn(getGenreArtists);
+  const [artists, setArtists] = useState<CatalogArtist[] | null>(null);
+  const [error, setError] = useState(false);
+  const [album, setAlbum] = useState<number | null>(null);
+  const [artist, setArtist] = useState<number | null>(null);
+  useEffect(() => {
+    if (!genre) return;
+    let cancelled = false;
+    setArtists(null); setError(false);
+    load({ data: { names: genre.artists, deezerGenre: genre.deezerGenre } })
+      .then((r) => { if (!cancelled) setArtists(r); })
+      .catch(() => { if (!cancelled) setError(true); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [genre?.name]);
+  return (<>
+    <Drawer open={genre !== null && artist === null && album === null} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DrawerContent className="mx-auto max-h-[90dvh] max-w-[440px]">
+        {genre && <div className="overflow-y-auto px-4 pb-8">
+          <DrawerHeader className="px-0">
+            <div className="relative -mx-4 -mt-2 mb-2 h-28 overflow-hidden">
+              <img src={genre.image} alt="" className="h-full w-full object-cover opacity-70" />
+              <span className="absolute inset-0" style={{ backgroundImage: "linear-gradient(180deg, transparent 20%, var(--background))" }} />
+            </div>
+            <DrawerTitle className="text-2xl font-black">{genre.name}</DrawerTitle>
+            <DrawerDescription>Artistas que hacen {genre.name.toLowerCase()}. Tocá uno para escucharlo.</DrawerDescription>
+          </DrawerHeader>
+
+          {!artists && !error && <div className="grid grid-cols-3 gap-4">{genre.artists.slice(0, 9).map((n) => <div key={n} className="text-center"><div className="mx-auto h-20 w-20 animate-pulse rounded-full bg-muted" /><p className="mt-1 truncate text-xs text-muted-foreground">{n}</p></div>)}</div>}
+          {(error || (artists && artists.length === 0)) && <div className="flex flex-wrap gap-2">
+            {genre.artists.map((n) => <Button key={n} variant="outline" size="sm" className="rounded-full" onClick={() => { onClose(); onSearch(n); }}>{n}</Button>)}
+          </div>}
+          {artists && artists.length > 0 && <div className="grid grid-cols-3 gap-x-3 gap-y-4">
+            {artists.map((a) => <ArtistChip key={a.id} artist={a} onOpen={() => setArtist(a.id)} wide />)}
+          </div>}
+        </div>}
+      </DrawerContent>
+    </Drawer>
+    <AlbumSheet id={album} onClose={() => setAlbum(null)} onArtist={(id) => { setAlbum(null); setArtist(id); }} />
+    <ArtistSheet id={artist} onClose={() => setArtist(null)} onAlbum={(id) => { setArtist(null); setAlbum(id); }} />
+  </>);
+}
+
+function ArtistChip({ artist, onOpen, wide }: { artist: CatalogArtist; onOpen: () => void; wide?: boolean }) {
   return (
-    <button onClick={onOpen} className="w-20 shrink-0 text-center">
+    <button onClick={onOpen} className={`${wide ? "w-full" : "w-20 shrink-0"} text-center`}>
       <img loading="lazy" src={artist.picture} alt={artist.name} className="mx-auto h-20 w-20 rounded-full object-cover" />
       <p className="mt-1 truncate text-xs font-bold">{artist.name}</p>
     </button>

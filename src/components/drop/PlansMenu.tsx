@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Crown, Gift, Menu, Sparkles } from "lucide-react";
+import { Check, ChevronRight, Crown, Gift, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { DropLogo } from "./DropLogo";
@@ -34,18 +34,52 @@ const KEY = "drop-plan-interes";
 
 export function PlansBar() {
   const [open, setOpen] = useState(false);
+  const plan = useChosenPlan(open);
   return (
     <>
       <div className="flex items-center justify-between gap-2 px-4 pt-3">
         <DropLogo className="h-8 w-20 object-contain object-left" />
         <div className="flex items-center gap-2">
           <NotificationsButton />
-          <button type="button" onClick={() => setOpen(true)} aria-label="Abrir menú de planes"
-            className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-foreground transition-colors active:bg-muted">
-            <Menu className="h-5 w-5" />
+          <button type="button" onClick={() => setOpen(true)} aria-label="Ver planes DROP+"
+            className="flex h-10 items-center gap-1.5 rounded-full px-3.5 text-xs font-black text-primary-foreground shadow-[var(--shadow-glow)] transition-transform active:scale-95"
+            style={{ backgroundImage: "var(--gradient-drop)" }}>
+            <Crown className="h-4 w-4" />DROP+
+            {plan !== "free" && <Check className="h-3.5 w-3.5" />}
           </button>
         </div>
       </div>
+      <PlansSheet open={open} onOpenChange={setOpen} />
+    </>
+  );
+}
+
+/** Plan en el que el fan se anotó en este dispositivo (se relee cada vez que cambia `dep`). */
+function useChosenPlan(dep?: unknown): PlanId {
+  const [plan, setPlan] = useState<PlanId>("free");
+  useEffect(() => {
+    try { const v = localStorage.getItem(KEY); setPlan(v === "plus" || v === "box" ? v : "free"); } catch { /* sin almacenamiento */ }
+  }, [dep]);
+  return plan;
+}
+
+/** Tarjeta "Tu plan" para el perfil: muestra el plan actual y abre los planes. */
+export function PlanCard() {
+  const [open, setOpen] = useState(false);
+  const chosen = useChosenPlan(open);
+  const plan = PLANS.find((p) => p.id === chosen) ?? PLANS[0];
+  const Icon = plan.icon;
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} className="mt-3 flex w-full items-center gap-3 rounded-2xl border border-primary/40 bg-primary/10 p-3 text-left transition-colors active:bg-primary/20">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}><Icon className="h-5 w-5" /></span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Tu plan</span>
+          <span className="block text-sm font-black">{plan.name}{chosen !== "free" && <span className="ml-1 font-semibold text-muted-foreground">· anotado</span>}</span>
+          <span className="block truncate text-xs text-muted-foreground">{chosen === "free" ? "Pasate a DROP+: preventas y acceso anticipado" : "Te avisamos cuando abran los pagos"}</span>
+        </span>
+        <span className="flex shrink-0 items-center text-xs font-bold text-primary">{chosen === "free" ? "Ver planes" : "Cambiar"}<ChevronRight className="h-4 w-4" /></span>
+      </button>
       <PlansSheet open={open} onOpenChange={setOpen} />
     </>
   );

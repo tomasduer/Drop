@@ -57,7 +57,7 @@ export function TopBar({
               type="button"
               onClick={onOpenProfile}
               className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-foreground transition-colors active:bg-muted"
-              aria-label="Abrir Mi DROP"
+              aria-label="Abrir mi perfil"
             >
               <UserRound className="h-4 w-4" />
             </button>

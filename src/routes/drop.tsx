@@ -8,7 +8,6 @@ import { MisionesView } from "@/components/drop/MisionesView";
 import { RankingView } from "@/components/drop/RankingView";
 import { ComunidadView } from "@/components/drop/ComunidadView";
 import { DashboardView } from "@/components/drop/DashboardView";
-import { ProfileView } from "@/components/drop/ProfileView";
 import { useDropAuth } from "@/components/drop/AuthProvider";
 import { useCurrentDrop } from "@/lib/drops";
 import { DropThemeStyles } from "@/components/drop/DropThemeStyles";
@@ -41,7 +40,6 @@ function DropUniverse() {
   const drop = useCurrentDrop();
   const { mode, saveProfile } = useDropAuth();
   const [dashboard, setDashboard] = useState(false);
-  const [profile, setProfile] = useState(false);
   const navigate = useNavigate();
   const goTab = (t: DropTab) => { setDashboard(false); void navigate({ to: "/drop", search: { d: drop.id, tab: t } }); };
 
@@ -50,13 +48,9 @@ function DropUniverse() {
     document.documentElement.dataset.drop = drop.id;
     return () => { delete document.documentElement.dataset.drop; };
   }, [drop.id]);
-  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }, [tab, dashboard, profile, d]);
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }, [tab, dashboard, d]);
   // Recordamos el último drop visitado (no limita: podés participar en todos).
   useEffect(() => { if (mode === "user") void saveProfile({ active_drop: drop.id }); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [drop.id, mode]);
-
-  if (profile) {
-    return <MobileShell><ProfileView onClose={() => setProfile(false)} /></MobileShell>;
-  }
 
   return (
     <MobileShell>
@@ -67,7 +61,7 @@ function DropUniverse() {
         title={dashboard ? "Dashboard" : `${drop.artist} · ${drop.title}`}
         dashboardOpen={dashboard}
         onToggleDashboard={() => setDashboard((v) => !v)}
-        onOpenProfile={() => { setDashboard(false); setProfile(true); }}
+        onOpenProfile={() => void navigate({ to: "/mi-drop" })}
       />
       <main className="pt-2">
         {dashboard ? <DashboardView /> : (

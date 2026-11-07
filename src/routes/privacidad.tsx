@@ -31,7 +31,7 @@ const sections: { title: string; body: string[] }[] = [
     "Tu nombre visible, tu foto, tus puntos en el ranking y tus reseñas públicas. Tu email nunca se muestra.",
   ] },
   { title: "Tus derechos", body: [
-    "Podés editar tu perfil cuando quieras desde Mi DROP. También podés pedir que borremos tu cuenta y todos tus datos.",
+    "Podés editar tu perfil cuando quieras desde tu Perfil. También podés pedir que borremos tu cuenta y todos tus datos.",
   ] },
 ];
 

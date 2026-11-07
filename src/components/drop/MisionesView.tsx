@@ -6,7 +6,9 @@ import { MissionGame, type GameKind } from "@/components/drop/MissionGames";
 import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
 import albumCover from "@/assets/album-cover.png.asset.json";
 import { PHOTOS } from "@/lib/fan-avatars";
-import { useCurrentDrop } from "@/lib/drops";
+import { useCurrentDrop, type DropInfo } from "@/lib/drops";
+import { FORMAT_INFO, ORDER_GAMES, formatOfDay, isDailyRotation } from "@/lib/game-styles";
+import type { Tables } from "@/integrations/supabase/types";
 import {
   Drawer,
   DrawerContent,
@@ -172,7 +174,7 @@ export function MisionesView() {
     const guestPractice = mode === 'guest' && m.game === 'trivia';
     return {...m,id:ids[i],title:configured?.title ?? m.title,verified,campaignPts:configured?.campaign_reward ?? 0,pts:verified ? configured?.general_reward ?? m.pts : 0,progress:undefined,cta:guestPractice ? 'Jugar de práctica' : verified ? 'Jugar ahora' : 'Ver experiencia',detail:verified && m.game !== 'trivia' ? {...m.detail,reward:configured ? `${configured.campaign_reward} pts de ${drop.artist} + ${configured.general_reward} puntos generales DROP` : m.detail.reward} : {...m.detail,intro:guestPractice ? 'Trivia de práctica para invitados. Sin puntos ni participación en el ranking.' : verified ? 'Respondé preguntas propias de DROP. Cada respuesta se valida y el intento queda guardado en tu cuenta.' : 'Experiencia demostrativa o pendiente. No verifica actividades ni acredita puntos.',steps:guestPractice ? ['Respondé las preguntas de práctica','Tu resultado es temporal y no acredita puntos'] : verified ? ['Respondé las preguntas','Un intento por día; 20 segundos por pregunta','Tu resultado se guarda al finalizar'] : ['Explorá la experiencia sin acreditación de puntos'],duration:guestPractice ? 'Práctica libre' : verified ? '1 intento por día · horario de Buenos Aires' : 'Pendiente de validación',players:verified ? 'Participación registrada en tu cuenta' : 'Demostración',reward:verified ? `Hasta ${configured?.campaign_reward} pts de ${drop.artist} + ${configured?.general_reward} puntos generales DROP` : 'Sin recompensas acreditables',tip:verified ? 'El canje de puntos generales no modifica tu ranking.' : 'La validación real todavía no está disponible.'}};
   });
-  const extra = state.missions.filter(m=>!ids.includes(m.id) && m.campaign_id===drop.id).map(m=>({...dailyTemplates[1],cover:m.id.endsWith('-presave')?drop.album:isLali?dailyTemplates[1].cover:drop.cover,tag:m.id.endsWith('-presave')?'Spotify · La que más suma':m.kind==='clue'?'Acertijo':m.kind==='trivia'?'Trivia':dailyTemplates[1].tag,desc:m.id.endsWith('-presave')?(drop.status==='upcoming'?'Pre-guardalo y tenelo apenas salga':'Guardalo en tu biblioteca de Spotify'):m.repeat_period==='daily'?'Nueva ronda todos los días':'Una sola vez por fan',id:m.id,title:m.title,game:m.kind as GameKind,verified:m.status==='verified',pts:m.general_reward,campaignPts:m.campaign_reward,progress:undefined,cta:m.status==='verified'?'Jugar ahora':'Ver experiencia',detail:{...dailyTemplates[1].detail,intro:'Actividad propia de DROP.',reward:`${m.campaign_reward} pts de ${drop.artist} + ${m.general_reward} puntos generales DROP`,players:'Participación real',tip:'El resultado se valida en tu cuenta.'}}));
+  const extra = state.missions.filter(m=>!ids.includes(m.id) && m.campaign_id===drop.id).map(m=>extraMission(m, drop, isLali));
   extra.sort((a,b)=>Number(b.id.endsWith('-presave'))-Number(a.id.endsWith('-presave')));
   const daily=isLali?[...extra.filter(m=>m.id.endsWith('-presave')),...missions.slice(0,3),...extra.filter(m=>!m.id.endsWith('-presave'))]:extra; const phygital=isLali?missions.slice(3):[];
   const earned: Record<string,number>={};
@@ -182,7 +184,8 @@ export function MisionesView() {
   const all=[...daily,...phygital];
   const playing=new Set(state.attempts.filter(a=>a.status!=='completed').map(a=>a.mission_id));
   const statusOf=(m:Mission):MissionStatus=>archived?'finalizada':m.title in earned?'completada':m.id&&playing.has(m.id)?'en_progreso':'disponible';
-  const featured=!archived&&drop.status!=='upcoming'?all.find(m=>statusOf(m)!=='completada'&&m.game!=='scan'&&m.game!=='ar'):undefined;
+  const open=!archived&&drop.status!=='upcoming';
+  const featured=open?(all.find(m=>m.id&&isDailyRotation(m.id)&&statusOf(m)!=='completada')??all.find(m=>statusOf(m)!=='completada'&&m.game!=='scan'&&m.game!=='ar')):undefined;
   const rest=all.filter(m=>m!==featured);
   const games=rest.filter(m=>m.game==='trivia'||m.game==='order'||m.game==='clue');
   const music=rest.filter(m=>m.game==='stream');
@@ -241,15 +244,16 @@ export function MisionesView() {
       {/* Misión destacada */}
       {featured && (
         <section>
-          <SectionTitle icon={Sparkles} title="Misión destacada" hint="Empezá por acá" />
+          <SectionTitle icon={Sparkles} title={featured.id && isDailyRotation(featured.id) ? "Juego del día" : "Misión destacada"} hint={featured.id && isDailyRotation(featured.id) ? "Cambia todos los días" : "Empezá por acá"} />
           <button onClick={() => setSelected(featured)} className="relative block w-full overflow-hidden rounded-3xl border border-primary/50 text-left shadow-[var(--shadow-glow)]">
-            <img decoding="async" src={featured.cover ?? drop.cover} alt="" className="h-56 w-full object-cover" />
+            <img decoding="async" src={featured.cover ?? drop.cover} alt="" className={`${featured.id && isDailyRotation(featured.id) ? "h-64" : "h-56"} w-full object-cover`} />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
             <div className="absolute inset-x-4 bottom-4">
               <StatusChip status={statusOf(featured)} />
               <p className="mt-2 text-[11px] font-black uppercase tracking-widest text-primary">{featured.tag}</p>
               <p className="text-2xl font-black leading-tight">{featured.title}</p>
               <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{featured.desc}</p>
+              {featured.id && isDailyRotation(featured.id) && <RotationStrip missionId={featured.id} />}
               <div className="mt-3 flex items-center justify-between">
                 <span className="text-sm font-black text-primary">+{featured.campaignPts || featured.pts} pts</span>
                 <span className="rounded-xl px-4 py-2 text-sm font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>{statusOf(featured) === "en_progreso" ? "Continuar" : featured.cta}</span>
@@ -651,4 +655,39 @@ function CountUp({ to }: { to: number }) {
     return () => cancelAnimationFrame(frame);
   }, [to]);
   return <>{value}</>;
+}
+
+/** Próximos formatos del Juego del día: hoy, mañana y pasado. */
+function RotationStrip({ missionId }: { missionId: string }) {
+  const days = [0, 1, 2].map((offset) => ({ offset, format: formatOfDay(missionId, offset) }));
+  return <div className="mt-2 flex flex-wrap gap-1">
+    {days.map(({ offset, format }) => format && <span key={offset} className={`whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${offset === 0 ? "bg-primary text-primary-foreground" : "bg-background/70 text-muted-foreground"}`}>{offset === 0 ? "Hoy" : offset === 1 ? "Mañana" : "Pasado"} {FORMAT_INFO[format].icon} {FORMAT_INFO[format].short}</span>)}
+  </div>;
+}
+
+/** Arma la tarjeta de una misión configurada en la base (las que no son las 5 clásicas de LALI). */
+function extraMission(m: Tables<"missions">, drop: DropInfo, isLali: boolean): Mission & { id: string } {
+  const base = dailyTemplates[1];
+  const presave = m.id.endsWith("-presave");
+  const reward = `${m.campaign_reward} pts de ${drop.artist} + ${m.general_reward} puntos generales DROP`;
+  const common = { ...base, id: m.id, title: m.title, game: m.kind as GameKind, verified: m.status === "verified", pts: m.general_reward, campaignPts: m.campaign_reward, progress: undefined, cta: m.status === "verified" ? "Jugar ahora" : "Ver experiencia", cover: isLali ? base.cover : drop.cover };
+  const today = formatOfDay(m.id);
+  if (today) {
+    const info = FORMAT_INFO[today];
+    return { ...common, icon: Sparkles, tag: `${info.icon} Hoy: ${info.name}`, desc: `${info.desc}${info.desc.endsWith("?") ? "" : "."} Mañana cambia el juego.`,
+      detail: { intro: `Cada día hay un juego distinto: emoji-tema, verdadero o falso o completá el título. Hoy toca ${info.icon} ${info.name}.`,
+        steps: ["Respondé antes de que se acabe el tiempo (15 s por pregunta)", "Cada acierto suma una parte de los puntos", "Volvé mañana: cambia el formato y las preguntas"],
+        duration: "≈ 1 minuto · se renueva cada día", players: "Participación real", reward, tip: "Jugalo todos los días para sostener tu racha." } };
+  }
+  const order = m.kind === "order" ? ORDER_GAMES[m.id] : undefined;
+  if (order) {
+    return { ...common, icon: Music, tag: order.tag, desc: order.desc, cta: m.status === "verified" ? "Empezar" : common.cta,
+      detail: { intro: `${order.desc}. Usá las flechas para mover cada pieza y confirmá cuando estés seguro.`,
+        steps: ["Subí y bajá cada pieza con las flechas", "Confirmá el orden", `Tenés ${m.max_checks} intentos: cada error resta un poco de puntos`],
+        duration: `Sin límite de tiempo · ${m.max_checks} intentos`, players: "Participación real", reward, tip: "Si dudás, empezá por las puntas: el primero y el último." } };
+  }
+  return { ...common, cover: presave ? drop.album : common.cover,
+    tag: presave ? "Spotify · La que más suma" : m.kind === "clue" ? "Acertijo" : m.kind === "trivia" ? "Trivia" : base.tag,
+    desc: presave ? (drop.status === "upcoming" ? "Pre-guardalo y tenelo apenas salga" : "Guardalo en tu biblioteca de Spotify") : m.repeat_period === "daily" ? "Nueva ronda todos los días" : "Una sola vez por fan",
+    detail: { ...base.detail, intro: "Actividad propia de DROP.", reward, players: "Participación real", tip: "El resultado se valida en tu cuenta." } };
 }

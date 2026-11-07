@@ -31,7 +31,8 @@ export function MissionsEditor({ campaignId }: { campaignId: string }) {
   async function edit(m: MissionRow) {
     if (m.kind !== "trivia" && m.kind !== "clue") { toast.message("Este tipo de misión todavía no se edita desde el panel."); return; }
     const { data } = await db.from("mission_validation_rules").select("rules").eq("mission_id", m.id).maybeSingle();
-    const rules = (data?.rules ?? {}) as { questions?: Question[]; pool?: Question[]; codes?: string[] };
+    const rules = (data?.rules ?? {}) as { questions?: Question[]; pool?: Question[]; codes?: string[]; rounds?: unknown };
+    if (rules.rounds) { toast.message("El Juego del día rota formatos y todavía no se edita desde el panel."); return; }
     setDraft({
       id: m.id, kind: m.kind, title: m.title, repeat: m.repeat_period, general: m.general_reward, campaign: m.campaign_reward,
       questions: rules.pool ?? rules.questions ?? [emptyQuestion()], answer: (rules.codes ?? []).join(", "),

@@ -1,4 +1,5 @@
 import { ListenButtons } from "./ListenButtons";
+import { FORMAT_INFO, formatOfDay, isDailyRotation } from "@/lib/game-styles";
 import { Countdown } from "./Countdown";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -40,7 +41,10 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
   const done = missions.filter((m) => doneIds.has(m.id)).length;
   const score = state.balances.find((b) => b.campaign_id === drop.id)?.score ?? 0;
   const pct = missions.length ? Math.round((100 * done) / missions.length) : 0;
-  const featured = missions.find((m) => !doneIds.has(m.id)) ?? missions[0];
+  const todayKey = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date());
+  const dailyGame = missions.find((m) => isDailyRotation(m.id) && !state.attempts.some((a) => a.mission_id === m.id && a.status === "completed" && a.period_key === todayKey));
+  const featured = dailyGame ?? missions.find((m) => !doneIds.has(m.id)) ?? missions[0];
+  const todayFormat = featured ? formatOfDay(featured.id) : undefined;
   const active = drop.status === "active";
 
   return (
@@ -100,7 +104,7 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
             <img decoding="async" src={drop.cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
             <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
             <div className="relative p-5">
-              <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-primary"><Target className="h-3.5 w-3.5" />{featured.kind === "trivia" ? "Trivia" : featured.kind === "clue" ? "Acertijo" : "Desafío"}{featured.repeat_period === "daily" ? " · diaria" : ""}</span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-primary"><Target className="h-3.5 w-3.5" />{todayFormat ? `Juego del día · ${FORMAT_INFO[todayFormat].icon} ${FORMAT_INFO[todayFormat].name}` : <>{featured.kind === "trivia" ? "Trivia" : featured.kind === "clue" ? "Acertijo" : featured.kind === "order" ? "Para ordenar" : "Desafío"}{featured.repeat_period === "daily" ? " · diaria" : ""}</>}</span>
               <p className="mt-1 text-lg font-black leading-tight">{featured.title}</p>
               <p className="mt-1 text-sm font-bold text-primary">+{featured.campaign_reward} pts de {drop.artist}</p>
               <span className="mt-4 inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>

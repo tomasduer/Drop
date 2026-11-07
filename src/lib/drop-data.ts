@@ -1,5 +1,5 @@
 import type { Tables } from '@/integrations/supabase/types';
-export type AttemptResult = { id: string; status: string; index: number; checks: number; deadline: string; general_award: number; campaign_award: number; question?: { q: string; options: string[] }; total?: number };
+export type AttemptResult = { id: string; status: string; index: number; checks: number; deadline: string; general_award: number; campaign_award: number; question?: { q: string; options: string[]; format?: string }; total?: number };
 export type DropState = { profile: Tables<'profiles'> | null; campaigns: Tables<'campaigns'>[]; missions: Tables<'missions'>[]; balances: Tables<'campaign_balances'>[]; attempts: Tables<'mission_attempts'>[]; movements: Tables<'point_movements'>[]; rewards: Tables<'reward_catalog'>[]; redemptions: Tables<'reward_redemptions'>[] };
 export type RankingFan = { id: string; display_name: string; avatar_url: string | null; score: number; rank: number; missions: number; following: boolean };
 export type RankingResult = { rows: RankingFan[]; me: RankingFan | null; week_start: string; week_end: string };

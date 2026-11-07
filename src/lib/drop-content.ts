@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { DropKind } from "@/lib/drops";
+import type { DropLayout } from "@/lib/drop-layout";
 
 /** Estética que se arma desde el panel de admin. Todos los colores en hex (#rrggbb). */
 export type DropTheme = {
@@ -10,7 +11,12 @@ export type DropTheme = {
   light?: boolean;
   font?: string;
   uppercase?: boolean;
+  /** No es estética: es el armado del inicio (portada y bloques). Va acá para no sumar columnas. */
+  layout?: DropLayout;
 };
+
+/** ¿El drop tiene colores o tipografía propios cargados en el panel? (el armado del inicio no cuenta). */
+export const hasCustomTheme = (t: DropTheme | null | undefined) => !!t && Object.keys(t).some((k) => k !== "layout");
 
 /** Fila de la tabla drop_content: lo editorial y visual de un drop, editable desde /admin. */
 export type DropContent = {

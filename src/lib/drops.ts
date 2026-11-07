@@ -47,6 +47,7 @@ import lnvGira from "@/assets/lnv-gira.webp";
 import pcCaras from "@/assets/pc-caras.webp";
 import adelaGlitter from "@/assets/adela-glitter.webp";
 import type { MerchItem } from "@/lib/merch";
+import type { DropLayout } from "@/lib/drop-layout";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import tiniCover from "@/assets/drop-photo-29.png.asset.json";
 
@@ -85,6 +86,8 @@ export type DropInfo = {
   spotifyAlbum?: string;
   /** Fecha y hora de apertura de un drop que viene (cuenta regresiva). */
   launchAt?: string;
+  /** Portada y bloques del inicio armados desde el panel (si no, se usa el formato de su tipo). */
+  layout?: DropLayout;
 };
 
 // Contenido editorial de cada drop. El estado real sale de la tabla campaigns cuando está disponible.
@@ -199,6 +202,7 @@ export function useDrops(): DropInfo[] {
         tagline: c.tagline || d.tagline, description: c.description || d.description,
         dates: c.dates || d.dates, fandom: c.fandom || d.fandom,
         cover: c.cover_url || d.cover, hero: c.hero_url || d.hero, album: c.album_url || c.hero_url || d.album,
+        layout: c.theme?.layout ?? d.layout,
       };
     };
     const known = DROP_CATALOG.map((d) => {

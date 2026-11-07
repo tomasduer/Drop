@@ -13,9 +13,9 @@ export const Route = createFileRoute("/mi-drop")({
     tab: TABS.includes(search.tab as ProfileTab) ? (search.tab as ProfileTab) : undefined,
   }),
   head: () => ({ meta: [
-    { title: "Mi DROP · Tu identidad musical" },
+    { title: "Mi perfil · DROP" },
     { name: "description", content: "Tu perfil en DROP: colección de drops, reseñas, shows, actividad y estadísticas musicales." },
-    { property: "og:title", content: "Mi DROP · Tu identidad musical" },
+    { property: "og:title", content: "Mi perfil · DROP" },
     { property: "og:description", content: "Tu colección de drops, reseñas, shows y actividad musical." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),

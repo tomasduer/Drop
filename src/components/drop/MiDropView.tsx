@@ -329,7 +329,7 @@ export function MiDropView({ initialTab }: { initialTab?: ProfileTab }) {
       </section>
 
       {/* Pestañas */}
-      <nav id="perfil-tabs" className="mt-7 scroll-mt-4 flex gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1" aria-label="Secciones de Mi DROP">
+      <nav id="perfil-tabs" className="mt-7 scroll-mt-4 flex gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1" aria-label="Secciones de tu perfil">
         {TABS.map((t) => (
           <Button key={t.id} variant={tab === t.id ? "default" : "ghost"} size="sm" onClick={() => setTab(t.id)} className="shrink-0 flex-1 text-xs">{t.label}</Button>
         ))}

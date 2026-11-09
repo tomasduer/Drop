@@ -329,11 +329,69 @@ function LiveRanking() {
   const [scope,setScope]=useState<Scope>('Global'); const [data,setData]=useState<RankingResult|null>(null); const [fan,setFan]=useState<RankingFan|null>(null); const [error,setError]=useState(''); const [loading,setLoading]=useState(false);
   async function load(){setLoading(true);setError('');try{if(mode==='user'){setData(await fetchRanking({data:{campaign:dropId,scope}}));}else{const {data:pub,error:e}=await (supabase.rpc as unknown as (fn:string,args:Record<string,string>)=>Promise<{data:unknown;error:unknown}>)('drop_public_ranking',{p_campaign:dropId});if(e)throw new Error('No pudimos cargar el ranking');setData(pub as RankingResult);}}catch(e){setError(e instanceof Error?e.message:'No pudimos cargar el ranking');}finally{setLoading(false);}}
   useEffect(()=>{if(mode==='user'||scope==='Global')void load();else setData(null);},[mode,scope,dropId,revision]);
-  return <div className="space-y-4 px-5"><h1 className="text-3xl font-black">{drop.status==='archived'?'Ranking final':'Ranking'}</h1><p className="text-sm text-muted-foreground">{drop.status==='archived'?`Así terminó ${drop.title}. Ya no se suman puntos.`:`Puntos de ${drop.artist} · los canjes no cambian tu posición.`}</p><div className="flex gap-2">{(['Global','Amigos','Semanal'] as Scope[]).map(s=><Button key={s} variant={scope===s?'default':'outline'} size="sm" onClick={()=>setScope(s)}>{s==='Amigos'&&<Users className="h-4 w-4" />}{s}</Button>)}</div>{scope==='Semanal'&&<p className="text-xs text-muted-foreground">Desde el lunes · horario de Buenos Aires</p>}
-    {mode!=='user'&&<p className="rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground">Estás viendo el ranking como invitado. Creá una cuenta para aparecer acá y seguir a otros fans.</p>}{mode!=='user'&&scope!=='Global'?<p className="py-6 text-sm text-muted-foreground">Ingresá con tu cuenta para ver tus amigos y el ranking semanal.</p>:loading&&!data?<p className="text-sm">Cargando ranking…</p>:error?<div role="alert">{error}<Button onClick={load} variant="outline">Reintentar</Button></div>:<>
-    <div className="grid grid-cols-3 items-end gap-2">{data?.rows.slice(0,3).map(f=><Button key={f.id} variant="outline" className="h-auto min-w-0 flex-col gap-2 p-3" onClick={()=>setFan(f)}><img loading="lazy" decoding="async" src={f.avatar_url||avatarFor(f.display_name)} alt={f.display_name} className="h-12 w-12 rounded-full object-cover" /><span className="w-full truncate text-xs">{f.display_name}</span><span>#{f.rank}</span><span className="text-xs text-primary">{f.score} pts</span></Button>)}</div>
-    <div className="divide-y divide-border">{data?.rows.slice(3).map(f=><Button key={f.id} variant="ghost" className="h-auto w-full justify-start gap-3 py-3" onClick={()=>setFan(f)}><span>#{f.rank}</span><img loading="lazy" decoding="async" src={f.avatar_url||avatarFor(f.display_name)} alt="" className="h-9 w-9 rounded-full object-cover" /><span className="min-w-0 flex-1 truncate text-left">{f.display_name}</span><span>{f.score} pts</span></Button>)}</div>
-    {data?.me&&<div className="rounded-xl border border-primary/40 bg-primary/5 p-3"><p className="text-sm font-bold">Tu posición: #{data.me.rank} · {data.me.score} pts de {drop.artist}</p>{(()=>{const me=data.me;const above=data.rows.filter(r=>r.score>me.score).at(-1);return above&&drop.status==='active'?<p className="mt-1 text-xs text-muted-foreground">Te faltan {above.score-me.score+1} pts para pasar a {above.display_name} (#{above.rank}). Completá misiones para subir.</p>:null;})()}</div>}{data&&!data.me&&mode==='user'&&drop.status==='active'&&<p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">Todavía no sumaste puntos en este drop. Completá tu primera misión para aparecer en el ranking.</p>}{scope==='Amigos'&&data?.rows.length===1&&<p className="text-xs text-muted-foreground">Todavía no seguís participantes de esta campaña.</p>}</>}
+  const archived = drop.status === 'archived';
+  const rows = data?.rows ?? [];
+  const podium = [rows[1], rows[0], rows[2]].map((f, i) => f && { f, place: [2, 1, 3][i] });
+  const me = data?.me ?? null;
+  const meInList = !!me && rows.slice(3).some((r) => r.id === me.id);
+  const prize = drop.prizes?.[0];
+  const pts = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const avatar = (f: RankingFan) => f.avatar_url || avatarFor(f.display_name);
+  return <div className="px-5">
+    {/* Portada del drop con el título del ranking */}
+    <div className="relative -mx-5 -mt-2 overflow-hidden px-5 pb-1 pt-24">
+      <img src={drop.hero} alt="" decoding="async" className="absolute inset-0 h-full w-full object-cover object-[center_30%]" />
+      <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to bottom, transparent 0%, color-mix(in oklab, var(--background) 45%, transparent) 45%, var(--background) 100%)' }} />
+      <div className="absolute inset-0 bg-primary/15 mix-blend-color" />
+      <div className="relative">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-primary">{drop.title} · Ranking</p>
+        <h1 className="font-display text-4xl leading-none">{archived ? 'Ranking final' : drop.fandom ? `Ranking de ${drop.fandom}` : 'Ranking'}</h1>
+      </div>
+    </div>
+    <p className="mt-2 text-sm text-muted-foreground">{archived ? `Así terminó ${drop.title}. Ya no se suman puntos.` : `Puntos de ${drop.artist} · los canjes no cambian tu posición.`}</p>
+
+    <div className="mt-3 flex gap-2">{(['Semanal','Global','Amigos'] as Scope[]).map(s=><button key={s} onClick={()=>setScope(s)} className={'flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-bold transition-colors ' + (scope===s ? 'text-primary-foreground' : 'border border-border text-muted-foreground active:bg-muted')} style={scope===s?{ backgroundImage: 'var(--gradient-drop)' }:undefined}>{s==='Amigos'&&<Users className="h-3.5 w-3.5" />}{s==='Semanal'?'Esta semana':s==='Global'?'General':s}</button>)}</div>
+    {scope==='Semanal'&&<p className="mt-2 text-xs text-muted-foreground">Desde el lunes · horario de Buenos Aires</p>}
+    {mode!=='user'&&<p className="mt-3 rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground">Estás viendo el ranking como invitado. Creá una cuenta para aparecer acá y seguir a otros fans.</p>}
+
+    {mode!=='user'&&scope!=='Global'?<p className="py-6 text-sm text-muted-foreground">Ingresá con tu cuenta para ver tus amigos y el ranking semanal.</p>:loading&&!data?<p className="py-6 text-sm">Cargando ranking…</p>:error?<div role="alert" className="py-6 text-sm">{error} <Button onClick={load} variant="outline" size="sm">Reintentar</Button></div>:<>
+      {/* Podio */}
+      {rows.length>0&&<div className="mt-4 grid grid-cols-3 items-end gap-2.5">{podium.map((p,i)=>p?<button key={p.f.id} onClick={()=>setFan(p.f)} className="flex min-w-0 flex-col items-center text-center transition-transform active:scale-95">
+        <div className="relative">
+          <img loading="lazy" decoding="async" src={avatar(p.f)} alt={p.f.display_name} className={'rounded-full border-2 object-cover ' + (p.place===1 ? 'h-[76px] w-[76px] border-primary shadow-[var(--shadow-glow)]' : 'h-[60px] w-[60px] border-border')} />
+          {p.place===1&&<Crown className="absolute -top-5 left-1/2 h-6 w-6 -translate-x-1/2 text-primary" />}
+          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2 text-[11px] font-black text-primary-foreground">{p.place}</span>
+        </div>
+        <span className="mt-3 w-full truncate text-[13px] font-bold">{p.f.display_name}</span>
+        <span className="text-xs text-muted-foreground">{pts(p.f.score)} pts</span>
+        <span className={'font-display mt-2 grid w-full place-items-center rounded-t-xl text-2xl text-primary ' + (p.place===1 ? 'h-16' : p.place===2 ? 'h-11' : 'h-8')} style={{ backgroundImage: 'linear-gradient(to bottom, color-mix(in oklab, var(--primary) 28%, transparent), color-mix(in oklab, var(--primary) 4%, transparent))' }}>{p.place}</span>
+      </button>:<div key={i} />)}</div>}
+
+      {/* Resto de la tabla */}
+      {rows.length>3&&<div className="overflow-hidden rounded-2xl border border-border bg-card">{rows.slice(3).map((f,i)=><button key={f.id} onClick={()=>setFan(f)} className={'flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors active:bg-muted ' + (i>0 ? 'border-t border-border/60 ' : '') + (me&&f.id===me.id ? 'bg-primary/10' : '')}>
+        <span className="w-6 font-bold text-muted-foreground">{f.rank}</span>
+        <img loading="lazy" decoding="async" src={avatar(f)} alt="" className="h-8 w-8 rounded-full object-cover" />
+        <span className="min-w-0 flex-1 truncate font-semibold">{f.display_name}{me&&f.id===me.id&&<span className="ml-1 text-primary">· Vos</span>}</span>
+        <span className="font-black">{pts(f.score)}</span>
+      </button>)}</div>}
+
+      {/* Tu posición */}
+      {me&&!meInList&&me.rank>3&&<button onClick={()=>setFan(me)} className="mt-2.5 flex w-full items-center gap-3 rounded-2xl border border-primary bg-primary/15 px-4 py-2.5 text-left text-sm">
+        <span className="w-6 font-bold text-primary">{me.rank}</span>
+        <img loading="lazy" decoding="async" src={avatar(me)} alt="" className="h-8 w-8 rounded-full object-cover" />
+        <span className="min-w-0 flex-1 truncate font-semibold">Vos · {me.display_name}</span>
+        <span className="font-black">{pts(me.score)}</span>
+      </button>}
+      {me&&drop.status==='active'&&(()=>{const above=rows.filter(r=>r.score>me.score).at(-1);return above?<p className="mt-2 text-xs text-muted-foreground">Te faltan {pts(above.score-me.score+1)} pts para pasar a {above.display_name} (#{above.rank}). Completá misiones para subir.</p>:null;})()}
+      {data&&!me&&mode==='user'&&drop.status==='active'&&<p className="mt-3 rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">Todavía no sumaste puntos en este drop. Completá tu primera misión para aparecer en el ranking.</p>}
+      {scope==='Amigos'&&rows.length===1&&<p className="mt-2 text-xs text-muted-foreground">Todavía no seguís participantes de esta campaña.</p>}
+
+      {/* Premio */}
+      {prize&&<div className="mt-3 flex items-center gap-3 rounded-2xl p-3 text-xs leading-snug" style={{ backgroundImage: 'var(--gradient-drop-soft)' }}>
+        <img loading="lazy" decoding="async" src={drop.album} alt="" className="h-11 w-11 shrink-0 rounded-lg object-cover" />
+        <span><span className="block text-[13px] font-bold">Top {prize.top}: {prize.label}</span>{drop.prizes!.slice(1).map(p=>`Top ${p.top}: ${p.label}`).join(' · ')}</span>
+      </div>}
+    </>}
     <Drawer open={!!fan} onOpenChange={o=>{if(!o)setFan(null);}}><DrawerContent><DrawerHeader><DrawerTitle>{fan?.display_name}</DrawerTitle><DrawerDescription>#{fan?.rank} · {fan?.score} pts de campaña</DrawerDescription></DrawerHeader><div className="space-y-3 px-4 pb-8"><p className="text-sm">{fan?.missions} misiones completadas</p>{fan&&fan.id!==profile.id&&mode==='user'&&<Button className="w-full" onClick={async()=>{try{await follow({data:{id:fan.id,follow:!fan.following}});setFan({...fan,following:!fan.following});await load();}catch(e){toast.error(e instanceof Error?e.message:'No pudimos guardar');}}}><UserPlus className="h-4 w-4" />{fan.following?'Dejar de seguir':'Seguir fan'}</Button>}</div></DrawerContent></Drawer>
   </div>;
 }

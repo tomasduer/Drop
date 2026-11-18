@@ -180,13 +180,14 @@ async function cached<T>(key: string, load: () => Promise<T>, maxAge = 86400): P
  * Busca en Eventos de Google. Con `artist` trae sus fechas (se guarda 3 días);
  * con `city` trae recitales de cualquier artista en esa ciudad (se guarda 1 día).
  */
-async function googleEvents(artist: string, size: number, city?: string): Promise<ExternalShow[]> {
+async function googleEvents(artist: string, size: number, city?: string, opts: { query?: string; start?: number; maxAge?: number } = {}): Promise<ExternalShow[]> {
   const key = process.env['SERPAPI_KEY'];
   if (!key) return [];
   // En español Google Events no devuelve resultados; en inglés sí (probado con el diagnóstico).
-  const q = city ? `Concerts in ${city}` : `${artist} concert`;
-  return cached(`serp:${q.toLowerCase()}`, async () => {
-    const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=en&gl=ar&api_key=${encodeURIComponent(key)}`;
+  const q = opts.query ?? (city ? `Concerts in ${city}` : `${artist} concert`);
+  const start = opts.start ?? 0;
+  return cached(`serp:${q.toLowerCase()}:${start}`, async () => {
+    const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=en&gl=ar${start ? `&start=${start}` : ''}&api_key=${encodeURIComponent(key)}`;
     const res = await fetch(url, { headers: { accept: 'application/json' } });
     // Un error se lanza (no se guarda en la caché) para reintentar en la próxima visita.
     if (!res.ok) throw new Error(`SerpApi respondió ${res.status}`);
@@ -216,9 +217,29 @@ async function googleEvents(artist: string, size: number, city?: string): Promis
       })
       .filter((s: ExternalShow) => !s.event_date || s.event_date >= new Date().toISOString())
       .slice(0, size);
-  }, city ? 86400 : 3 * 86400);
+  }, opts.maxAge ?? (city ? 86400 : 3 * 86400));
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
+
+/**
+ * Salas donde tocan artistas nacionales: Google las busca como "Concerts at <sala>" y trae su agenda.
+ * Cada sala se guarda 3 días para no gastar el cupo gratis de SerpApi.
+ */
+const CITY_VENUES: Record<string, string[]> = {
+  'Buenos Aires': ['Movistar Arena', 'Estadio Luna Park', 'Teatro Vorterix', 'Niceto Club', 'C Art Media', 'La Trastienda Club', 'Estadio Obras', 'Teatro Gran Rex'],
+  'Córdoba': ['Quality Espacio', 'Plaza de la Música Córdoba'],
+  'Rosario': ['Teatro Broadway Rosario', 'Distrito Rock Rosario'],
+  'La Plata': ['Estadio Único Diego Armando Maradona', 'Teatro Ópera La Plata'],
+};
+
+/** Recitales de la ciudad: dos páginas de "Concerts in <ciudad>" (1 día) + la agenda de sus salas (3 días). */
+function cityJobs(city: string): Promise<ExternalShow[]>[] {
+  return [
+    googleEvents('', 20, city),
+    googleEvents('', 20, city, { start: 10 }),
+    ...(CITY_VENUES[city] ?? []).map((v) => googleEvents('', 20, city, { query: `Concerts at ${v} ${city}`, maxAge: 3 * 86400 })),
+  ];
+}
 
 export const getExternalShows = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => z.object({
@@ -242,13 +263,13 @@ export const getExternalShows = createServerFn({ method: 'POST' })
         : await settle([
             ...artists.map((a) => ticketmaster(a, 4)),
             ...artists.map((a) => googleEvents(a, 4)),
-            ...(data.city ? [googleEvents('', 20, data.city)] : []),
+            ...(data.city ? cityJobs(data.city) : []),
             // Shows de música cerca del fan, de cualquier artista.
             ...(data.near ? [ticketmaster('', 20, data.near, 50)] : []),
           ]);
       const seen = new Set<string>();
       return lists.flat().filter((s) => (seen.has(s.id) ? false : (seen.add(s.id), true)))
-        .sort((a, b) => (a.event_date ?? '9').localeCompare(b.event_date ?? '9')).slice(0, 60);
+        .sort((a, b) => (a.event_date ?? '9').localeCompare(b.event_date ?? '9')).slice(0, 120);
     } catch {
       return [];
     }
@@ -283,6 +304,7 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       await run('Ticketmaster "Ricardo Arjona"', () => ticketmaster('Ricardo Arjona', 5)),
       await run('Google "Ricardo Arjona"', () => googleEvents('Ricardo Arjona', 5)),
       await run('Google "Concerts in Buenos Aires"', () => googleEvents('', 20, 'Buenos Aires')),
+      await run('Google "Concerts at Niceto Club"', () => googleEvents('', 20, 'Buenos Aires', { query: 'Concerts at Niceto Club Buenos Aires', maxAge: 3 * 86400 })),
       await serpRaw('Concerts in Buenos Aires'),
     ];
   });

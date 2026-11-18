@@ -189,7 +189,11 @@ async function googleEvents(artist: string, size: number, city?: string): Promis
     const norm = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     const k = norm(artist);
     return (json?.events_results ?? [])
-      .filter((e: any) => city || norm(`${e.title ?? ''} ${e.description ?? ''}`).includes(k))
+      .filter((e: any) => {
+        if (city) return true;
+        const text = norm(`${e.title ?? ''} ${e.description ?? ''}`);
+        return text.includes(k) || k.split(/\s+/).filter((w) => w.length >= 4).some((w) => text.includes(w));
+      })
       .map((e: any): ExternalShow => {
         const addr: string[] = Array.isArray(e.address) ? e.address : [];
         // En la búsqueda por ciudad el artista no viene aparte: se toma del título ("Artista en Lugar", "Artista - Gira").
@@ -244,6 +248,23 @@ export const getExternalShows = createServerFn({ method: 'POST' })
     }
   });
 
+/** Respuesta cruda de SerpApi (sin caché), resumida para el diagnóstico. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function serpRaw(q: string): Promise<string> {
+  const key = process.env['SERPAPI_KEY'];
+  if (!key) return `SerpApi "${q}": sin clave`;
+  try {
+    const res = await fetch(`https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=es&gl=ar&no_cache=true&api_key=${encodeURIComponent(key)}`);
+    const json: any = await res.json().catch(() => ({}));
+    const ev: any[] = json?.events_results ?? [];
+    return `SerpApi crudo "${q}": HTTP ${res.status} · estado ${json?.search_metadata?.status ?? '?'} · error: ${json?.error ?? 'ninguno'} · ${ev.length} eventos` +
+      ev.slice(0, 3).map((e) => `\n   - ${e.title} | ${e.date?.start_date ?? ''} ${e.date?.when ?? ''} | ${(e.address ?? []).join(' / ')}`).join('');
+  } catch (e) {
+    return `SerpApi crudo "${q}": falla de red (${e instanceof Error ? e.message : String(e)})`;
+  }
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 /** Diagnóstico de las fuentes de shows (para revisar claves): cuántos trae cada una o qué error da. */
 export const getShowsDiag = createServerFn({ method: 'POST' })
   .handler(async () => {
@@ -256,5 +277,7 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       await run('Ticketmaster "Ricardo Arjona"', () => ticketmaster('Ricardo Arjona', 5)),
       await run('Google "Ricardo Arjona"', () => googleEvents('Ricardo Arjona', 5)),
       await run('Google "recitales en Buenos Aires"', () => googleEvents('', 20, 'Buenos Aires')),
+      await serpRaw('recitales en Buenos Aires'),
+      await serpRaw('Events in Buenos Aires'),
     ];
   });

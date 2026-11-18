@@ -12,7 +12,7 @@ import { useDrops, type DropInfo } from "@/lib/drops";
 import { ArtistLine } from "@/components/drop/ArtistLine";
 import { CatalogResults, type MusicGenre } from "./Catalog";
 import { getExternalShows } from "@/lib/music.functions";
-import { cityCoords, distanceKm, useUserLocation } from "@/lib/geo";
+import { cityCoords, distanceKm, nearestCity, useUserLocation } from "@/lib/geo";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
@@ -125,7 +125,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   // Artistas de los drops (sin repetir) + shows de música cerca del fan si compartió su ubicación.
   const dropArtists = useMemo(() => [...new Set(catalog.map((d) => d.artist))].slice(0, 10), [catalog]);
   useEffect(() => {
-    fetchExternalShows({ data: { artists: dropArtists, ...(location ? { near: location } : {}) } })
+    fetchExternalShows({ data: { artists: dropArtists, city: location ? nearestCity(location) : "Buenos Aires", ...(location ? { near: location } : {}) } })
       .then(setExternalShows).catch(() => setExternalShows([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, dropArtists.join("|")]);

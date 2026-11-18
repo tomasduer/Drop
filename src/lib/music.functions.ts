@@ -367,3 +367,36 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       await serpRaw('Concerts in Buenos Aires'),
     ];
   });
+
+/** Ticketeras oficiales donde se busca un show cuando la fuente no trae su link de venta. */
+export const TICKET_SITES = ['passline.com', 'ticketek.com.ar', 'allaccess.com.ar', 'enigmatickets.com', 'tuentrada.com', 'livepass.com.ar', 'ticketmaster.com.ar', 'venti.com.ar', 'plateanet.com', 'eventbrite.com.ar', 'entradauno.com', 'alternativateatral.com'];
+export const ticketSearchUrl = (artist: string) =>
+  `https://www.google.com/search?q=${encodeURIComponent(`${artist} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`)}`;
+
+/**
+ * Página de venta oficial de un artista: primer resultado de Google que sea de una ticketera oficial
+ * (se guarda 3 días). Si no hay clave o resultado, la búsqueda de Google limitada a ticketeras.
+ */
+export const findTicketLink = createServerFn({ method: 'POST' })
+  .inputValidator((input: unknown) => z.object({ artist: z.string().trim().min(2).max(80), venue: z.string().trim().max(80).optional() }).parse(input))
+  .handler(async ({ data }): Promise<string> => {
+    const fallback = ticketSearchUrl(data.artist);
+    const key = process.env['SERPAPI_KEY'];
+    if (!key) return fallback;
+    try {
+      const q = `${data.artist} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`;
+      const links = await cached(`tix1:${data.artist.toLowerCase()}`, async () => {
+        const res = await fetch(`https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(q)}&hl=es&gl=ar&num=10&api_key=${encodeURIComponent(key)}`, { headers: { accept: 'application/json' } });
+        if (!res.ok) throw new Error(`SerpApi respondió ${res.status}`);
+        const json: any = await res.json();
+        return ((json?.organic_results ?? []) as any[])
+          .map((r) => String(r?.link ?? '')).filter((l) => isOfficial(hostOf(l))).slice(0, 5);
+      }, 3 * 86400);
+      // Si hay varias, la que menciona la sala del show.
+      const venue = (data.venue ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 4);
+      return links.find((l) => venue.some((w) => l.toLowerCase().includes(w))) ?? links[0] ?? fallback;
+    } catch (e) {
+      console.warn('[entradas]', e instanceof Error ? e.message : e);
+      return fallback;
+    }
+  });

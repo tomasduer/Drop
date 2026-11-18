@@ -182,11 +182,10 @@ async function googleEvents(artist: string, size: number, city?: string): Promis
   return cached(`serp:${q.toLowerCase()}`, async () => {
     const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=es&gl=ar&api_key=${encodeURIComponent(key)}`;
     const res = await fetch(url, { headers: { accept: 'application/json' } });
-    if (!res.ok) {
-      console.warn(`[shows] SerpApi respondió ${res.status}`);
-      return [];
-    }
+    // Un error se lanza (no se guarda en la caché) para reintentar en la próxima visita.
+    if (!res.ok) throw new Error(`SerpApi respondió ${res.status}`);
     const json: any = await res.json();
+    if (json?.error && !/hasn't returned any results|no results/i.test(String(json.error))) throw new Error(`SerpApi: ${json.error}`);
     const norm = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     const k = norm(artist);
     return (json?.events_results ?? [])
@@ -221,9 +220,15 @@ export const getExternalShows = createServerFn({ method: 'POST' })
   .handler(async ({ data }): Promise<ExternalShow[]> => {
     try {
       const artists = data.artists?.length ? data.artists : DEFAULT_SHOW_ARTISTS;
+      // Cada fuente por separado: si una falla, las demás igual se muestran.
+      const settle = async (jobs: Promise<ExternalShow[]>[]) => (await Promise.allSettled(jobs)).map((r) => {
+        if (r.status === 'fulfilled') return r.value;
+        console.warn('[shows]', r.reason instanceof Error ? r.reason.message : r.reason);
+        return [];
+      });
       const lists = data.q && data.q.length >= 2
-        ? await Promise.all([ticketmaster(data.q, 10), googleEvents(data.q, 10)])
-        : await Promise.all([
+        ? await settle([ticketmaster(data.q, 10), googleEvents(data.q, 10)])
+        : await settle([
             ...artists.map((a) => ticketmaster(a, 4)),
             ...artists.map((a) => googleEvents(a, 4)),
             ...(data.city ? [googleEvents('', 20, data.city)] : []),
@@ -236,4 +241,19 @@ export const getExternalShows = createServerFn({ method: 'POST' })
     } catch {
       return [];
     }
+  });
+
+/** Diagnóstico de las fuentes de shows (para revisar claves): cuántos trae cada una o qué error da. */
+export const getShowsDiag = createServerFn({ method: 'POST' })
+  .handler(async () => {
+    const run = async (name: string, job: () => Promise<ExternalShow[]>) => {
+      try { const r = await job(); return `${name}: ${r.length} shows`; } catch (e) { return `${name}: error (${e instanceof Error ? e.message : String(e)})`; }
+    };
+    return [
+      `TICKETMASTER_API_KEY: ${process.env['TICKETMASTER_API_KEY'] ? 'cargada' : 'NO cargada'}`,
+      `SERPAPI_KEY: ${process.env['SERPAPI_KEY'] ? 'cargada' : 'NO cargada'}`,
+      await run('Ticketmaster "Ricardo Arjona"', () => ticketmaster('Ricardo Arjona', 5)),
+      await run('Google "Ricardo Arjona"', () => googleEvents('Ricardo Arjona', 5)),
+      await run('Google "recitales en Buenos Aires"', () => googleEvents('', 20, 'Buenos Aires')),
+    ];
   });

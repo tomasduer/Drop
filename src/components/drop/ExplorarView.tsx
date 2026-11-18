@@ -11,7 +11,7 @@ import { useDropAuth } from "./AuthProvider";
 import { useDrops, type DropInfo } from "@/lib/drops";
 import { ArtistLine } from "@/components/drop/ArtistLine";
 import { CatalogResults, type MusicGenre } from "./Catalog";
-import { getExternalShows } from "@/lib/music.functions";
+import { getExternalShows, getShowsDiag } from "@/lib/music.functions";
 import { cityCoords, distanceKm, nearestCity, useUserLocation } from "@/lib/geo";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
@@ -104,6 +104,14 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   const [savingDrop, setSavingDrop] = useState<string | null>(null);
   const fetchExternalShows = useServerFn(getExternalShows);
   const [externalShows, setExternalShows] = useState<ShowEvent[]>([]);
+  // Diagnóstico de fuentes de shows: abrir /resenas?diag=shows
+  const fetchDiag = useServerFn(getShowsDiag);
+  const [showsDiag, setShowsDiag] = useState<string[] | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined" || !new URLSearchParams(window.location.search).has("diag")) return;
+    fetchDiag().then(setShowsDiag).catch((e) => setShowsDiag([`Error: ${e instanceof Error ? e.message : String(e)}`]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const { location, status: locationStatus, request: requestLocation, clear: clearLocation } = useUserLocation();
 
   useEffect(() => {
@@ -354,6 +362,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
         <div className="mb-1 flex items-end justify-between">
           <h2 className="text-xl font-black">Shows cerca tuyo</h2>
                   </div>
+        {showsDiag && <pre className="mb-3 whitespace-pre-wrap rounded-xl border border-border bg-card p-3 text-[11px]">{showsDiag.join("\n")}</pre>}
         {location ? (
           <p className="mb-3 text-xs text-muted-foreground">
             {nearCount > 0 ? `${nearCount} ${nearCount === 1 ? "show" : "shows"} a menos de ${NEAR_KM} km. Después, el resto por distancia.` : `No encontramos shows a menos de ${NEAR_KM} km. Te mostramos los más cercanos.`}{" "}

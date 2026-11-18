@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays, ChevronRight, MapPin, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getExternalShows } from "@/lib/music.functions";
+import { findTicketLink, getExternalShows, ticketSearchUrl } from "@/lib/music.functions";
 import { cityCoords, distanceKm, nearestCity, useUserLocation } from "@/lib/geo";
 import { useDrops } from "@/lib/drops";
 import type { ShowEvent } from "@/lib/explore-data";
@@ -83,17 +83,24 @@ export function joinDates(dates: (string | null)[]): string {
   return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} y ${parts[parts.length - 1]}`;
 }
 
-/** Búsqueda en Google de las entradas oficiales del show (cuando la fuente no trae link). */
-/** Ticketeras oficiales donde se busca el show cuando la fuente no trae su link de venta. */
-const TICKET_SITES = ["passline.com", "ticketek.com.ar", "allaccess.com.ar", "enigmatickets.com", "tuentrada.com", "livepass.com.ar", "ticketmaster.com.ar", "venti.com.ar", "plateanet.com", "eventbrite.com.ar", "entradauno.com", "alternativateatral.com"];
-const ticketSearch = (show: ShowEvent) =>
-  `https://www.google.com/search?q=${encodeURIComponent(`${show.artist || show.title} (${TICKET_SITES.map((d) => `site:${d}`).join(" OR ")})`.replace(/\s+/g, " "))}`;
+/** Abre la venta oficial: el link de la fuente, o la página que encuentra el servidor en las ticketeras oficiales. */
+function useOpenTickets() {
+  const find = useServerFn(findTicketLink);
+  return async (show: ShowEvent) => {
+    // La pestaña se abre ya (si no, el navegador la bloquea) y después se le pone la dirección.
+    const tab = window.open("about:blank", "_blank");
+    const artist = show.artist || show.title;
+    const url = await find({ data: { artist, venue: show.venue ?? undefined } }).catch(() => ticketSearchUrl(artist));
+    if (tab) tab.location.href = url; else window.location.href = url;
+  };
+}
 
 export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" }: { group: ShowGroup; showKm: boolean; onReview?: (show: ShowEvent) => void; className?: string }) {
   const { show, dates, km } = group;
   // Link oficial de venta si alguna fecha lo trae; si no, búsqueda del show solo en ticketeras oficiales.
   const official = dates.find((d) => d.url && d.official !== false);
   const info = dates.find((d) => d.url && d.official === false);
+  const openTickets = useOpenTickets();
   return (
     <article className={`${className} overflow-hidden rounded-2xl border border-border bg-card`}>
       <img decoding="async" src={show.image_url ?? eventCrowd} alt={`Imagen de ${show.title}`} loading="lazy" className="h-28 w-full object-cover" />
@@ -111,9 +118,11 @@ export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" 
         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{show.venue}{show.city ? ` · ${show.city}` : ""}</span></p>
         {showKm && km != null && <p className="mt-0.5 text-xs font-semibold text-primary">{km < 1 ? "A menos de 1 km" : `A ${Math.round(km).toLocaleString("es-AR")} km`}</p>}
         {/* Siempre hay cómo comprar: el link oficial o la búsqueda en ticketeras oficiales. */}
-        <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs">
-          <a href={official?.url || ticketSearch(show)} target="_blank" rel="noreferrer">Ver entradas</a>
-        </Button>
+        {official?.url ? (
+          <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={official.url} target="_blank" rel="noreferrer">Ver entradas</a></Button>
+        ) : (
+          <Button variant="outline" size="sm" className="mt-2 w-full text-xs" onClick={() => openTickets(show)}>Ver entradas</Button>
+        )}
         {!official && info?.url && <a href={info.url} target="_blank" rel="noreferrer" className="mt-1 block text-center text-[11px] text-muted-foreground underline-offset-2 hover:underline">Más información</a>}
         {onReview && <Button variant="ghost" size="sm" className="mt-1 h-auto w-full whitespace-normal px-2 py-1.5 text-xs" onClick={() => onReview(show)}><PenLine className="h-3.5 w-3.5 shrink-0" />Reseñar</Button>}
       </div>

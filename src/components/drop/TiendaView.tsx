@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, ChevronRight, ClipboardList, Lock, MapPin, Minus, Package, Plus, Search, ShoppingCart, Sparkles, Store as StoreIcon, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ClipboardList, Lock, MapPin, Minus, Package, Plus, Search, ShoppingCart, Sparkles, Store as StoreIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { getRanking } from "@/lib/drop.functions";
 import { useDrops, type DropInfo } from "@/lib/drops";
@@ -183,8 +183,10 @@ function HeroCarousel({ stores }: { stores: Store[] }) {
   }, [list.length]);
 
   if (!list.length) return null;
+  const go = (n: number) => { const el = ref.current; if (el) el.scrollTo({ left: ((n + list.length) % list.length) * el.clientWidth, behavior: "smooth" }); };
   return (
     <div className="mt-4 px-5">
+      <div className="relative">
       <div ref={ref} onScroll={(e) => setI(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
         className="flex snap-x snap-mandatory overflow-x-auto rounded-3xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {list.map((s) => {
@@ -201,6 +203,13 @@ function HeroCarousel({ stores }: { stores: Store[] }) {
             </Link>
           );
         })}
+      </div>
+      {list.length > 1 && (["prev", "next"] as const).map((dir) => (
+        <button key={dir} type="button" aria-label={dir === "prev" ? "Tienda anterior" : "Tienda siguiente"} onClick={() => go(dir === "prev" ? i - 1 : i + 1)}
+          className={`absolute top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/65 ${dir === "prev" ? "left-3" : "right-3"}`}>
+          {dir === "prev" ? <ChevronLeft className="h-6 w-6" /> : <ChevronRight className="h-6 w-6" />}
+        </button>
+      ))}
       </div>
       <div className="mt-3 flex items-center justify-center gap-3">
         <div className="flex items-center gap-1.5">

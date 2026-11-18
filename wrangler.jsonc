@@ -8,5 +8,7 @@
   "vars": {
     "SUPABASE_URL": "https://ccugbmnrpzvvurnwhmut.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_M7C21iy9g8Eel0n6y32lKg_EOFLN77D"
-  }
+  },
+  // Caché de las búsquedas de shows (SerpApi/Ticketmaster): en workers.dev la Cache API no guarda nada.
+  "kv_namespaces": [{ "binding": "SHOWS_CACHE", "id": "15130c82bf194f18a5510f07619f3fcd" }]
 }

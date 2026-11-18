@@ -190,16 +190,26 @@ function officialLink(tickets: any[] | undefined, fallback: string | undefined):
   return info ? { url: info.link, official: false } : { url: '', official: false };
 }
 
+/** KV de Cloudflare (binding SHOWS_CACHE). Nitro deja los bindings en globalThis.__env__. */
+type Kv = { get: (k: string) => Promise<string | null>; put: (k: string, v: string, o?: { expirationTtl?: number }) => Promise<void> };
+const showsKv = (): Kv | undefined => (globalThis as any).__env__?.SHOWS_CACHE as Kv | undefined;
+
+// La Cache API no guarda nada en *.workers.dev, por eso se usa KV (con la Cache API como respaldo).
 async function cached<T>(key: string, load: () => Promise<T>, maxAge = 86400): Promise<T> {
+  const kv = showsKv();
   const cache = (globalThis as any).caches?.default as Cache | undefined;
   const req = new Request(`https://drop-cache.local/${encodeURIComponent(key)}`);
-  if (cache) {
-    try { const hit = await cache.match(req); if (hit) return (await hit.json()) as T; } catch { /* sin caché */ }
-  }
+  try {
+    if (kv) { const hit = await kv.get(key); if (hit) return JSON.parse(hit) as T; }
+    else if (cache) { const hit = await cache.match(req); if (hit) return (await hit.json()) as T; }
+  } catch { /* sin caché */ }
   const value = await load();
   // Una lista vacía no se guarda: puede ser un tropiezo de la búsqueda y conviene reintentar.
-  if (cache && !(Array.isArray(value) && value.length === 0)) {
-    try { await cache.put(req, new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', 'cache-control': `max-age=${maxAge}` } })); } catch { /* sin caché */ }
+  if (!(Array.isArray(value) && value.length === 0)) {
+    try {
+      if (kv) await kv.put(key, JSON.stringify(value), { expirationTtl: Math.max(60, maxAge) });
+      else if (cache) await cache.put(req, new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', 'cache-control': `max-age=${maxAge}` } }));
+    } catch { /* sin caché */ }
   }
   return value;
 }
@@ -329,6 +339,7 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
     return [
       `TICKETMASTER_API_KEY: ${process.env['TICKETMASTER_API_KEY'] ? 'cargada' : 'NO cargada'}`,
       `SERPAPI_KEY: ${process.env['SERPAPI_KEY'] ? 'cargada' : 'NO cargada'}`,
+      `Caché KV: ${showsKv() ? 'activa' : 'NO activa'}`,
       await run('Ticketmaster "Ricardo Arjona"', () => ticketmaster('Ricardo Arjona', 5)),
       await run('Google "Ricardo Arjona"', () => googleEvents('Ricardo Arjona', 5)),
       await run('Google "Concerts in Buenos Aires"', () => googleEvents('', 20, 'Buenos Aires')),

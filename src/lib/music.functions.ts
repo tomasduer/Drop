@@ -171,7 +171,7 @@ const OFFICIAL_TICKETS = [
   'venti', 'livepass', 'ticketmaster', 'eventbrite', 'autoentrada', 'ticketportal', 'paseshow', 'entradaweb', 'tickethoy',
   'ticketway', 'eticket', 'boleteria', 'deportick', 'superboletos', 'puntoticket', 'tuboleta', 'dice',
   'movistararena', 'lunapark', 'vorterix', 'niceto', 'latrastienda', 'teatrogranrex', 'artmedia', 'quality', 'plazadelamusica',
-  'cultura', 'gob',
+  'ticketeralibre', 'paylogic', 'flashpass', 'tickethub', 'entradasya', 'bombo', 'cultura', 'gob',
 ];
 /** Reventa o agregadores con recargo: nunca se usan. */
 const RESALE = ['viagogo', 'stubhub', 'seatgeek', 'vividseats', 'ticketnetwork', 'tickpick', 'gametime', 'ticketsmarter', 'ticombo', 'fanpass', 'ticketswap', 'ticketcity', 'megaseats', 'boxofficeticketsales', 'tixel', 'goldstar', 'eventticketscenter', 'concerttickets', 'ticketsonsale', 'coastaltickets'];
@@ -368,15 +368,13 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       await ticketDiag('Maria Becerra Pop Tickets'),
       await ticketDiag('Paula Mattheus'),
       await ticketDiag('Easykid'),
-      await ticketRaw('Easykid entradas'),
-      await ticketRaw('Easykid site:allaccess.com.ar'),
       `Artistas de las fichas: ${(await googleEvents('', 20, 'Buenos Aires').catch(() => [])).map((x) => `${x.artist}${x.url ? (x.official ? ' (oficial)' : ' (info)') : ''}`).join(' · ')}`,
       await ticketDiag('Abel Pintos'),
     ];
   });
 
 /** Ticketeras oficiales donde se busca un show cuando la fuente no trae su link de venta. */
-export const TICKET_SITES = ['passline.com', 'ticketek.com.ar', 'allaccess.com.ar', 'enigmatickets.com', 'tuentrada.com', 'livepass.com.ar', 'ticketmaster.com.ar', 'venti.com.ar', 'plateanet.com', 'eventbrite.com.ar', 'entradauno.com', 'alternativateatral.com'];
+export const TICKET_SITES = ['passline.com', 'ticketek.com.ar', 'allaccess.com.ar', 'enigmatickets.com', 'tuentrada.com', 'livepass.com.ar', 'ticketmaster.com.ar', 'venti.com.ar', 'plateanet.com', 'eventbrite.com.ar', 'entradauno.com', 'alternativateatral.com', 'ticketeralibre.com.ar'];
 const fold = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 /** "Maria Becerra Pop Tickets" → "Maria Becerra Pop": saca palabras de relleno de los títulos de Google. */
 export const cleanArtist = (a: string) =>
@@ -405,7 +403,7 @@ async function ticketLinks(artist: string): Promise<{ link: string; text: string
       .slice(0, 5);
   };
   // Se guarda también "no encontrado" (1 día) para no gastar búsquedas en cada clic.
-  const hit = await cached(`tix4:${fold(name)}`, async () => {
+  const hit = await cached(`tix5:${fold(name)}`, async () => {
     let links = await search(`${name} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`);
     // Segunda vuelta, más amplia: la búsqueda común de entradas, quedándose con las ticketeras oficiales.
     if (!links.length) links = await search(`${name} entradas`);

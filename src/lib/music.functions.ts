@@ -215,11 +215,12 @@ async function cached<T>(key: string, load: () => Promise<T>, maxAge = 86400): P
     else if (cache) { const hit = await cache.match(req); if (hit) return (await hit.json()) as T; }
   } catch { /* sin caché */ }
   const value = await load();
-  // Una lista vacía no se guarda: puede ser un tropiezo de la búsqueda y conviene reintentar.
-  if (!(Array.isArray(value) && value.length === 0)) {
+  // Una lista vacía se guarda solo 6 horas: se reintenta, pero sin gastar una búsqueda en cada visita.
+  const ttl = Array.isArray(value) && value.length === 0 ? Math.min(maxAge, 6 * 3600) : maxAge;
+  {
     try {
-      if (kv) await kv.put(key, JSON.stringify(value), { expirationTtl: Math.max(60, maxAge) });
-      else if (cache) await cache.put(req, new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', 'cache-control': `max-age=${maxAge}` } }));
+      if (kv) await kv.put(key, JSON.stringify(value), { expirationTtl: Math.max(60, ttl) });
+      else if (cache) await cache.put(req, new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', 'cache-control': `max-age=${ttl}` } }));
     } catch { /* sin caché */ }
   }
   return value;
@@ -350,6 +351,20 @@ async function serpRaw(q: string): Promise<string> {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+/** Búsquedas de SerpApi usadas y restantes (consultar la cuenta no gasta búsquedas). */
+async function serpAccount(): Promise<string> {
+  const key = process.env['SERPAPI_KEY'];
+  if (!key) return 'SerpApi cuenta: sin clave';
+  try {
+    const res = await fetch(`https://serpapi.com/account.json?api_key=${encodeURIComponent(key)}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const a: any = await res.json().catch(() => ({}));
+    return `SerpApi cuenta: plan ${a?.plan_name ?? '?'} · usadas este mes ${a?.this_month_usage ?? '?'} de ${a?.searches_per_month ?? '?'} · quedan ${a?.plan_searches_left ?? a?.total_searches_left ?? '?'}${a?.error ? ` · error: ${a.error}` : ''}`;
+  } catch (e) {
+    return `SerpApi cuenta: falla (${e instanceof Error ? e.message : String(e)})`;
+  }
+}
+
 /** Diagnóstico de las fuentes de shows (para revisar claves): cuántos trae cada una o qué error da. */
 export const getShowsDiag = createServerFn({ method: 'POST' })
   .handler(async () => {
@@ -361,10 +376,8 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       `SERPAPI_KEY: ${process.env['SERPAPI_KEY'] ? 'cargada' : 'NO cargada'}`,
       `Caché KV: ${showsKv() ? 'activa' : 'NO activa'}`,
       await run('Ticketmaster "Ricardo Arjona"', () => ticketmaster('Ricardo Arjona', 5)),
-      await run('Google "Ricardo Arjona"', () => googleEvents('Ricardo Arjona', 5)),
       await run('Google "Concerts in Buenos Aires"', () => googleEvents('', 20, 'Buenos Aires')),
-      await run('Google "Concerts at Niceto Club"', () => googleEvents('', 20, 'Buenos Aires', { query: 'Concerts at Niceto Club Buenos Aires', maxAge: 3 * 86400 })),
-      await serpRaw('Concerts in Buenos Aires'),
+      await serpAccount(),
       await ticketDiag('Maria Becerra Pop Tickets'),
       await ticketDiag('Paula Mattheus'),
       await ticketDiag('Easykid'),

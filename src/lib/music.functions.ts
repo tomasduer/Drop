@@ -101,7 +101,7 @@ export const getGenreCatalog = createServerFn({ method: 'POST' })
   });
 
 // Agenda de shows de Ticketmaster (Discovery API). Necesita el secreto TICKETMASTER_API_KEY en Cloudflare.
-export type ExternalShow = { id: string; title: string; artist: string; event_date: string | null; city: string; venue: string; image_url: string | null; url: string; lat?: number; lng?: number };
+export type ExternalShow = { id: string; title: string; artist: string; event_date: string | null; city: string; venue: string; image_url: string | null; url: string; lat?: number; lng?: number; /** Ciudad buscada cuando el show vino de "recitales en <ciudad>". */ area?: string };
 export const DEFAULT_SHOW_ARTISTS = ['Ricardo Arjona', 'Airbag', 'Dillom', 'LALI', 'Adéla', 'María Becerra', 'TINI'];
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -201,6 +201,7 @@ async function googleEvents(artist: string, size: number, city?: string): Promis
           venue: e.venue?.name ?? addr[0] ?? '', city: addr[1] ?? addr[0] ?? '',
           image_url: e.image ?? e.thumbnail ?? null,
           url: e.ticket_info?.find((t: any) => t.link_type === 'tickets')?.link ?? e.link ?? '',
+          ...(city ? { area: city } : {}),
         };
       })
       .filter((s: ExternalShow) => !s.event_date || s.event_date >= new Date().toISOString())
@@ -233,7 +234,7 @@ export const getExternalShows = createServerFn({ method: 'POST' })
             ...artists.map((a) => googleEvents(a, 4)),
             ...(data.city ? [googleEvents('', 20, data.city)] : []),
             // Shows de música cerca del fan, de cualquier artista.
-            ...(data.near ? [ticketmaster('', 20, data.near)] : []),
+            ...(data.near ? [ticketmaster('', 20, data.near, 50)] : []),
           ]);
       const seen = new Set<string>();
       return lists.flat().filter((s) => (seen.has(s.id) ? false : (seen.add(s.id), true)))

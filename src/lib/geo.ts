@@ -36,6 +36,19 @@ const CITIES: Record<string, Geo> = {
 
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
+const DISPLAY: Record<string, string> = { caba: "Buenos Aires", cordoba: "Córdoba", tucuman: "Tucumán", "san miguel de tucuman": "Tucumán", neuquen: "Neuquén", "bahia blanca": "Bahía Blanca", parana: "Paraná", asuncion: "Asunción", "sao paulo": "São Paulo", "ciudad de mexico": "Ciudad de México" };
+const title = (k: string) => DISPLAY[k] ?? k.replace(/\b\w/g, (c) => c.toUpperCase());
+
+/** Ciudad conocida más cercana al fan (para buscar recitales ahí). */
+export function nearestCity(at: Geo): string {
+  let best = "buenos aires", min = Infinity;
+  for (const [k, g] of Object.entries(CITIES)) {
+    const d = distanceKm(at, g);
+    if (d < min) { min = d; best = k; }
+  }
+  return title(best);
+}
+
 /** Coordenadas de una ciudad ("Córdoba", "Rosario, AR"…), si la conocemos. */
 export function cityCoords(city: string | null | undefined): Geo | null {
   if (!city) return null;

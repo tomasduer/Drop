@@ -158,7 +158,7 @@ function serpDate(when: string | undefined, start: string | undefined): string |
   return new Date(Date.UTC(year, mon, day, time ? Number(time[1]) + 3 : 3, time ? Number(time[2]) : 0)).toISOString();
 }
 
-async function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
+async function cached<T>(key: string, load: () => Promise<T>, maxAge = 86400): Promise<T> {
   const cache = (globalThis as any).caches?.default as Cache | undefined;
   const req = new Request(`https://drop-cache.local/${encodeURIComponent(key)}`);
   if (cache) {
@@ -166,16 +166,21 @@ async function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
   }
   const value = await load();
   if (cache) {
-    try { await cache.put(req, new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', 'cache-control': 'max-age=86400' } })); } catch { /* sin caché */ }
+    try { await cache.put(req, new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', 'cache-control': `max-age=${maxAge}` } })); } catch { /* sin caché */ }
   }
   return value;
 }
 
-async function googleEvents(artist: string, size: number): Promise<ExternalShow[]> {
+/**
+ * Busca en Eventos de Google. Con `artist` trae sus fechas (se guarda 3 días);
+ * con `city` trae recitales de cualquier artista en esa ciudad (se guarda 1 día).
+ */
+async function googleEvents(artist: string, size: number, city?: string): Promise<ExternalShow[]> {
   const key = process.env['SERPAPI_KEY'];
   if (!key) return [];
-  return cached(`serp:${artist.toLowerCase()}`, async () => {
-    const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(`${artist} concierto`)}&hl=es&gl=ar&api_key=${encodeURIComponent(key)}`;
+  const q = city ? `recitales en ${city}` : `${artist} concierto`;
+  return cached(`serp:${q.toLowerCase()}`, async () => {
+    const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=es&gl=ar&api_key=${encodeURIComponent(key)}`;
     const res = await fetch(url, { headers: { accept: 'application/json' } });
     if (!res.ok) {
       console.warn(`[shows] SerpApi respondió ${res.status}`);
@@ -185,12 +190,14 @@ async function googleEvents(artist: string, size: number): Promise<ExternalShow[
     const norm = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     const k = norm(artist);
     return (json?.events_results ?? [])
-      .filter((e: any) => norm(`${e.title ?? ''} ${e.description ?? ''}`).includes(k))
-      .map((e: any, i: number): ExternalShow => {
+      .filter((e: any) => city || norm(`${e.title ?? ''} ${e.description ?? ''}`).includes(k))
+      .map((e: any): ExternalShow => {
         const addr: string[] = Array.isArray(e.address) ? e.address : [];
+        // En la búsqueda por ciudad el artista no viene aparte: se toma del título ("Artista en Lugar", "Artista - Gira").
+        const who = city ? String(e.title ?? '').split(/\s+(?:en|at|@|-|–|\|)\s+/i)[0].trim() || 'Recital' : artist;
         return {
-          id: `gg-${k.replace(/\W+/g, '-')}-${i}-${norm(e.title ?? '').replace(/\W+/g, '-').slice(0, 40)}`,
-          title: e.title ?? artist, artist,
+          id: `gg-${norm(`${e.title ?? ''}-${e.date?.start_date ?? ''}`).replace(/\W+/g, '-').slice(0, 60)}`,
+          title: e.title ?? artist, artist: who,
           event_date: serpDate(e.date?.when, e.date?.start_date),
           venue: e.venue?.name ?? addr[0] ?? '', city: addr[1] ?? addr[0] ?? '',
           image_url: e.image ?? e.thumbnail ?? null,
@@ -199,7 +206,7 @@ async function googleEvents(artist: string, size: number): Promise<ExternalShow[
       })
       .filter((s: ExternalShow) => !s.event_date || s.event_date >= new Date().toISOString())
       .slice(0, size);
-  });
+  }, city ? 86400 : 3 * 86400);
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
@@ -208,6 +215,8 @@ export const getExternalShows = createServerFn({ method: 'POST' })
     q: z.string().trim().max(80).optional(),
     artists: z.array(z.string().trim().min(2).max(60)).max(10).optional(),
     near: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).optional(),
+    /** Ciudad del fan: suma recitales de cualquier artista en esa ciudad. */
+    city: z.string().trim().min(2).max(60).optional(),
   }).parse(input ?? {}))
   .handler(async ({ data }): Promise<ExternalShow[]> => {
     try {
@@ -217,12 +226,13 @@ export const getExternalShows = createServerFn({ method: 'POST' })
         : await Promise.all([
             ...artists.map((a) => ticketmaster(a, 4)),
             ...artists.map((a) => googleEvents(a, 4)),
+            ...(data.city ? [googleEvents('', 20, data.city)] : []),
             // Shows de música cerca del fan, de cualquier artista.
-            ...(data.near ? [ticketmaster('', 12, data.near)] : []),
+            ...(data.near ? [ticketmaster('', 20, data.near)] : []),
           ]);
       const seen = new Set<string>();
       return lists.flat().filter((s) => (seen.has(s.id) ? false : (seen.add(s.id), true)))
-        .sort((a, b) => (a.event_date ?? '9').localeCompare(b.event_date ?? '9')).slice(0, 30);
+        .sort((a, b) => (a.event_date ?? '9').localeCompare(b.event_date ?? '9')).slice(0, 60);
     } catch {
       return [];
     }

@@ -1,1 +1,0 @@
-import{j as o}from"./index-75oOOmI0.js";import{W as m}from"./WelcomeView-ClcUlhZ9.js";import"./button-CEJAr93F.js";import"./index-pDeXGgoX.js";import"./drop-logo-negativo-BgkkeCk8.js";import"./disc-3-B4lYxjO8.js";import"./arrow-right-BrmetnPF.js";function c(){return o.jsx(m,{})}export{c as component};

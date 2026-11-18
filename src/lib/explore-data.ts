@@ -27,6 +27,7 @@ export type ShowEvent = {
   venue: string;
   image_url: string | null;
   url?: string;
+  official?: boolean;
   lat?: number;
   lng?: number;
   area?: string;

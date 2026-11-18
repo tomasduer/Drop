@@ -390,7 +390,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
                     <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><CalendarDays className="h-3 w-3" />{show.event_date ? new Date(show.event_date).toLocaleDateString("es-AR") : "Fecha a confirmar"}</p>
                     <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{show.venue}{show.city ? ` · ${show.city}` : ""}</span></p>
                     {location && show.km != null && <p className="mt-0.5 text-xs font-semibold text-primary">{show.km < 1 ? "A menos de 1 km" : `A ${Math.round(show.km).toLocaleString("es-AR")} km`}</p>}
-                    {show.url ? <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={show.url} target="_blank" rel="noreferrer">Ver entradas</a></Button> : <Button
+                    {show.url ? <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={show.url} target="_blank" rel="noreferrer">{show.official === false ? "Más información" : "Ver entradas"}</a></Button> : <Button
                       variant={attended ? "secondary" : "outline"}
                       size="sm"
                       className="mt-2 w-full text-xs"

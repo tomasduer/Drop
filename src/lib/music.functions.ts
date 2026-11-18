@@ -101,7 +101,7 @@ export const getGenreCatalog = createServerFn({ method: 'POST' })
   });
 
 // Agenda de shows de Ticketmaster (Discovery API). Necesita el secreto TICKETMASTER_API_KEY en Cloudflare.
-export type ExternalShow = { id: string; title: string; artist: string; event_date: string | null; city: string; venue: string; image_url: string | null; url: string; lat?: number; lng?: number; /** Ciudad buscada cuando el show vino de "recitales en <ciudad>". */ area?: string };
+export type ExternalShow = { id: string; title: string; artist: string; event_date: string | null; city: string; venue: string; image_url: string | null; url: string; /** true si `url` es una ticketera oficial; false si es solo información. */ official?: boolean; lat?: number; lng?: number; /** Ciudad buscada cuando el show vino de "recitales en <ciudad>". */ area?: string };
 export const DEFAULT_SHOW_ARTISTS = ['Ricardo Arjona', 'Airbag', 'Dillom', 'LALI', 'Adéla', 'María Becerra', 'TINI'];
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -162,6 +162,34 @@ function serpDate(when: string | undefined, start: string | undefined): string |
   return new Date(Date.UTC(year, mon, day, hour != null ? hour + 3 : 3, hour != null ? minute : 0)).toISOString();
 }
 
+/** Ticketeras oficiales (Argentina y región) y sitios de salas. */
+const OFFICIAL_TICKETS = [
+  'ticketek.com.ar', 'allaccess.com.ar', 'enigmatickets.com', 'passline.com', 'entradauno.com', 'tuentrada.com',
+  'plateanet.com', 'alternativateatral.com', 'venti.com.ar', 'livepass.com.ar', 'ticketmaster.com', 'ticketmaster.com.ar',
+  'eventbrite.com', 'eventbrite.com.ar', 'autoentrada.com', 'ticketportal.com.ar', 'paseshow.com.ar', 'entradaweb.com.ar',
+  'movistararena.com.ar', 'lunapark.com.ar', 'vorterix.com', 'niceto.com', 'latrastienda.com', 'teatrogranrex.com.ar',
+  'complejoartmedia.com', 'quality-espacio.com', 'plazadelamusica.com', 'dice.fm', 'bandsintown.com',
+];
+/** Reventa o agregadores con recargo: nunca se usan. */
+const RESALE = ['viagogo', 'stubhub', 'seatgeek', 'vividseats', 'ticketnetwork', 'tickpick', 'gametime', 'ticketsmarter', 'ticombo', 'fanpass', 'ticketswap', 'ticketcity', 'megaseats', 'boxofficeticketsales', 'tixel', 'goldstar', 'eventticketscenter', 'concerttickets', 'ticketsonsale', 'coastaltickets'];
+
+function hostOf(link: string): string {
+  try { return new URL(link).hostname.replace(/^www\./, '').toLowerCase(); } catch { return ''; }
+}
+const isOfficial = (h: string) => OFFICIAL_TICKETS.some((d) => h === d || h.endsWith(`.${d}`));
+const isResale = (h: string) => !h || RESALE.some((r) => h.includes(r));
+
+/** Elige el link oficial de venta; si no hay, uno informativo que no sea reventa; si tampoco, ninguno. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function officialLink(tickets: any[] | undefined, fallback: string | undefined): { url: string; official: boolean } {
+  const links = (tickets ?? []).map((t) => ({ link: String(t?.link ?? ''), type: String(t?.link_type ?? ''), host: hostOf(String(t?.link ?? '')) }));
+  const official = links.find((t) => isOfficial(t.host));
+  if (official) return { url: official.link, official: true };
+  const info = [...links.filter((t) => t.type !== 'tickets'), ...(fallback ? [{ link: fallback, type: 'info', host: hostOf(fallback) }] : [])]
+    .find((t) => !isResale(t.host) && !t.host.endsWith('google.com'));
+  return info ? { url: info.link, official: false } : { url: '', official: false };
+}
+
 async function cached<T>(key: string, load: () => Promise<T>, maxAge = 86400): Promise<T> {
   const cache = (globalThis as any).caches?.default as Cache | undefined;
   const req = new Request(`https://drop-cache.local/${encodeURIComponent(key)}`);
@@ -211,7 +239,7 @@ async function googleEvents(artist: string, size: number, city?: string, opts: {
           event_date: serpDate(e.date?.when, e.date?.start_date),
           venue: e.venue?.name ?? addr[0] ?? '', city: addr[1] ?? addr[0] ?? '',
           image_url: e.image ?? e.thumbnail ?? null,
-          url: e.ticket_info?.find((t: any) => t.link_type === 'tickets')?.link ?? e.link ?? '',
+          ...officialLink(e.ticket_info, e.link),
           ...(city ? { area: city } : {}),
         };
       })

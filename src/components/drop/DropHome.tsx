@@ -122,6 +122,7 @@ export function DropHome({ drop, onGo }: { drop: DropInfo; onGo: (tab: DropTab) 
               );
             })}
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">A igual puntaje, queda arriba quien llegó primero. <a href="/terminos#premios" className="underline">Reglas y premios</a></p>
           {active && <Button variant="outline" className="mt-3 w-full" onClick={() => onGo("ranking")}><Trophy /> Ver el ranking</Button>}
         </section>
       ) : null;

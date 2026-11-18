@@ -365,38 +365,67 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       await run('Google "Concerts in Buenos Aires"', () => googleEvents('', 20, 'Buenos Aires')),
       await run('Google "Concerts at Niceto Club"', () => googleEvents('', 20, 'Buenos Aires', { query: 'Concerts at Niceto Club Buenos Aires', maxAge: 3 * 86400 })),
       await serpRaw('Concerts in Buenos Aires'),
+      await ticketDiag('Maria Becerra Pop Tickets'),
+      await ticketDiag('Paula Mattheus'),
     ];
   });
 
 /** Ticketeras oficiales donde se busca un show cuando la fuente no trae su link de venta. */
 export const TICKET_SITES = ['passline.com', 'ticketek.com.ar', 'allaccess.com.ar', 'enigmatickets.com', 'tuentrada.com', 'livepass.com.ar', 'ticketmaster.com.ar', 'venti.com.ar', 'plateanet.com', 'eventbrite.com.ar', 'entradauno.com', 'alternativateatral.com'];
-export const ticketSearchUrl = (artist: string) =>
-  `https://www.google.com/search?q=${encodeURIComponent(`${artist} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`)}`;
+const fold = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+/** "Maria Becerra Pop Tickets" → "Maria Becerra Pop": saca palabras de relleno de los títulos de Google. */
+export const cleanArtist = (a: string) =>
+  a.replace(/\b(tickets?|entradas|concerts?|concierto|live|en vivo|tour|gira|show|world tour)\b/gi, ' ').replace(/[|·,–-]+\s*$/, '').replace(/\s+/g, ' ').trim() || a;
+/** Búsqueda simple (sin operadores a la vista) para cuando no se encuentra la página oficial. */
+export const ticketSearchUrl = (artist: string) => `https://www.google.com/search?q=${encodeURIComponent(`${cleanArtist(artist)} entradas`)}`;
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/** Páginas de ticketeras oficiales que mencionan al artista (búsqueda de Google por SerpApi, 3 días en KV). */
+async function ticketLinks(artist: string): Promise<{ link: string; text: string }[]> {
+  const key = process.env['SERPAPI_KEY'];
+  if (!key) throw new Error('sin SERPAPI_KEY');
+  const name = cleanArtist(artist);
+  const q = `${name} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`;
+  const words = fold(name).split(/[^a-z0-9]+/).filter((w) => w.length >= 3).slice(0, 2);
+  return cached(`tix2:${fold(name)}`, async () => {
+    const res = await fetch(`https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(q)}&hl=es&gl=ar&num=10&api_key=${encodeURIComponent(key)}`, { headers: { accept: 'application/json' } });
+    const json: any = await res.json().catch(() => ({}));
+    if (!res.ok || json?.error) {
+      if (/hasn't returned any results|no results/i.test(String(json?.error ?? ''))) return [];
+      throw new Error(`SerpApi ${res.status}: ${json?.error ?? 'sin detalle'}`);
+    }
+    return ((json?.organic_results ?? []) as any[])
+      .map((r) => ({ link: String(r?.link ?? ''), text: fold(`${r?.title ?? ''} ${r?.snippet ?? ''} ${r?.link ?? ''}`) }))
+      // De una ticketera oficial y que nombre al artista (no cualquier evento del sitio).
+      .filter((r) => isOfficial(hostOf(r.link)) && words.every((w) => r.text.includes(w)))
+      .slice(0, 5);
+  }, 3 * 86400);
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
- * Página de venta oficial de un artista: primer resultado de Google que sea de una ticketera oficial
- * (se guarda 3 días). Si no hay clave o resultado, la búsqueda de Google limitada a ticketeras.
+ * Página de venta oficial de un artista: primer resultado de una ticketera oficial (prefiere la de la sala).
+ * Si no la encuentra, devuelve "" y la ficha usa el link informativo o una búsqueda simple.
  */
 export const findTicketLink = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => z.object({ artist: z.string().trim().min(2).max(80), venue: z.string().trim().max(80).optional() }).parse(input))
   .handler(async ({ data }): Promise<string> => {
-    const fallback = ticketSearchUrl(data.artist);
-    const key = process.env['SERPAPI_KEY'];
-    if (!key) return fallback;
     try {
-      const q = `${data.artist} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`;
-      const links = await cached(`tix1:${data.artist.toLowerCase()}`, async () => {
-        const res = await fetch(`https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(q)}&hl=es&gl=ar&num=10&api_key=${encodeURIComponent(key)}`, { headers: { accept: 'application/json' } });
-        if (!res.ok) throw new Error(`SerpApi respondió ${res.status}`);
-        const json: any = await res.json();
-        return ((json?.organic_results ?? []) as any[])
-          .map((r) => String(r?.link ?? '')).filter((l) => isOfficial(hostOf(l))).slice(0, 5);
-      }, 3 * 86400);
-      // Si hay varias, la que menciona la sala del show.
-      const venue = (data.venue ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 4);
-      return links.find((l) => venue.some((w) => l.toLowerCase().includes(w))) ?? links[0] ?? fallback;
+      const links = await ticketLinks(data.artist);
+      const venue = fold(data.venue ?? '').split(/[^a-z0-9]+/).filter((w) => w.length >= 4 && !['estadio', 'teatro', 'club', 'arena'].includes(w));
+      return (links.find((l) => venue.some((w) => l.text.includes(w))) ?? links[0])?.link ?? '';
     } catch (e) {
       console.warn('[entradas]', e instanceof Error ? e.message : e);
-      return fallback;
+      return '';
     }
   });
+
+/** Para el diagnóstico: qué encuentra la búsqueda de entradas para un artista. */
+async function ticketDiag(artist: string): Promise<string> {
+  try {
+    const links = await ticketLinks(artist);
+    return `Entradas "${cleanArtist(artist)}": ${links.length ? links.map((l) => l.link).join(' , ') : 'ninguna página oficial'}`;
+  } catch (e) {
+    return `Entradas "${cleanArtist(artist)}": error (${e instanceof Error ? e.message : String(e)})`;
+  }
+}

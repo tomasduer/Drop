@@ -86,11 +86,12 @@ export function joinDates(dates: (string | null)[]): string {
 /** Abre la venta oficial: el link de la fuente, o la página que encuentra el servidor en las ticketeras oficiales. */
 function useOpenTickets() {
   const find = useServerFn(findTicketLink);
-  return async (show: ShowEvent) => {
+  return async (show: ShowEvent, info?: string) => {
     // La pestaña se abre ya (si no, el navegador la bloquea) y después se le pone la dirección.
     const tab = window.open("about:blank", "_blank");
     const artist = show.artist || show.title;
-    const url = await find({ data: { artist, venue: show.venue ?? undefined } }).catch(() => ticketSearchUrl(artist));
+    const found = await find({ data: { artist, venue: show.venue ?? undefined } }).catch(() => "");
+    const url = found || info || ticketSearchUrl(artist);
     if (tab) tab.location.href = url; else window.location.href = url;
   };
 }
@@ -121,7 +122,7 @@ export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" 
         {official?.url ? (
           <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={official.url} target="_blank" rel="noreferrer">Ver entradas</a></Button>
         ) : (
-          <Button variant="outline" size="sm" className="mt-2 w-full text-xs" onClick={() => openTickets(show)}>Ver entradas</Button>
+          <Button variant="outline" size="sm" className="mt-2 w-full text-xs" onClick={() => openTickets(show, info?.url)}>Ver entradas</Button>
         )}
         {!official && info?.url && <a href={info.url} target="_blank" rel="noreferrer" className="mt-1 block text-center text-[11px] text-muted-foreground underline-offset-2 hover:underline">Más información</a>}
         {onReview && <Button variant="ghost" size="sm" className="mt-1 h-auto w-full whitespace-normal px-2 py-1.5 text-xs" onClick={() => onReview(show)}><PenLine className="h-3.5 w-3.5 shrink-0" />Reseñar</Button>}

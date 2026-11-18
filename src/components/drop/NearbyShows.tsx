@@ -70,6 +70,19 @@ export function useNearbyShows() {
 
 const fmt = (d: string | null, opts: Intl.DateTimeFormatOptions) => (d ? new Date(d).toLocaleDateString("es-AR", opts) : "A confirmar");
 
+/** "18 y 19 nov", "30 nov y 1 dic", "5, 6 y 7 dic": todas las fechas en un solo texto. */
+export function joinDates(dates: (string | null)[]): string {
+  const known = dates.filter((d): d is string => !!d).map((d) => new Date(d));
+  if (!known.length) return "A confirmar";
+  const month = (d: Date) => d.toLocaleDateString("es-AR", { month: "short" }).replace(".", "");
+  const parts: string[] = [];
+  known.forEach((d, i) => {
+    const next = known[i + 1];
+    parts.push(next && next.getMonth() === d.getMonth() ? String(d.getDate()) : `${d.getDate()} ${month(d)}`);
+  });
+  return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} y ${parts[parts.length - 1]}`;
+}
+
 export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" }: { group: ShowGroup; showKm: boolean; onReview?: (show: ShowEvent) => void; className?: string }) {
   const { show, dates, km } = group;
   const main = dates.find((d) => d.url) ?? dates[0];
@@ -84,17 +97,13 @@ export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" 
         ) : (
           <div className="mt-1">
             <p className="flex items-center gap-1 text-xs font-semibold text-foreground"><CalendarDays className="h-3 w-3" />{dates.length} fechas</p>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {dates.map((d) => d.url && d.url !== main?.url
-                ? <a key={d.id} href={d.url} target="_blank" rel="noreferrer" className="rounded-full border border-border px-2 py-0.5 text-[11px] hover:border-primary">{fmt(d.date, { day: "numeric", month: "short" })}</a>
-                : <span key={d.id} className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">{fmt(d.date, { day: "numeric", month: "short" })}</span>)}
-            </div>
+            <p className="mt-1 inline-block rounded-full border border-border px-2 py-0.5 text-[11px] leading-snug">{joinDates(dates.map((d) => d.date))}</p>
           </div>
         )}
         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{show.venue}{show.city ? ` · ${show.city}` : ""}</span></p>
         {showKm && km != null && <p className="mt-0.5 text-xs font-semibold text-primary">{km < 1 ? "A menos de 1 km" : `A ${Math.round(km).toLocaleString("es-AR")} km`}</p>}
         {main?.url && <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={main.url} target="_blank" rel="noreferrer">{main.official === false ? "Más información" : "Ver entradas"}</a></Button>}
-        {onReview && <Button variant="ghost" size="sm" className="mt-1 w-full text-xs" onClick={() => onReview(show)}><PenLine className="h-3.5 w-3.5" />Reseñar este show</Button>}
+        {onReview && <Button variant="ghost" size="sm" className="mt-1 h-auto w-full whitespace-normal px-2 py-1.5 text-xs" onClick={() => onReview(show)}><PenLine className="h-3.5 w-3.5 shrink-0" />Reseñar</Button>}
       </div>
     </article>
   );

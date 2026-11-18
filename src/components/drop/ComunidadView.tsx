@@ -14,7 +14,6 @@ import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
 import { PHOTOS, avatarFor } from "@/lib/fan-avatars";
 import airbagBanda from "@/assets/airbag-banda.webp";
 import airbagVivo from "@/assets/airbag-vivo.webp";
-import lnvGira from "@/assets/lnv-gira.webp";
 import adelaLengua from "@/assets/adela-lengua.webp";
 import adelaEstrellas from "@/assets/adela-estrellas.webp";
 import adelaGlitter from "@/assets/adela-glitter.webp";
@@ -25,8 +24,21 @@ import pcLaboratorio from "@/assets/pc-laboratorio.webp";
 import pcCaras from "@/assets/pc-caras.webp";
 import pcGlobosSilla from "@/assets/pc-globos-silla.webp";
 import pcGlobosVuelo from "@/assets/pc-globos-vuelo.webp";
-import lnvTraje from "@/assets/lnv-traje.webp";
-import lnvPoster from "@/assets/lnv-poster.webp";
+import dlRosas from "@/assets/dillom-rosas.webp";
+import dlBano from "@/assets/dillom-bano.webp";
+import dlGato from "@/assets/dillom-gato.webp";
+import dlFisheye from "@/assets/dillom-fisheye.webp";
+import dlConLali from "@/assets/dillom-con-lali.webp";
+import dlBoca from "@/assets/dillom-boca.webp";
+import dlEscenarioAgachado from "@/assets/dillom-escenario-agachado.webp";
+import dlCamisaCadenas from "@/assets/dillom-camisa-cadenas.webp";
+import dlGorroBackstage from "@/assets/dillom-gorro-backstage.webp";
+import dlEscenarioRojo from "@/assets/dillom-escenario-rojo.webp";
+import dlConejo from "@/assets/dillom-conejo.webp";
+import dlRollingStone from "@/assets/dillom-rolling-stone.webp";
+import dlRetrato from "@/assets/dillom-retrato.webp";
+import dlFiestaAnteojos from "@/assets/dillom-fiesta-anteojos.webp";
+import dlFiestaRayas from "@/assets/dillom-fiesta-rayas.webp";
 import arjonaPortada from "@/assets/arjona-portada.webp";
 import arjonaSeco from "@/assets/arjona-seco-no-dijo.webp";
 import arjonaRojo from "@/assets/arjona-rojo.webp";
@@ -131,9 +143,21 @@ const OTHER_FEEDS: Record<string, Post[]> = {
   ],
   "dillom-lnv": [
     { kind: "achievement", user: "rocio.violenta", time: "hace 8 min", achievement: "completó la trivia de La nueva violencia 5/5", pts: 200 },
-    { kind: "post", user: "tomas.dllm", time: "hace 30 min", text: "La nueva violencia de punta a punta sin saltear nada. Dillom no erra 🩷🖤", likes: 534, comments: 87 },
-    { kind: "post", user: "agus.gira", time: "hace 2 h", text: "¿Quién va a La gira violenta en Mendoza? Armemos grupo 🎤", likes: 211, comments: 64 },
-    { kind: "post", user: "lu.anteojos", time: "hace 4 h", text: "Ya tengo el traje y los anteojos para el show 🕶️", likes: 389, comments: 42 },
+    { kind: "post", user: "tomas.dllm", time: "hace 30 min", text: "La nueva violencia de punta a punta sin saltear nada. Dillom no erra 🩷🖤", likes: 534, comments: 87, image: dlEscenarioRojo },
+    { kind: "post", user: "agus.gira", time: "hace 2 h", text: "¿Quién va a La gira violenta en Mendoza? Armemos grupo 🎤", likes: 211, comments: 64, image: dlGorroBackstage },
+    { kind: "post", user: "lu.anteojos", time: "hace 4 h", text: "Ya tengo el traje y los anteojos para el show 🕶️", likes: 389, comments: 42, image: dlEscenarioAgachado },
+    { kind: "post", user: "cami.violenta", time: "hace 5 h", text: "Camisa rota, cadenas y candado. La estética de esta era es otra cosa ⛓️", likes: 612, comments: 71, image: dlCamisaCadenas },
+    { kind: "post", user: "dante.fan", time: "hace 6 h", text: "Dillom y LALI juntos en la fiesta, no estoy bien 😭", likes: 1480, comments: 203, image: dlConLali },
+    { kind: "post", user: "pili.gatos", time: "hace 8 h", text: "Nadie habla de lo tierno que es con su gato 🐈", likes: 2210, comments: 156, image: dlGato },
+    { kind: "post", user: "nico.retratos", time: "hace 10 h", text: "Backstage antes del show. Esa mirada dice todo.", likes: 498, comments: 33, image: dlRetrato },
+    { kind: "post", user: "flor.rs", time: "hace 12 h", text: "Volví a ver la sesión de Rolling Stone. Los guantes de esqueleto 💀", likes: 743, comments: 58, image: dlRollingStone },
+    { kind: "post", user: "joaco.xeneize", time: "hace 1 día", text: "Con la de Boca y una birra, el Dillom de siempre 💙💛", likes: 905, comments: 112, image: dlBoca },
+    { kind: "post", user: "sofi.fisheye", time: "hace 1 día", text: "Esta foto con ojo de pez es mi fondo de pantalla desde hace meses", likes: 367, comments: 29, image: dlFisheye },
+    { kind: "post", user: "mati.noche", time: "hace 2 días", text: "Fotos de la fiesta de lanzamiento. Qué noche 🖤", likes: 822, comments: 64, image: dlFiestaRayas },
+    { kind: "post", user: "valen.ramos", time: "hace 2 días", text: "Throwback: el Dillom de las rosas 🌹", likes: 455, comments: 37, image: dlRosas },
+    { kind: "post", user: "juli.after", time: "hace 3 días", text: "Anteojos negros hasta en el after 😎", likes: 318, comments: 21, image: dlFiestaAnteojos },
+    { kind: "post", user: "ema.burbujas", time: "hace 4 días", text: ":3", likes: 1890, comments: 240, image: dlBano },
+    { kind: "post", user: "mora.alfileres", time: "hace 5 días", text: "El gorro de conejo con alfileres y cruces. Ícono.", likes: 676, comments: 48, image: dlConejo },
   ],
   airbag: [
     { kind: "achievement", user: "sardelli.fan", time: "hace 12 min", achievement: "completó la trivia de El Club de la Pelea 5/5", pts: 200 },
@@ -174,9 +198,9 @@ const OTHER_GROUPS: Record<string, typeof groups> = {
     { name: "Caras de cesárea", members: 2650, img: pcCaras },
   ],
   "dillom-lnv": [
-    { name: "La gira violenta", members: 11240, img: lnvGira },
-    { name: "Trajes y anteojos", members: 3870, img: lnvTraje },
-    { name: "Los violentos", members: 6520, img: lnvPoster },
+    { name: "La gira violenta", members: 11240, img: dlEscenarioRojo },
+    { name: "Trajes y anteojos", members: 3870, img: dlEscenarioAgachado },
+    { name: "Los violentos", members: 6520, img: dlCamisaCadenas },
   ],
   airbag: [
     { name: "El Club", members: 8420, img: airbagBanda },

@@ -53,9 +53,22 @@ import dlRetrato from "@/assets/dillom-retrato.webp";
 import dlFiestaAnteojos from "@/assets/dillom-fiesta-anteojos.webp";
 import dlFiestaRayas from "@/assets/dillom-fiesta-rayas.webp";
 import arjonaPortada from "@/assets/arjona-portada.webp";
-import arjonaSeco from "@/assets/arjona-seco-no-dijo.webp";
-import arjonaRojo from "@/assets/arjona-rojo.webp";
-import arjonaRed from "@/assets/arjona-red.webp";
+import arArgentina from "@/assets/arjona-argentina.webp";
+import arGorroRosa from "@/assets/arjona-gorro-rosa.webp";
+import arCamisaBlanca from "@/assets/arjona-camisa-blanca.webp";
+import arRetrato from "@/assets/arjona-retrato.webp";
+import arSonrisa from "@/assets/arjona-sonrisa.webp";
+import arVelas from "@/assets/arjona-velas.webp";
+import arCalleBn from "@/assets/arjona-calle-bn.webp";
+import arLentes from "@/assets/arjona-lentes.webp";
+import arLibro from "@/assets/arjona-libro.webp";
+import arBrazos from "@/assets/arjona-brazos.webp";
+import arPieDeMicro from "@/assets/arjona-pie-de-micro.webp";
+import arGuitarraNegra from "@/assets/arjona-guitarra-negra.webp";
+import arBancoTeatro from "@/assets/arjona-banco-teatro.webp";
+import arBlancoYNegro from "@/assets/arjona-blanco-y-negro.webp";
+import arBaul from "@/assets/arjona-baul.webp";
+import arPayaso from "@/assets/arjona-payaso.webp";
 
 
 type Post =
@@ -143,10 +156,23 @@ const stickers = [
 const OTHER_FEEDS: Record<string, Post[]> = {
   "arjona-seco": [
     { kind: "achievement", user: "vale.arjonista", time: "hace 6 min", achievement: "entró al TOP 60 y va por las entradas 🎟️", pts: 0 },
-    { kind: "post", user: "marce.seco", time: "hace 20 min", text: "12 fechas en el Movistar Arena y yo quiero estar en las 12 😭 ¿quién más va a varias?", likes: 734, comments: 0, image: arjonaRojo },
+    { kind: "post", user: "marce.seco", time: "hace 20 min", text: "12 fechas en el Movistar Arena y yo quiero estar en las 12 😭 ¿quién más va a varias?", likes: 734, comments: 0, image: arBrazos },
     { kind: "post", user: "gabi.historias", time: "hace 1 h", text: "La tapa de Seco con la foto de chiquito es lo más lindo que hizo. Todo el disco suena a carta vieja ✉️", likes: 512, comments: 0, image: arjonaPortada },
-    { kind: "post", user: "lucho.trovador", time: "hace 3 h", text: "Voy por el meet & greet. Trivia diaria todos los días hasta el show 💪", likes: 289, comments: 0 },
-    { kind: "post", user: "sole.movistar", time: "hace 5 h", text: "Ya tengo armada la playlist para la previa del Seco Tour 🎶", likes: 198, comments: 0, image: arjonaRed },
+    { kind: "post", user: "lucho.trovador", time: "hace 3 h", text: "Voy por el meet & greet. Trivia diaria todos los días hasta el show 💪", likes: 289, comments: 0, image: arGuitarraNegra },
+    { kind: "post", user: "sole.movistar", time: "hace 5 h", text: "Ya tengo armada la playlist para la previa del Seco Tour 🎶", likes: 198, comments: 0, image: arRetrato },
+    { kind: "post", user: "cande.arjonista", time: "hace 6 h", text: "Con la camiseta argentina en el escenario 🇦🇷 Ese show no me lo olvido más", likes: 1204, comments: 0, image: arArgentina },
+    { kind: "post", user: "fede.letras", time: "hace 7 h", text: "Versión acústica a la luz de las velas. Si hace algo así en el Movistar me muero 🕯️", likes: 876, comments: 0, image: arVelas },
+    { kind: "post", user: "mica.historias", time: "hace 8 h", text: "Esa sonrisa cuando el público canta solo 🥹", likes: 643, comments: 0, image: arSonrisa },
+    { kind: "post", user: "nico.trovador", time: "hace 9 h", text: "Sentado en el banco, la voz y nada más. Así se cuenta una historia 🎭", likes: 588, comments: 0, image: arBancoTeatro },
+    { kind: "post", user: "lu.seco", time: "hace 10 h", text: "Modo lectura antes de escribir el próximo disco 📖☕", likes: 421, comments: 0, image: arLibro },
+    { kind: "post", user: "romi.movistar", time: "hace 12 h", text: "Pantalla en blanco y negro y la guitarra negra. Estética Seco total 🖤", likes: 512, comments: 0, image: arBlancoYNegro },
+    { kind: "post", user: "tincho.arjona", time: "hace 14 h", text: "El gorro rosa 💗 nadie más lo puede llevar así", likes: 367, comments: 0, image: arGorroRosa },
+    { kind: "post", user: "pau.cartas", time: "hace 16 h", text: "Camisa blanca y micrófono: el combo de siempre que nunca falla 🎤", likes: 455, comments: 0, image: arCamisaBlanca },
+    { kind: "post", user: "agus.fila", time: "hace 18 h", text: "Sentado en el baúl como en una vieja estación de tren 🚂 qué puesta", likes: 298, comments: 0, image: arBaul },
+    { kind: "post", user: "dani.arjonista", time: "hace 1 d", text: "Foto en blanco y negro por la calle. Se le nota feliz 😄", likes: 712, comments: 0, image: arCalleBn },
+    { kind: "post", user: "sofi.trivia", time: "hace 1 d", text: "Fondo de pantalla nuevo, gracias 😎", likes: 389, comments: 0, image: arLentes },
+    { kind: "post", user: "joaco.seco", time: "hace 1 d", text: "El maquillaje de payaso fue de las cosas más locas que hizo en un show 🎩", likes: 534, comments: 0, image: arPayaso },
+    { kind: "post", user: "flor.canciones", time: "hace 2 d", text: "Ese micrófono de pie y la camisa blanca. Clásico 🤍", likes: 276, comments: 0, image: arPieDeMicro },
   ],
   "adela-prima": [
     { kind: "achievement", user: "prima.sofi", time: "hace 5 min", achievement: "completó la trivia de PRIMA 5/5", pts: 200 },
@@ -208,9 +234,9 @@ const OTHER_FEEDS: Record<string, Post[]> = {
 };
 const OTHER_GROUPS: Record<string, typeof groups> = {
   "arjona-seco": [
-    { name: "Arjonistas", members: 15230, img: arjonaRojo },
-    { name: "Fila del Movistar", members: 4870, img: arjonaSeco },
-    { name: "Cartas de Seco", members: 3120, img: arjonaRed },
+    { name: "Arjonistas", members: 15230, img: arArgentina },
+    { name: "Fila del Movistar", members: 4870, img: arSonrisa },
+    { name: "Cartas de Seco", members: 3120, img: arLibro },
   ],
   "adela-prima": [
     { name: "Primas", members: 7340, img: adelaAuto },

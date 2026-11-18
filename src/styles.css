@@ -256,7 +256,7 @@ html[data-drop="arjona-seco"] {
   --display-transform: uppercase;
   --texture-opacity: 0.2;
 }
-/* Adela · PRIMA: pared blanca, pelo fucsia, glitter y marcador negro escrito a mano. Tema claro. */
+/* Adéla · PRIMA: pared blanca, pelo fucsia, glitter y marcador negro escrito a mano. Tema claro. */
 html[data-drop="adela-prima"] {
   --background: oklch(0.97 0.006 350);
   --foreground: oklch(0.17 0.01 350);

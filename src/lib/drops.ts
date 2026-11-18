@@ -13,6 +13,7 @@ import airbagCover from "@/assets/airbag-portada.webp";
 import lnvCover from "@/assets/lnv-portada.webp";
 import lnvIcon from "@/assets/lnv-icon.webp";
 import adelaCover from "@/assets/adela-portada.webp";
+import dillomGuitarra from "@/assets/dillom-guitarra.webp";
 import adelaHero from "@/assets/adela-hero.webp";
 import adelaIcon from "@/assets/adela-icon.webp";
 import airbagIcon from "@/assets/airbag-icon.webp";
@@ -76,6 +77,8 @@ export type DropInfo = {
   dates: string;
   status: DropStatus;
   fandom: string;
+  /** Foto de portada del ranking (si no, se usa `hero`). */
+  rankingHero?: string;
   /** Premios por puesto en el ranking del drop (ej.: top 10, top 60). */
   prizes?: { top: number; label: string }[];
   /** Fechas de un show con varias funciones, para mostrarlas en el inicio del drop. */
@@ -108,7 +111,7 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "dillom-lnv", kind: "album", artist: "Dillom", title: "La nueva violencia",
     tagline: "Bienvenidos a la nueva violencia.",
     description: "Dillom vuelve con La nueva violencia y La gira violenta. Trivias diarias, acertijos y desafíos alrededor del disco. Sumá puntos y peleá el ranking del fandom.",
-    cover: lnvIcon, hero: lnvCover, album: lnvCover, dates: "En curso · La gira violenta", status: "active", fandom: "La nueva violencia",
+    cover: lnvIcon, hero: lnvCover, album: lnvCover, dates: "En curso · La gira violenta", status: "active", fandom: "La nueva violencia", rankingHero: dillomGuitarra,
     merch: [
       { id: "remera", name: "Remera La nueva violencia", detail: "Fucsia, con la cara de Dillom", price: 30000, image: lnvRemera },
       { id: "poster", name: "Póster de la gira", detail: "La gira violenta · 50 x 70 cm", price: 15000, image: lnvGira },

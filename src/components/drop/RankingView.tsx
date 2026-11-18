@@ -340,7 +340,7 @@ function LiveRanking() {
   return <div className="px-5">
     {/* Portada del drop con el título del ranking */}
     <div className="relative -mx-5 -mt-2 overflow-hidden px-5 pb-1 pt-24">
-      <img src={drop.hero} alt="" decoding="async" className="absolute inset-0 h-full w-full object-cover object-[center_30%]" />
+      <img src={drop.rankingHero ?? drop.hero} alt="" decoding="async" className="absolute inset-0 h-full w-full object-cover object-[center_30%]" />
       <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to bottom, transparent 0%, color-mix(in oklab, var(--background) 45%, transparent) 45%, var(--background) 100%)' }} />
       <div className="absolute inset-0 bg-primary/15 mix-blend-color" />
       <div className="relative">

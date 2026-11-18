@@ -433,7 +433,7 @@ export function ComunidadView() {
               <img loading="lazy" decoding="async"
                 src={g.img}
                 alt={g.name}
-                className="mb-2 h-10 w-10 rounded-xl object-cover"
+                className="mb-2 h-10 w-10 rounded-xl object-cover object-[center_20%]"
               />
               <p className="text-sm font-semibold">{g.name}</p>
               <p className="text-xs text-muted-foreground">{(g.members + (isIn ? 1 : 0)).toLocaleString("es-AR")} fans</p>
@@ -499,7 +499,7 @@ export function ComunidadView() {
                   src={p.image}
                   alt={`Publicación de ${p.user}`}
                   loading="lazy"
-                  className={p.fan || p.local ? "mx-4 mb-1 h-32 w-32 rounded-xl object-cover" : "max-h-72 w-full object-cover"}
+                  className={p.fan || p.local ? "mx-4 mb-1 h-32 w-32 rounded-xl object-cover" : "max-h-[30rem] w-full object-cover object-[center_22%]"}
                 />
               )}
 

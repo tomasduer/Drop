@@ -367,6 +367,9 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       await serpRaw('Concerts in Buenos Aires'),
       await ticketDiag('Maria Becerra Pop Tickets'),
       await ticketDiag('Paula Mattheus'),
+      await ticketDiag('Easykid'),
+      `Artistas de las fichas: ${(await googleEvents('', 20, 'Buenos Aires').catch(() => [])).map((x) => `${x.artist}${x.url ? (x.official ? ' (oficial)' : ' (info)') : ''}`).join(' · ')}`,
+      await ticketDiag('Abel Pintos'),
     ];
   });
 
@@ -385,21 +388,28 @@ async function ticketLinks(artist: string): Promise<{ link: string; text: string
   const key = process.env['SERPAPI_KEY'];
   if (!key) throw new Error('sin SERPAPI_KEY');
   const name = cleanArtist(artist);
-  const q = `${name} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`;
   const words = fold(name).split(/[^a-z0-9]+/).filter((w) => w.length >= 3).slice(0, 2);
-  return cached(`tix2:${fold(name)}`, async () => {
-    const res = await fetch(`https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(q)}&hl=es&gl=ar&num=10&api_key=${encodeURIComponent(key)}`, { headers: { accept: 'application/json' } });
+  const search = async (q: string) => {
+    const res = await fetch(`https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(q)}&hl=es&gl=ar&google_domain=google.com.ar&num=20&api_key=${encodeURIComponent(key)}`, { headers: { accept: 'application/json' } });
     const json: any = await res.json().catch(() => ({}));
     if (!res.ok || json?.error) {
       if (/hasn't returned any results|no results/i.test(String(json?.error ?? ''))) return [];
       throw new Error(`SerpApi ${res.status}: ${json?.error ?? 'sin detalle'}`);
     }
     return ((json?.organic_results ?? []) as any[])
-      .map((r) => ({ link: String(r?.link ?? ''), text: fold(`${r?.title ?? ''} ${r?.snippet ?? ''} ${r?.link ?? ''}`) }))
+      .map((r) => ({ link: String(r?.link ?? ''), text: fold(`${r?.title ?? ''} ${r?.snippet ?? ''} ${r?.link ?? ''}`).replace(/[^a-z0-9]+/g, '') }))
       // De una ticketera oficial y que nombre al artista (no cualquier evento del sitio).
       .filter((r) => isOfficial(hostOf(r.link)) && words.every((w) => r.text.includes(w)))
       .slice(0, 5);
+  };
+  // Se guarda también "no encontrado" (3 días) para no gastar búsquedas en cada clic.
+  const hit = await cached(`tix3:${fold(name)}`, async () => {
+    let links = await search(`${name} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`);
+    // Segunda vuelta, más amplia: la búsqueda común de entradas, quedándose con las ticketeras oficiales.
+    if (!links.length) links = await search(`${name} entradas`);
+    return { links };
   }, 3 * 86400);
+  return hit.links;
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

@@ -162,13 +162,16 @@ function serpDate(when: string | undefined, start: string | undefined): string |
   return new Date(Date.UTC(year, mon, day, hour != null ? hour + 3 : 3, hour != null ? minute : 0)).toISOString();
 }
 
-/** Ticketeras oficiales (Argentina y región) y sitios de salas. */
+/**
+ * Ticketeras oficiales (Argentina y región) y sitios de salas, por nombre: se reconocen con cualquier
+ * dominio (.com, .com.ar, subdominios), por ejemplo "ticketek" en "premier.ticketek.com.ar".
+ */
 const OFFICIAL_TICKETS = [
-  'ticketek.com.ar', 'allaccess.com.ar', 'enigmatickets.com', 'passline.com', 'entradauno.com', 'tuentrada.com',
-  'plateanet.com', 'alternativateatral.com', 'venti.com.ar', 'livepass.com.ar', 'ticketmaster.com', 'ticketmaster.com.ar',
-  'eventbrite.com', 'eventbrite.com.ar', 'autoentrada.com', 'ticketportal.com.ar', 'paseshow.com.ar', 'entradaweb.com.ar',
-  'movistararena.com.ar', 'lunapark.com.ar', 'vorterix.com', 'niceto.com', 'latrastienda.com', 'teatrogranrex.com.ar',
-  'complejoartmedia.com', 'quality-espacio.com', 'plazadelamusica.com', 'dice.fm', 'bandsintown.com',
+  'ticketek', 'allaccess', 'enigmatickets', 'passline', 'entradauno', 'tuentrada', 'plateanet', 'alternativateatral',
+  'venti', 'livepass', 'ticketmaster', 'eventbrite', 'autoentrada', 'ticketportal', 'paseshow', 'entradaweb', 'tickethoy',
+  'ticketway', 'eticket', 'boleteria', 'deportick', 'superboletos', 'puntoticket', 'tuboleta', 'dice',
+  'movistararena', 'lunapark', 'vorterix', 'niceto', 'latrastienda', 'teatrogranrex', 'artmedia', 'quality', 'plazadelamusica',
+  'cultura', 'gob',
 ];
 /** Reventa o agregadores con recargo: nunca se usan. */
 const RESALE = ['viagogo', 'stubhub', 'seatgeek', 'vividseats', 'ticketnetwork', 'tickpick', 'gametime', 'ticketsmarter', 'ticombo', 'fanpass', 'ticketswap', 'ticketcity', 'megaseats', 'boxofficeticketsales', 'tixel', 'goldstar', 'eventticketscenter', 'concerttickets', 'ticketsonsale', 'coastaltickets'];
@@ -176,16 +179,24 @@ const RESALE = ['viagogo', 'stubhub', 'seatgeek', 'vividseats', 'ticketnetwork',
 function hostOf(link: string): string {
   try { return new URL(link).hostname.replace(/^www\./, '').toLowerCase(); } catch { return ''; }
 }
-const isOfficial = (h: string) => OFFICIAL_TICKETS.some((d) => h === d || h.endsWith(`.${d}`));
 const isResale = (h: string) => !h || RESALE.some((r) => h.includes(r));
+const labels = (h: string) => h.split('.').flatMap((l) => [l, ...l.split('-')]);
+/** Oficial si el dominio es de una ticketera conocida o tiene el nombre de la sala (p. ej. "estadioobras.com.ar"). */
+const isOfficial = (h: string, venue = '') => {
+  if (!h || isResale(h)) return false;
+  const parts = labels(h);
+  if (OFFICIAL_TICKETS.some((n) => parts.includes(n) || parts.some((p) => p.startsWith(n) && p.length - n.length <= 3))) return true;
+  const words = venue.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 5 && !['estadio', 'teatro', 'buenos', 'aires', 'centro', 'arena', 'club'].includes(w));
+  return words.some((w) => h.includes(w));
+};
 
 /** Elige el link oficial de venta; si no hay, uno informativo que no sea reventa; si tampoco, ninguno. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function officialLink(tickets: any[] | undefined, fallback: string | undefined): { url: string; official: boolean } {
+function officialLink(tickets: any[] | undefined, fallback: string | undefined, venue = ''): { url: string; official: boolean } {
   const links = (tickets ?? []).map((t) => ({ link: String(t?.link ?? ''), type: String(t?.link_type ?? ''), host: hostOf(String(t?.link ?? '')) }));
-  const official = links.find((t) => isOfficial(t.host));
+  const official = links.find((t) => t.type === 'tickets' && isOfficial(t.host, venue)) ?? links.find((t) => isOfficial(t.host, venue));
   if (official) return { url: official.link, official: true };
-  const info = [...links.filter((t) => t.type !== 'tickets'), ...(fallback ? [{ link: fallback, type: 'info', host: hostOf(fallback) }] : [])]
+  const info = [...links.filter((t) => t.type !== 'tickets'), ...links.filter((t) => t.type === 'tickets'), ...(fallback ? [{ link: fallback, type: 'info', host: hostOf(fallback) }] : [])]
     .find((t) => !isResale(t.host) && !t.host.endsWith('google.com'));
   return info ? { url: info.link, official: false } : { url: '', official: false };
 }
@@ -224,7 +235,7 @@ async function googleEvents(artist: string, size: number, city?: string, opts: {
   // En español Google Events no devuelve resultados; en inglés sí (probado con el diagnóstico).
   const q = opts.query ?? (city ? `Concerts in ${city}` : `${artist} concert`);
   const start = opts.start ?? 0;
-  return cached(`serp:${q.toLowerCase()}:${start}`, async () => {
+  return cached(`serp2:${q.toLowerCase()}:${start}`, async () => {
     const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=en&gl=ar${start ? `&start=${start}` : ''}&api_key=${encodeURIComponent(key)}`;
     const res = await fetch(url, { headers: { accept: 'application/json' } });
     // Un error se lanza (no se guarda en la caché) para reintentar en la próxima visita.
@@ -249,7 +260,7 @@ async function googleEvents(artist: string, size: number, city?: string, opts: {
           event_date: serpDate(e.date?.when, e.date?.start_date),
           venue: e.venue?.name ?? addr[0] ?? '', city: addr[1] ?? addr[0] ?? '',
           image_url: e.image ?? e.thumbnail ?? null,
-          ...officialLink(e.ticket_info, e.link),
+          ...officialLink(e.ticket_info, e.link, e.venue?.name ?? addr[0] ?? ''),
           ...(city ? { area: city } : {}),
         };
       })
@@ -332,7 +343,7 @@ async function serpRaw(q: string): Promise<string> {
     const json: any = await res.json().catch(() => ({}));
     const ev: any[] = json?.events_results ?? [];
     return `SerpApi crudo "${q}": HTTP ${res.status} · estado ${json?.search_metadata?.status ?? '?'} · error: ${json?.error ?? 'ninguno'} · ${ev.length} eventos` +
-      ev.slice(0, 3).map((e) => `\n   - ${e.title} | ${e.date?.start_date ?? ''} ${e.date?.when ?? ''} | ${(e.address ?? []).join(' / ')}`).join('');
+      ev.slice(0, 5).map((e) => `\n   - ${e.title} | ${e.date?.start_date ?? ''} | ${(e.address ?? []).join(' / ')}\n     links: ${(e.ticket_info ?? []).map((t: any) => `${t.link_type}:${hostOf(String(t.link ?? ''))}`).join(', ') || 'ninguno'} → ${officialLink(e.ticket_info, e.link, e.venue?.name ?? '').url ? (officialLink(e.ticket_info, e.link, e.venue?.name ?? '').official ? 'oficial' : 'info') : 'sin link'}`).join('');
   } catch (e) {
     return `SerpApi crudo "${q}": falla de red (${e instanceof Error ? e.message : String(e)})`;
   }

@@ -14,6 +14,7 @@ import lnvCover from "@/assets/lnv-portada.webp";
 import lnvIcon from "@/assets/lnv-icon.webp";
 import adelaCover from "@/assets/adela-portada.webp";
 import dillomGuitarra from "@/assets/dillom-guitarra.webp";
+import airbagMascara from "@/assets/airbag-ranking.webp";
 import adelaHero from "@/assets/adela-hero.webp";
 import adelaIcon from "@/assets/adela-icon.webp";
 import airbagIcon from "@/assets/airbag-icon.webp";
@@ -131,7 +132,7 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "airbag", kind: "album", artist: "Airbag", title: "El Club de la Pelea I",
     tagline: "Primera regla: no le cuentes a nadie.",
     description: "Entrá al club. Trivias de los 7 temas, acertijos y desafíos alrededor de El Club de la Pelea I. Sumá puntos y peleá el ranking con los fans de Airbag.",
-    cover: airbagIcon, hero: airbagBanda, album: airbagCover, dates: "En curso", status: "active", fandom: "El Club",
+    cover: airbagIcon, hero: airbagBanda, album: airbagCover, dates: "En curso", status: "active", fandom: "El Club", rankingHero: airbagMascara,
     merch: [
       { id: "remera", name: "Remera El Club", detail: "El Club de la Pelea II · Buenos Aires 2026", price: 30000, image: airbagRemera },
       { id: "buzo", name: "Buzo Al final es el infierno", detail: "Negro, con calaveras y estampa en las mangas", price: 65000, image: airbagBuzo },

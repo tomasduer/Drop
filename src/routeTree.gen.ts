@@ -21,6 +21,7 @@ import { Route as MiDropRouteImport } from './routes/mi-drop'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as ResenasRouteImport } from './routes/resenas'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ShowsRouteImport } from './routes/shows'
 import { Route as SpotifyRouteImport } from './routes/spotify'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as TiendaRouteImport } from './routes/tienda'
@@ -85,6 +86,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShowsRoute = ShowsRouteImport.update({
+  id: '/shows',
+  path: '/shows',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SpotifyRoute = SpotifyRouteImport.update({
   id: '/spotify',
   path: '/spotify',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/privacidad': typeof PrivacidadRoute
   '/resenas': typeof ResenasRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/shows': typeof ShowsRoute
   '/spotify': typeof SpotifyRoute
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/privacidad': typeof PrivacidadRoute
   '/resenas': typeof ResenasRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/shows': typeof ShowsRoute
   '/spotify': typeof SpotifyRoute
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/privacidad': typeof PrivacidadRoute
   '/resenas': typeof ResenasRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/shows': typeof ShowsRoute
   '/spotify': typeof SpotifyRoute
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/resenas'
     | '/reset-password'
+    | '/shows'
     | '/spotify'
     | '/terminos'
     | '/tienda'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/resenas'
     | '/reset-password'
+    | '/shows'
     | '/spotify'
     | '/terminos'
     | '/tienda'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/resenas'
     | '/reset-password'
+    | '/shows'
     | '/spotify'
     | '/terminos'
     | '/tienda'
@@ -220,6 +232,7 @@ export interface RootRouteChildren {
   PrivacidadRoute: typeof PrivacidadRoute
   ResenasRoute: typeof ResenasRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ShowsRoute: typeof ShowsRoute
   SpotifyRoute: typeof SpotifyRoute
   TerminosRoute: typeof TerminosRoute
   TiendaRoute: typeof TiendaRoute
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shows': {
+      id: '/shows'
+      path: '/shows'
+      fullPath: '/shows'
+      preLoaderRoute: typeof ShowsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/spotify': {
       id: '/spotify'
       path: '/spotify'
@@ -348,6 +368,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadRoute: PrivacidadRoute,
   ResenasRoute: ResenasRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ShowsRoute: ShowsRoute,
   SpotifyRoute: SpotifyRoute,
   TerminosRoute: TerminosRoute,
   TiendaRoute: TiendaRoute,

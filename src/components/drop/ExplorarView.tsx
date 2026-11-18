@@ -11,8 +11,8 @@ import { useDropAuth } from "./AuthProvider";
 import { useDrops, type DropInfo } from "@/lib/drops";
 import { ArtistLine } from "@/components/drop/ArtistLine";
 import { CatalogResults, type MusicGenre } from "./Catalog";
-import { getExternalShows, getShowsDiag } from "@/lib/music.functions";
-import { cityCoords, distanceKm, nearestCity, useUserLocation } from "@/lib/geo";
+import { getShowsDiag } from "@/lib/music.functions";
+import { EmptyShows, LocationBar, SeeAllShows, ShowCard, useNearbyShows } from "./NearbyShows";
 import laliCover from "@/assets/album-cover.png.asset.json";
 import mariaCover from "@/assets/drop-photo-18.png.asset.json";
 import dillomCover from "@/assets/drop-photo-19.png.asset.json";
@@ -102,8 +102,6 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("todas");
   const localReviews = useLocalReviews();
   const [savingDrop, setSavingDrop] = useState<string | null>(null);
-  const fetchExternalShows = useServerFn(getExternalShows);
-  const [externalShows, setExternalShows] = useState<ShowEvent[]>([]);
   // Diagnóstico de fuentes de shows: abrir /resenas?diag=shows
   const fetchDiag = useServerFn(getShowsDiag);
   const [showsDiag, setShowsDiag] = useState<string[] | null>(null);
@@ -112,7 +110,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
     fetchDiag().then(setShowsDiag).catch((e) => setShowsDiag([`Error: ${e instanceof Error ? e.message : String(e)}`]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { location, status: locationStatus, request: requestLocation, clear: clearLocation } = useUserLocation();
+  const nearby = useNearbyShows();
 
   useEffect(() => {
     if (mode !== "user") {
@@ -130,13 +128,6 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   }, [mode]);
 
   const catalog = useDrops();
-  // Artistas de los drops (sin repetir) + shows de música cerca del fan si compartió su ubicación.
-  const dropArtists = useMemo(() => [...new Set(catalog.map((d) => d.artist))].slice(0, 10), [catalog]);
-  useEffect(() => {
-    fetchExternalShows({ data: { artists: dropArtists, city: location ? nearestCity(location) : "Buenos Aires", near: location ?? cityCoords("Buenos Aires")! } })
-      .then(setExternalShows).catch(() => setExternalShows([]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, dropArtists.join("|")]);
 
   const q = query.trim().toLowerCase();
   const match = (...parts: (string | null | undefined)[]) => !q || parts.some((p) => p?.toLowerCase().includes(q));
@@ -155,19 +146,8 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   const visibleReviews = allReviews
     .filter((r) => reviewFilter === "todas" || r.subject_type === reviewFilter)
     .filter((r) => match(r.subject_title, r.subject_artist, r.author_name, r.text, r.extras?.venue));
-  // Shows reales (Ticketmaster / Eventos de Google) solo de la ciudad del fan: su ubicación o, si no la compartió, Buenos Aires.
-  const CITY_KM = 60;
-  const showsCity = location ? nearestCity(location) : "Buenos Aires";
-  const cityCenter = location ?? cityCoords("Buenos Aires")!;
-  const showKm = (s: ShowEvent) => {
-    const at = s.lat != null && s.lng != null ? { lat: s.lat, lng: s.lng } : cityCoords(s.city);
-    return at ? distanceKm(cityCenter, at) : null;
-  };
-  const visibleShows = externalShows
-    .map((s) => ({ ...s, km: showKm(s) }))
-    .filter((s) => (s.km != null ? s.km <= CITY_KM : s.area === showsCity))
-    .filter((s) => match(s.title, s.artist, s.city, s.venue))
-    .sort((a, b) => (a.event_date ?? "9").localeCompare(b.event_date ?? "9"));
+  // Shows reales de la ciudad del fan, una ficha por artista y sala (ver NearbyShows).
+  const visibleShows = nearby.groups.filter((g) => match(g.show.title, g.show.artist, g.show.city, g.show.venue));
   const visibleGenres = GENRES.filter((g) => match(g.name, g.detail));
 
   const onSaveDrop = async (drop: DropInfo) => {
@@ -355,63 +335,17 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
       <section id="shows" className="mt-7 scroll-mt-4">
         <div className="mb-1 flex items-end justify-between">
           <h2 className="text-xl font-black">Shows cerca tuyo</h2>
-                  </div>
+          <SeeAllShows />
+        </div>
         {showsDiag && <pre className="mb-3 whitespace-pre-wrap rounded-xl border border-border bg-card p-3 text-[11px]">{showsDiag.join("\n")}</pre>}
-        {location ? (
-          <p className="mb-3 text-xs text-muted-foreground">
-            Recitales en {showsCity}.{" "}
-            <button className="font-semibold text-primary underline-offset-2 hover:underline" onClick={clearLocation}>Quitar ubicación</button>
-          </p>
-        ) : (
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/60 p-3">
-            <p className="text-xs text-muted-foreground">
-              {locationStatus === "denied" ? "No pudimos usar tu ubicación. Activala para DROP en tu navegador." : locationStatus === "unavailable" ? "No pudimos obtener tu ubicación. Probá de nuevo." : "Te mostramos recitales en Buenos Aires. Compartí tu ubicación para ver los de tu ciudad."}
-            </p>
-            <Button size="sm" variant="outline" className="shrink-0 text-xs" disabled={locationStatus === "loading"} onClick={requestLocation}>
-              <MapPin className="h-3.5 w-3.5" />{locationStatus === "loading" ? "Buscando…" : "Usar mi ubicación"}
-            </Button>
-          </div>
-        )}
+        <LocationBar nearby={nearby} />
         {visibleShows.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
-            <p className="text-sm font-bold">No encontramos recitales en {showsCity}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Cuando haya fechas confirmadas en tu ciudad, aparecen acá.</p>
-          </div>
+          <EmptyShows city={nearby.city} loading={nearby.loading} />
         ) : (
           <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
-            {visibleShows.map((show) => {
-              const attended = data.myShowIds.includes(show.id);
-              return (
-                <article key={show.id} className="w-52 shrink-0 overflow-hidden rounded-2xl border border-border bg-card">
-                  <img decoding="async" src={show.image_url ?? SHOW_IMAGES[show.artist] ?? eventCrowd} alt={`Imagen de ${show.title}`} loading="lazy" className="h-28 w-full object-cover" />
-                  <div className="p-3">
-                    <p className="truncate text-sm font-bold">{show.title}</p>
-                    <p className="text-xs text-muted-foreground">{show.artist}</p>
-                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><CalendarDays className="h-3 w-3" />{show.event_date ? new Date(show.event_date).toLocaleDateString("es-AR") : "Fecha a confirmar"}</p>
-                    <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{show.venue}{show.city ? ` · ${show.city}` : ""}</span></p>
-                    {location && show.km != null && <p className="mt-0.5 text-xs font-semibold text-primary">{show.km < 1 ? "A menos de 1 km" : `A ${Math.round(show.km).toLocaleString("es-AR")} km`}</p>}
-                    {show.url ? <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={show.url} target="_blank" rel="noreferrer">{show.official === false ? "Más información" : "Ver entradas"}</a></Button> : <Button
-                      variant={attended ? "secondary" : "outline"}
-                      size="sm"
-                      className="mt-2 w-full text-xs"
-                      onClick={async () => {
-                        if (mode !== "user") { toast.message("Creá una cuenta para registrar tus shows."); return; }
-                        try {
-                          await toggleShow({ data: { show_id: show.id, attended: !attended } });
-                          setData((d) => ({ ...d, myShowIds: attended ? d.myShowIds.filter((id) => id !== show.id) : [...d.myShowIds, show.id] }));
-                          toast.success(attended ? "Show quitado de tu historial" : "Show agregado a tu historial");
-                        } catch {
-                          toast.error("El registro de shows se activa al aceptar los cambios de datos del borrador.");
-                        }
-                      }}
-                    >
-                      {attended ? "Asistí ✓" : "Asistí a este show"}
-                    </Button>}
-                    <Button variant="ghost" size="sm" className="mt-1 w-full text-xs" onClick={() => setWriting({ kind: "show", show })}><PenLine className="h-3.5 w-3.5" />Reseñar este show</Button>
-                  </div>
-                </article>
-              );
-            })}
+            {visibleShows.slice(0, 12).map((g) => (
+              <ShowCard key={g.key} group={g} showKm={!!nearby.location} onReview={(show) => setWriting({ kind: "show", show })} />
+            ))}
           </div>
         )}
       </section>
@@ -455,7 +389,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
         <NewReviewDialog
           initialKind={writing.kind}
           initialShow={writing.show}
-          shows={[...data.shows, ...externalShows]}
+          shows={[...data.shows, ...nearby.shows]}
           onClose={() => setWriting(null)}
           onPublished={(r) => {
             setWriting(null);

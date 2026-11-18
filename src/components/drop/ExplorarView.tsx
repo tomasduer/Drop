@@ -227,7 +227,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
                   <div className="mt-3 flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold">{myScore(drop.id) > 0 ? `Participando · ${myScore(drop.id).toLocaleString("es-AR")} pts` : "Todavía no participás"}</span>
                     <span className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-black text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}>
-                      {myScore(drop.id) > 0 ? "Continuar" : "Entrar al drop"} <ArrowRight className="h-3.5 w-3.5" />
+                      Entrar al drop <ArrowRight className="h-3.5 w-3.5" />
                     </span>
                   </div>
                 </div>

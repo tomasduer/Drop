@@ -1,5 +1,5 @@
--- Drop nuevo (tipo show): Adela presenta PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix.
-INSERT INTO public.campaigns(id,artist,title,status) VALUES ('adela-prima','Adela','PRIMA en el Teatro Vorterix','pending')
+-- Drop nuevo (tipo show): Adéla presenta PRIMA en un sideshow de Lollapalooza en el Teatro Vorterix.
+INSERT INTO public.campaigns(id,artist,title,status) VALUES ('adela-prima','Adéla','PRIMA en el Teatro Vorterix','pending')
 ON CONFLICT (id) DO UPDATE SET status='active', title=EXCLUDED.title;
 
 INSERT INTO public.missions(id,campaign_id,title,kind,status,general_reward,campaign_reward,repeat_period,max_checks,question_seconds) VALUES
@@ -10,21 +10,21 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.mission_validation_rules(mission_id,rules) VALUES
  ('adela-trivia','{"per_round":5,"pool":[
-  {"q":"¿Cómo se llama el nuevo álbum de Adela?","options":["PRIMA","Quimera","Brava"],"correct":0},
+  {"q":"¿Cómo se llama el nuevo álbum de Adéla?","options":["PRIMA","Quimera","Brava"],"correct":0},
   {"q":"¿En qué teatro presenta PRIMA?","options":["Teatro Gran Rex","Teatro Vorterix","Teatro Colón"],"correct":1},
   {"q":"¿De qué festival es este sideshow?","options":["Lollapalooza","Cosquín Rock","Primavera Sound"],"correct":0},
-  {"q":"¿De qué color es el pelo de Adela en la era PRIMA?","options":["Fucsia","Azul","Rubio platino"],"correct":0},
+  {"q":"¿De qué color es el pelo de Adéla en la era PRIMA?","options":["Fucsia","Azul","Rubio platino"],"correct":0},
   {"q":"¿Qué forma tiene el glitter de su maquillaje?","options":["Un corazón","Una estrella","Un rayo"],"correct":1},
-  {"q":"¿Qué palabra está escrita en el auto rosa de la sesión de fotos?","options":["ADELA","PRIMA","LOLLA"],"correct":1},
+  {"q":"¿Qué palabra está escrita en el auto rosa de la sesión de fotos?","options":["ADÉLA","PRIMA","LOLLA"],"correct":1},
   {"q":"¿Cómo aparece escrito PRIMA en la tapa del disco?","options":["En marcador negro, a mano","En letras doradas","En neón rosa"],"correct":0},
   {"q":"¿De qué color es el auto de la sesión de PRIMA?","options":["Negro","Rosa","Blanco"],"correct":1}
  ]}'::jsonb),
  ('adela-previa','{"questions":[
-  {"q":"¿Qué tipo de drop es el de Adela en DROP?","options":["Nuevo single","Show","Novedad"],"correct":1},
-  {"q":"¿Qué presenta Adela en el Teatro Vorterix?","options":["Su nuevo álbum PRIMA","Un single","Un documental"],"correct":0},
+  {"q":"¿Qué tipo de drop es el de Adéla en DROP?","options":["Nuevo single","Show","Novedad"],"correct":1},
+  {"q":"¿Qué presenta Adéla en el Teatro Vorterix?","options":["Su nuevo álbum PRIMA","Un single","Un documental"],"correct":0},
   {"q":"¿Cómo se llama un show extra de un artista del festival fuera del predio?","options":["Sideshow","Backstage","Soundcheck"],"correct":0},
-  {"q":"¿Cómo se llama el fandom del drop de Adela?","options":["Primas","Adeladores","Fucsias"],"correct":0},
-  {"q":"¿Dónde tiene glitter Adela en la tapa de PRIMA?","options":["El pelo y la cara","Las manos","Nada, no hay glitter"],"correct":0}]}'::jsonb),
+  {"q":"¿Cómo se llama el fandom del drop de Adéla?","options":["Primas","Adéladores","Fucsias"],"correct":0},
+  {"q":"¿Dónde tiene glitter Adéla en la tapa de PRIMA?","options":["El pelo y la cara","Las manos","Nada, no hay glitter"],"correct":0}]}'::jsonb),
  ('adela-frase','{"codes":["vorterix"]}'::jsonb)
 ON CONFLICT (mission_id) DO NOTHING;
 

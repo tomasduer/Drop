@@ -83,6 +83,10 @@ export function joinDates(dates: (string | null)[]): string {
   return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} y ${parts[parts.length - 1]}`;
 }
 
+/** Búsqueda en Google de las entradas oficiales del show (cuando la fuente no trae link). */
+const ticketSearch = (show: ShowEvent) =>
+  `https://www.google.com/search?q=${encodeURIComponent(`${show.artist || show.title} ${show.venue ?? ""} entradas oficiales`.trim())}`;
+
 export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" }: { group: ShowGroup; showKm: boolean; onReview?: (show: ShowEvent) => void; className?: string }) {
   const { show, dates, km } = group;
   const main = dates.find((d) => d.url) ?? dates[0];
@@ -102,7 +106,10 @@ export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" 
         )}
         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{show.venue}{show.city ? ` · ${show.city}` : ""}</span></p>
         {showKm && km != null && <p className="mt-0.5 text-xs font-semibold text-primary">{km < 1 ? "A menos de 1 km" : `A ${Math.round(km).toLocaleString("es-AR")} km`}</p>}
-        {main?.url && <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={main.url} target="_blank" rel="noreferrer">{main.official === false ? "Más información" : "Ver entradas"}</a></Button>}
+        {/* Sin link de la fuente: búsqueda de entradas del show, para que siempre haya cómo comprarlas. */}
+        <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs">
+          <a href={main?.url || ticketSearch(show)} target="_blank" rel="noreferrer">{main?.url && main.official === false ? "Más información" : "Ver entradas"}</a>
+        </Button>
         {onReview && <Button variant="ghost" size="sm" className="mt-1 h-auto w-full whitespace-normal px-2 py-1.5 text-xs" onClick={() => onReview(show)}><PenLine className="h-3.5 w-3.5 shrink-0" />Reseñar</Button>}
       </div>
     </article>

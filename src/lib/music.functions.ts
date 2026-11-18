@@ -101,21 +101,31 @@ export const getGenreCatalog = createServerFn({ method: 'POST' })
   });
 
 // Agenda de shows de Ticketmaster (Discovery API). Necesita el secreto TICKETMASTER_API_KEY en Cloudflare.
-export type ExternalShow = { id: string; title: string; artist: string; event_date: string | null; city: string; venue: string; image_url: string | null; url: string };
-export const DEFAULT_SHOW_ARTISTS = ['LALI', 'María Becerra', 'TINI', 'Dillom'];
+export type ExternalShow = { id: string; title: string; artist: string; event_date: string | null; city: string; venue: string; image_url: string | null; url: string; lat?: number; lng?: number };
+export const DEFAULT_SHOW_ARTISTS = ['Ricardo Arjona', 'Airbag', 'Dillom', 'LALI', 'Adéla', 'María Becerra', 'TINI'];
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-async function ticketmaster(keyword: string, size: number): Promise<ExternalShow[]> {
+type Geo = { lat: number; lng: number };
+/** Busca en Ticketmaster. Con `keyword` filtra por artista; con `near` busca shows de música a menos de `radiusKm`. */
+async function ticketmaster(keyword: string, size: number, near?: Geo, radiusKm = 150): Promise<ExternalShow[]> {
   const key = process.env['TICKETMASTER_API_KEY'];
-  if (!key) return [];
-  const url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${encodeURIComponent(key)}&keyword=${encodeURIComponent(keyword)}&classificationName=music&sort=date,asc&size=${size}`;
+  if (!key) {
+    console.warn('[shows] Falta el secreto TICKETMASTER_API_KEY: no se buscan shows externos.');
+    return [];
+  }
+  const geo = near ? `&latlong=${near.lat.toFixed(4)},${near.lng.toFixed(4)}&radius=${radiusKm}&unit=km` : '';
+  const kw = keyword ? `&keyword=${encodeURIComponent(keyword)}` : '';
+  const url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${encodeURIComponent(key)}${kw}${geo}&classificationName=music&sort=date,asc&size=${size}`;
   const res = await fetch(url, { headers: { accept: 'application/json' } });
-  if (!res.ok) return [];
+  if (!res.ok) {
+    console.warn(`[shows] Ticketmaster respondió ${res.status}`);
+    return [];
+  }
   const json: any = await res.json();
   const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const k = norm(keyword);
   return (json?._embedded?.events ?? [])
-    .filter((e: any) => (e._embedded?.attractions ?? []).some((a: any) => norm(a.name ?? '').includes(k)) || norm(e.name ?? '').includes(k))
+    .filter((e: any) => !k || (e._embedded?.attractions ?? []).some((a: any) => norm(a.name ?? '').includes(k)) || norm(e.name ?? '').includes(k))
     .map((e: any): ExternalShow => {
       const venue = e._embedded?.venues?.[0];
       const img = [...(e.images ?? [])].filter((i: any) => i.ratio === '16_9').sort((a: any, b: any) => Math.abs(a.width - 640) - Math.abs(b.width - 640))[0] ?? e.images?.[0];
@@ -124,23 +134,32 @@ async function ticketmaster(keyword: string, size: number): Promise<ExternalShow
         event_date: e.dates?.start?.dateTime ?? e.dates?.start?.localDate ?? null,
         city: [venue?.city?.name, venue?.country?.countryCode].filter(Boolean).join(', '), venue: venue?.name ?? '',
         image_url: img?.url ?? null, url: e.url ?? '',
+        lat: venue?.location?.latitude ? Number(venue.location.latitude) : undefined,
+        lng: venue?.location?.longitude ? Number(venue.location.longitude) : undefined,
       };
     });
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 export const getExternalShows = createServerFn({ method: 'POST' })
-  .inputValidator((input: unknown) => z.object({ q: z.string().trim().max(80).optional(), artists: z.array(z.string().trim().min(2).max(60)).max(6).optional() }).parse(input ?? {}))
+  .inputValidator((input: unknown) => z.object({
+    q: z.string().trim().max(80).optional(),
+    artists: z.array(z.string().trim().min(2).max(60)).max(10).optional(),
+    near: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).optional(),
+  }).parse(input ?? {}))
   .handler(async ({ data }): Promise<ExternalShow[]> => {
     try {
-      const lists = data.artists?.length
-        ? await Promise.all(data.artists.map((a) => ticketmaster(a, 4)))
-        : data.q && data.q.length >= 2
+      const artists = data.artists?.length ? data.artists : DEFAULT_SHOW_ARTISTS;
+      const lists = data.q && data.q.length >= 2
         ? [await ticketmaster(data.q, 10)]
-        : await Promise.all(DEFAULT_SHOW_ARTISTS.map((a) => ticketmaster(a, 5)));
+        : await Promise.all([
+            ...artists.map((a) => ticketmaster(a, 4)),
+            // Shows de música cerca del fan, de cualquier artista.
+            ...(data.near ? [ticketmaster('', 12, data.near)] : []),
+          ]);
       const seen = new Set<string>();
       return lists.flat().filter((s) => (seen.has(s.id) ? false : (seen.add(s.id), true)))
-        .sort((a, b) => (a.event_date ?? '9').localeCompare(b.event_date ?? '9')).slice(0, 20);
+        .sort((a, b) => (a.event_date ?? '9').localeCompare(b.event_date ?? '9')).slice(0, 30);
     } catch {
       return [];
     }

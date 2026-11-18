@@ -27,6 +27,8 @@ export type ShowEvent = {
   venue: string;
   image_url: string | null;
   url?: string;
+  lat?: number;
+  lng?: number;
 };
 
 export type DropCard = {

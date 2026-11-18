@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, ChevronRight, Crown, Gift, Sparkles } from "lucide-react";
+import { Check, ChevronRight, Crown, Disc3, Gem, Gift, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { DropLogo } from "./DropLogo";
@@ -24,11 +24,33 @@ const PLANS: Plan[] = [
     perks: ["Todo lo de Free", "Sin publicidad", "Acceso anticipado y preventas", "Insignia DROP+"],
   },
   {
-    id: "box", name: "Mystery Box", price: "$24.990", period: "por caja", icon: Gift,
+    id: "box", name: "Mystery Box", price: "$24.990", period: "desde, por caja", icon: Gift,
     tagline: "Una caja sorpresa de tus artistas.",
-    perks: ["Merch, vinilos y coleccionables", "Ediciones limitadas", "Envío a todo el país", "1 mes de DROP+"],
+    perks: ["3 cajas para elegir", "Merch, vinilos y coleccionables", "Armada según lo que escuchás", "Envío a todo el país"],
   },
 ];
+
+// Tres tamaños de Mystery Box. Cada caja se arma según los artistas y drops del fan.
+type BoxId = "esencial" | "coleccionista" | "superfan";
+type Box = { id: BoxId; name: string; price: string; tagline: string; perks: string[]; icon: LucideIcon; featured?: boolean };
+const BOXES: Box[] = [
+  {
+    id: "esencial", name: "Esencial", price: "$24.990", icon: Gift,
+    tagline: "Para arrancar tu colección.",
+    perks: ["2 o 3 productos de merch oficial", "Stickers y póster del drop", "1 mes de DROP+"],
+  },
+  {
+    id: "coleccionista", name: "Coleccionista", price: "$44.990", icon: Disc3, featured: true,
+    tagline: "Música en formato físico.",
+    perks: ["Un vinilo o CD de tus artistas", "Merch oficial y un pin numerado", "Ítem de edición limitada", "2 meses de DROP+"],
+  },
+  {
+    id: "superfan", name: "Superfan", price: "$74.990", icon: Gem,
+    tagline: "Lo más exclusivo de cada drop.",
+    perks: ["Vinilo firmado o edición especial", "Buzo o campera oficial", "Lugar asegurado en un sorteo de meet & greet", "3 meses de DROP+"],
+  },
+];
+const BOX_KEY = "drop-mystery-box";
 
 const KEY = "drop-plan-interes";
 
@@ -88,9 +110,24 @@ export function PlanCard() {
 function PlansSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const { mode } = useDropAuth();
   const [chosen, setChosen] = useState<PlanId>("free");
+  const [box, setBox] = useState<BoxId | null>(null);
   useEffect(() => {
-    try { const v = localStorage.getItem(KEY); if (v === "plus" || v === "box") setChosen(v); } catch { /* sin almacenamiento */ }
+    try {
+      const v = localStorage.getItem(KEY); if (v === "plus" || v === "box") setChosen(v);
+      const b = localStorage.getItem(BOX_KEY); setBox(BOXES.some((x) => x.id === b) ? (b as BoxId) : null);
+    } catch { /* sin almacenamiento */ }
   }, [open]);
+
+  const pickBox = (b: Box) => {
+    if (mode !== "user") { toast("Creá tu cuenta para pedir tu Mystery Box"); return; }
+    const next = box === b.id ? null : b.id;
+    try {
+      if (next) { localStorage.setItem(BOX_KEY, next); localStorage.setItem(KEY, "box"); } else { localStorage.removeItem(BOX_KEY); if (chosen === "box") localStorage.removeItem(KEY); }
+    } catch { /* sin almacenamiento */ }
+    setBox(next); if (next) setChosen("box"); else if (chosen === "box") setChosen("free");
+    toast.success(next ? `Te anotamos para la Mystery Box ${b.name}. Te avisamos cuando abran los pagos.` : "Sacaste tu Mystery Box");
+  };
+  const showBoxes = () => document.getElementById("mystery-boxes")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const subscribe = (plan: Plan) => {
     if (mode !== "user") { toast("Creá tu cuenta para suscribirte a un plan"); return; }
@@ -126,17 +163,57 @@ function PlansSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
                 </ul>
                 {p.id === "free" ? (
                   <p className="mt-3 rounded-lg border border-border py-2 text-center text-[11px] font-bold text-muted-foreground">{active ? "Tu plan" : "Incluido"}</p>
+                ) : p.id === "box" ? (
+                  <button type="button" onClick={showBoxes}
+                    className={`mt-3 w-full rounded-lg py-2 text-[11px] font-black ${active ? "border border-primary text-primary" : "text-primary-foreground"}`}
+                    style={active ? undefined : { backgroundImage: "var(--gradient-drop)" }}>
+                    {active ? "Anotado" : "Ver cajas"}
+                  </button>
                 ) : (
                   <button type="button" onClick={() => subscribe(p)}
                     className={`mt-3 w-full rounded-lg py-2 text-[11px] font-black ${active ? "border border-primary text-primary" : "text-primary-foreground"}`}
                     style={active ? undefined : { backgroundImage: "var(--gradient-drop)" }}>
-                    {active ? "Anotado" : p.id === "box" ? "La quiero" : "Suscribirme"}
+                    {active ? "Anotado" : "Suscribirme"}
                   </button>
                 )}
               </article>
             );
           })}
         </div>
+        <section id="mystery-boxes" className="mt-6 scroll-mt-4">
+          <h3 className="text-xl font-black">Elegí tu Mystery Box</h3>
+          <p className="mt-1 text-xs text-muted-foreground">Ninguna caja es igual a otra: la armamos con lo que escuchás, los artistas que seguís y los drops en los que participás.</p>
+          <div className="mt-3 space-y-2">
+            {BOXES.map((b) => {
+              const Icon = b.icon;
+              const active = box === b.id;
+              return (
+                <article key={b.id} className={`relative rounded-2xl border p-3 ${b.featured ? "border-primary/70 bg-primary/10" : "border-border bg-card"}`}>
+                  {b.featured && <span className="absolute -top-2 right-3 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-primary-foreground">La más pedida</span>}
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-primary-foreground" style={{ backgroundImage: "var(--gradient-drop)" }}><Icon className="h-5 w-5" /></span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Mystery Box</p>
+                      <h4 className="text-base font-black leading-tight">{b.name}</h4>
+                      <p className="text-[11px] text-muted-foreground">{b.tagline}</p>
+                    </div>
+                    <p className="shrink-0 text-right"><span className="block text-lg font-black leading-none">{b.price}</span><span className="text-[10px] text-muted-foreground">por caja</span></p>
+                  </div>
+                  <ul className="mt-3 grid grid-cols-2 gap-x-2 gap-y-1.5">
+                    {b.perks.map((perk) => (
+                      <li key={perk} className="flex gap-1 text-[11px] leading-snug"><Check className="mt-px h-3 w-3 shrink-0 text-primary" />{perk}</li>
+                    ))}
+                  </ul>
+                  <button type="button" onClick={() => pickBox(b)}
+                    className={`mt-3 w-full rounded-lg py-2 text-xs font-black ${active ? "border border-primary text-primary" : "text-primary-foreground"}`}
+                    style={active ? undefined : { backgroundImage: "var(--gradient-drop)" }}>
+                    {active ? "Anotada" : "La quiero"}
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        </section>
         <p className="mt-4 text-[11px] text-muted-foreground">Precios de referencia en pesos. Los pagos abren pronto: anotate y te avisamos.</p>
       </SheetContent>
     </Sheet>

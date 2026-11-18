@@ -82,6 +82,8 @@ type Post =
       image?: string;
       avatar?: string | null;
       mine?: boolean;
+      /** Se muestra primero en el feed sin cambiar su clave de likes (que depende de la posición en la lista). */
+      pinned?: boolean;
     }
   | {
       kind: "achievement";
@@ -197,6 +199,7 @@ const OTHER_FEEDS: Record<string, Post[]> = {
     { kind: "post", user: "juli.after", time: "hace 3 días", text: "Anteojos negros hasta en el after 😎", likes: 318, comments: 21, image: dlFiestaAnteojos },
     { kind: "post", user: "ema.burbujas", time: "hace 4 días", text: ":3", likes: 1890, comments: 240, image: dlBano },
     { kind: "post", user: "mora.alfileres", time: "hace 5 días", text: "El gorro de conejo con alfileres y cruces. Ícono.", likes: 676, comments: 48, image: dlConejo },
+    { kind: "post", user: "fan.de.dillom", time: "hace 2 min", text: "te quiero mucho dillom, toma 100 pesos", likes: 1312, comments: 0, pinned: true },
   ],
   airbag: [
     { kind: "achievement", user: "sardelli.fan", time: "hace 12 min", achievement: "completó la trivia de El Club de la Pelea 5/5", pts: 200 },
@@ -304,11 +307,13 @@ export function ComunidadView() {
       likes: p.likes, comments: p.comments, liked: p.liked, mine: p.mine, postId: p.id,
       fan: { id: p.user_id, name: p.author, avatar: p.avatar, following: p.following },
     })),
-    ...dropFeed.map((p, i) => {
-      if (p.kind === "achievement") return p;
-      const st = stats[seedKey(i)];
-      return { key: seedKey(i), user: p.user, time: p.time, text: p.text, image: p.image, avatar: p.avatar, likes: p.likes + (st?.likes ?? 0), comments: st?.comments ?? 0, liked: !!st?.liked };
-    }),
+    ...dropFeed.map((p, i) => [p, i] as const)
+      .sort(([a], [b]) => Number(b.kind === "post" && !!b.pinned) - Number(a.kind === "post" && !!a.pinned))
+      .map(([p, i]) => {
+        if (p.kind === "achievement") return p;
+        const st = stats[seedKey(i)];
+        return { key: seedKey(i), user: p.user, time: p.time, text: p.text, image: p.image, avatar: p.avatar, likes: p.likes + (st?.likes ?? 0), comments: st?.comments ?? 0, liked: !!st?.liked };
+      }),
   ];
 
   const patchCard = (key: string, f: (c: { likes: number; comments: number; liked: boolean }) => { likes: number; comments: number; liked: boolean }) => {

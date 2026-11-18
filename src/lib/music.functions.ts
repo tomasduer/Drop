@@ -150,12 +150,16 @@ function serpDate(when: string | undefined, start: string | undefined): string |
     if (mo != null && d >= 1 && d <= 31) { day = d; mon = mo; break; }
   }
   if (mon == null || !day) return null;
-  const time = (when ?? '').match(/(\d{1,2}):(\d{2})/);
+  // "21:00", "9 PM", "9:30 pm"
+  const t = (when ?? '').toLowerCase().match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/) ?? (when ?? '').match(/(\d{1,2}):(\d{2})/);
+  let hour = t ? Number(t[1]) % (t[3] ? 12 : 24) + (t[3] === 'pm' ? 12 : 0) : null;
+  if (hour != null && (hour < 0 || hour > 23)) hour = null;
+  const minute = t?.[2] ? Number(t[2]) : 0;
   const now = new Date();
   let year = now.getUTCFullYear();
   if (new Date(Date.UTC(year, mon, day + 1)) < now) year += 1;
   // Hora de Argentina (UTC-3).
-  return new Date(Date.UTC(year, mon, day, time ? Number(time[1]) + 3 : 3, time ? Number(time[2]) : 0)).toISOString();
+  return new Date(Date.UTC(year, mon, day, hour != null ? hour + 3 : 3, hour != null ? minute : 0)).toISOString();
 }
 
 async function cached<T>(key: string, load: () => Promise<T>, maxAge = 86400): Promise<T> {
@@ -165,7 +169,8 @@ async function cached<T>(key: string, load: () => Promise<T>, maxAge = 86400): P
     try { const hit = await cache.match(req); if (hit) return (await hit.json()) as T; } catch { /* sin caché */ }
   }
   const value = await load();
-  if (cache) {
+  // Una lista vacía no se guarda: puede ser un tropiezo de la búsqueda y conviene reintentar.
+  if (cache && !(Array.isArray(value) && value.length === 0)) {
     try { await cache.put(req, new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', 'cache-control': `max-age=${maxAge}` } })); } catch { /* sin caché */ }
   }
   return value;
@@ -178,9 +183,10 @@ async function cached<T>(key: string, load: () => Promise<T>, maxAge = 86400): P
 async function googleEvents(artist: string, size: number, city?: string): Promise<ExternalShow[]> {
   const key = process.env['SERPAPI_KEY'];
   if (!key) return [];
-  const q = city ? `recitales en ${city}` : `${artist} concierto`;
+  // En español Google Events no devuelve resultados; en inglés sí (probado con el diagnóstico).
+  const q = city ? `Concerts in ${city}` : `${artist} concert`;
   return cached(`serp:${q.toLowerCase()}`, async () => {
-    const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=es&gl=ar&api_key=${encodeURIComponent(key)}`;
+    const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=en&gl=ar&api_key=${encodeURIComponent(key)}`;
     const res = await fetch(url, { headers: { accept: 'application/json' } });
     // Un error se lanza (no se guarda en la caché) para reintentar en la próxima visita.
     if (!res.ok) throw new Error(`SerpApi respondió ${res.status}`);
@@ -254,7 +260,7 @@ async function serpRaw(q: string): Promise<string> {
   const key = process.env['SERPAPI_KEY'];
   if (!key) return `SerpApi "${q}": sin clave`;
   try {
-    const res = await fetch(`https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=es&gl=ar&no_cache=true&api_key=${encodeURIComponent(key)}`);
+    const res = await fetch(`https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(q)}&hl=en&gl=ar&no_cache=true&api_key=${encodeURIComponent(key)}`);
     const json: any = await res.json().catch(() => ({}));
     const ev: any[] = json?.events_results ?? [];
     return `SerpApi crudo "${q}": HTTP ${res.status} · estado ${json?.search_metadata?.status ?? '?'} · error: ${json?.error ?? 'ninguno'} · ${ev.length} eventos` +
@@ -276,8 +282,7 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       `SERPAPI_KEY: ${process.env['SERPAPI_KEY'] ? 'cargada' : 'NO cargada'}`,
       await run('Ticketmaster "Ricardo Arjona"', () => ticketmaster('Ricardo Arjona', 5)),
       await run('Google "Ricardo Arjona"', () => googleEvents('Ricardo Arjona', 5)),
-      await run('Google "recitales en Buenos Aires"', () => googleEvents('', 20, 'Buenos Aires')),
-      await serpRaw('recitales en Buenos Aires'),
-      await serpRaw('Events in Buenos Aires'),
+      await run('Google "Concerts in Buenos Aires"', () => googleEvents('', 20, 'Buenos Aires')),
+      await serpRaw('Concerts in Buenos Aires'),
     ];
   });

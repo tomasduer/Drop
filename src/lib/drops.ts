@@ -15,6 +15,7 @@ import lnvIcon from "@/assets/lnv-icon.webp";
 import adelaCover from "@/assets/adela-portada.webp";
 import dillomGuitarra from "@/assets/dillom-guitarra.webp";
 import airbagMascara from "@/assets/airbag-ranking.webp";
+import arjonaVelas from "@/assets/arjona-ranking.webp";
 import adelaHero from "@/assets/adela-hero.webp";
 import adelaIcon from "@/assets/adela-icon.webp";
 import airbagIcon from "@/assets/airbag-icon.webp";
@@ -143,7 +144,7 @@ export const DROP_CATALOG: DropInfo[] = [
     id: "arjona-seco", kind: "show", artist: "Ricardo Arjona", title: "Seco Tour en el Movistar Arena", spotifyAlbum: "Seco",
     tagline: "16 fechas en el Movistar Arena. Ganá entradas y un meet & greet.",
     description: "Ricardo Arjona llega al Movistar Arena con 16 fechas del Seco Tour, en mayo y julio. Jugá las misiones y subí en el ranking: los primeros 60 se ganan dos entradas y los primeros 10, además, un meet & greet con Arjona.",
-    cover: arjonaIcon, hero: arjonaHero, album: arjonaCover, dates: "Seco Tour · Movistar Arena · mayo y julio 2027", status: "active", fandom: "Arjonistas",
+    cover: arjonaIcon, hero: arjonaHero, album: arjonaCover, dates: "Seco Tour · Movistar Arena · mayo y julio 2027", status: "active", fandom: "Arjonistas", rankingHero: arjonaVelas,
     showDates: { label: "Movistar Arena · 21 h", dates: ["Sáb 1/5", "Dom 2/5", "Lun 3/5", "Vie 7/5", "Sáb 8/5", "Mar 11/5", "Mié 12/5", "Lun 17/5", "Mar 18/5", "Mié 19/5", "Dom 23/5", "Lun 24/5", "Mar 25/5", "Jue 1/7", "Vie 2/7", "Lun 5/7"] },
     prizes: [
       { top: 10, label: "Meet & greet con Ricardo Arjona + dos entradas" },

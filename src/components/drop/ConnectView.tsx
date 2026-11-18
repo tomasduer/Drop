@@ -40,6 +40,7 @@ export function ConnectView() {
   const requireTerms = () => {
     if (terms) { try { localStorage.setItem(TERMS_KEY, new Date().toISOString()); } catch { /* sin almacenamiento */ } return true; }
     setTermsMissing(true); setError("Para continuar tenés que aceptar los términos y condiciones.");
+    document.getElementById("aceptar-terminos")?.scrollIntoView({ behavior: "smooth", block: "center" });
     return false;
   };
   const switchMode = (next: typeof mode) => { setMode(next); setNotice(""); setError(""); setPassword(""); };
@@ -86,11 +87,7 @@ export function ConnectView() {
       <h1 className="mt-5 text-3xl font-black leading-tight">{mode === "signup" ? "Creá tu cuenta." : mode === "forgot" ? "Recuperá tu acceso." : "Tu música. Tu DROP."}</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mode === "signup" ? "Guardá tus puntos, álbumes y drops en todos tus dispositivos." : mode === "forgot" ? "Te enviamos un enlace para elegir una nueva contraseña." : "Entrá a tu cuenta y seguí viviendo la música."}</p>
       {mode !== "forgot" && <>
-        <label className={`mt-6 flex items-start gap-3 rounded-lg border p-3 text-xs leading-relaxed transition-colors ${termsMissing && !terms ? "border-destructive bg-destructive/10" : "border-border bg-card"}`}>
-          <Checkbox checked={terms} onCheckedChange={(v) => { const ok = v === true; setTerms(ok); if (ok) { setTermsMissing(false); setError(""); } }} className="mt-0.5 h-5 w-5" aria-label="Acepto los términos y condiciones" />
-          <span>Acepto los <a href="/terminos" target="_blank" rel="noreferrer" className="font-semibold text-primary underline">términos y condiciones</a> y la <a href="/privacidad" target="_blank" rel="noreferrer" className="font-semibold text-primary underline">política de privacidad</a> de DROP.</span>
-        </label>
-        <Button type="button" disabled={busy} onClick={google} className="mt-4 h-12 w-full gap-3 border border-border bg-white font-bold text-neutral-900 shadow-sm hover:bg-white/90"><GoogleIcon />Continuar con Google</Button>
+        <Button type="button" disabled={busy} onClick={google} className="mt-6 h-12 w-full gap-3 border border-border bg-white font-bold text-neutral-900 shadow-sm hover:bg-white/90"><GoogleIcon />Continuar con Google</Button>
         <p className="mt-2 text-center text-xs text-muted-foreground">Es lo más rápido: un toque y entrás.</p>
         <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />o con tu email<span className="h-px flex-1 bg-border" /></div>
       </>}
@@ -99,6 +96,12 @@ export function ConnectView() {
         <label className="block text-xs font-semibold">Email<div className="relative mt-2"><Mail className="absolute left-4 top-4 h-4 w-4 text-muted-foreground" /><input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={`${input} pl-11`} placeholder="vos@ejemplo.com" /></div></label>
         {mode !== "forgot" && <label className="block text-xs font-semibold">Contraseña<div className="relative mt-2"><input type={visible ? "text" : "password"} autoComplete={mode === "signup" ? "new-password" : "current-password"} value={password} onChange={(e) => setPassword(e.target.value)} className={`${input} pr-12`} placeholder={mode === "signup" ? "Al menos 8 caracteres" : "Tu contraseña"} /><Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1.5" aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"} onClick={() => setVisible((v) => !v)}>{visible ? <EyeOff /> : <Eye />}</Button></div></label>}
         {mode === "login" && <Button type="button" variant="link" className="h-auto px-0 text-xs" onClick={() => switchMode("forgot")}>Olvidé mi contraseña</Button>}
+        {mode !== "forgot" && (
+          <label id="aceptar-terminos" className={`flex items-start gap-3 rounded-lg border p-3 text-xs leading-relaxed transition-colors ${termsMissing && !terms ? "border-destructive bg-destructive/10" : "border-border bg-card"}`}>
+            <Checkbox checked={terms} onCheckedChange={(v) => { const ok = v === true; setTerms(ok); if (ok) { setTermsMissing(false); setError(""); } }} className="mt-0.5 h-5 w-5" aria-label="Acepto los términos y condiciones" />
+            <span>Acepto los <a href="/terminos" target="_blank" rel="noreferrer" className="font-semibold text-primary underline">términos y condiciones</a> y la <a href="/privacidad" target="_blank" rel="noreferrer" className="font-semibold text-primary underline">política de privacidad</a> de DROP.</span>
+          </label>
+        )}
         {error && <p role="alert" className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm">{error}</p>}
         {notice && <p role="status" className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm leading-relaxed">{notice}</p>}
         <Button type="submit" disabled={busy} variant={mode === "forgot" ? "default" : "outline"} className="h-12 w-full font-bold">{busy ? <Loader2 className="animate-spin" /> : <ArrowRight />}{mode === "signup" ? "Crear cuenta" : mode === "forgot" ? "Enviar enlace" : "Iniciar sesión"}</Button>

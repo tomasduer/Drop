@@ -84,12 +84,16 @@ export function joinDates(dates: (string | null)[]): string {
 }
 
 /** Búsqueda en Google de las entradas oficiales del show (cuando la fuente no trae link). */
+/** Ticketeras oficiales donde se busca el show cuando la fuente no trae su link de venta. */
+const TICKET_SITES = ["passline.com", "ticketek.com.ar", "allaccess.com.ar", "enigmatickets.com", "tuentrada.com", "livepass.com.ar", "ticketmaster.com.ar", "venti.com.ar", "plateanet.com", "eventbrite.com.ar", "entradauno.com", "alternativateatral.com"];
 const ticketSearch = (show: ShowEvent) =>
-  `https://www.google.com/search?q=${encodeURIComponent(`${show.artist || show.title} ${show.venue ?? ""} entradas oficiales`.trim())}`;
+  `https://www.google.com/search?q=${encodeURIComponent(`${show.artist || show.title} (${TICKET_SITES.map((d) => `site:${d}`).join(" OR ")})`.replace(/\s+/g, " "))}`;
 
 export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" }: { group: ShowGroup; showKm: boolean; onReview?: (show: ShowEvent) => void; className?: string }) {
   const { show, dates, km } = group;
-  const main = dates.find((d) => d.url) ?? dates[0];
+  // Link oficial de venta si alguna fecha lo trae; si no, búsqueda del show solo en ticketeras oficiales.
+  const official = dates.find((d) => d.url && d.official !== false);
+  const info = dates.find((d) => d.url && d.official === false);
   return (
     <article className={`${className} overflow-hidden rounded-2xl border border-border bg-card`}>
       <img decoding="async" src={show.image_url ?? eventCrowd} alt={`Imagen de ${show.title}`} loading="lazy" className="h-28 w-full object-cover" />
@@ -106,10 +110,11 @@ export function ShowCard({ group, showKm, onReview, className = "w-52 shrink-0" 
         )}
         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{show.venue}{show.city ? ` · ${show.city}` : ""}</span></p>
         {showKm && km != null && <p className="mt-0.5 text-xs font-semibold text-primary">{km < 1 ? "A menos de 1 km" : `A ${Math.round(km).toLocaleString("es-AR")} km`}</p>}
-        {/* Sin link de la fuente: búsqueda de entradas del show, para que siempre haya cómo comprarlas. */}
+        {/* Siempre hay cómo comprar: el link oficial o la búsqueda en ticketeras oficiales. */}
         <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs">
-          <a href={main?.url || ticketSearch(show)} target="_blank" rel="noreferrer">{main?.url && main.official === false ? "Más información" : "Ver entradas"}</a>
+          <a href={official?.url || ticketSearch(show)} target="_blank" rel="noreferrer">Ver entradas</a>
         </Button>
+        {!official && info?.url && <a href={info.url} target="_blank" rel="noreferrer" className="mt-1 block text-center text-[11px] text-muted-foreground underline-offset-2 hover:underline">Más información</a>}
         {onReview && <Button variant="ghost" size="sm" className="mt-1 h-auto w-full whitespace-normal px-2 py-1.5 text-xs" onClick={() => onReview(show)}><PenLine className="h-3.5 w-3.5 shrink-0" />Reseñar</Button>}
       </div>
     </article>

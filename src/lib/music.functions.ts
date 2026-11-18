@@ -14,7 +14,7 @@ export type CatalogArtistDetail = CatalogArtist & { top: CatalogTrack[]; albums:
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function get(path: string): Promise<any> {
-  const res = await fetch(`${API}${path}`, { headers: { accept: 'application/json', 'user-agent': 'DROP/1.0 (+https://drop.duerluli.workers.dev)' } });
+  const res = await fetch(`${API}${path}`, { headers: { accept: 'application/json', 'user-agent': 'DROP/1.0 (+https://drop.appdrop.workers.dev)' } });
   if (!res.ok) throw new Error('No pudimos conectar con el catálogo musical.');
   const json = await res.json();
   if (json?.error) throw new Error('No pudimos conectar con el catálogo musical.');

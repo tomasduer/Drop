@@ -391,6 +391,7 @@ function LiveRanking() {
         <img loading="lazy" decoding="async" src={drop.album} alt="" className="h-11 w-11 shrink-0 rounded-lg object-cover" />
         <span><span className="block text-[13px] font-bold">Top {prize.top}: {prize.label}</span>{drop.prizes!.slice(1).map(p=>`Top ${p.top}: ${p.label}`).join(' · ')}</span>
       </div>}
+      {prize&&<p className="mt-2 text-[11px] text-muted-foreground">A igual puntaje, queda arriba quien llegó primero. <a href="/terminos#desempate" className="underline">Ver reglas</a></p>}
     </>}
     <Drawer open={!!fan} onOpenChange={o=>{if(!o)setFan(null);}}><DrawerContent><DrawerHeader><DrawerTitle>{fan?.display_name}</DrawerTitle><DrawerDescription>#{fan?.rank} · {fan?.score} pts de campaña</DrawerDescription></DrawerHeader><div className="space-y-3 px-4 pb-8"><p className="text-sm">{fan?.missions} misiones completadas</p>{fan&&fan.id!==profile.id&&mode==='user'&&<Button className="w-full" onClick={async()=>{try{await follow({data:{id:fan.id,follow:!fan.following}});setFan({...fan,following:!fan.following});await load();}catch(e){toast.error(e instanceof Error?e.message:'No pudimos guardar');}}}><UserPlus className="h-4 w-4" />{fan.following?'Dejar de seguir':'Seguir fan'}</Button>}</div></DrawerContent></Drawer>
   </div>;

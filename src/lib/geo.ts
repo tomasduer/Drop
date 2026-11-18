@@ -53,7 +53,11 @@ export function nearestCity(at: Geo): string {
 export function cityCoords(city: string | null | undefined): Geo | null {
   if (!city) return null;
   const name = norm(city.split(",")[0] ?? "");
-  return CITIES[name] ?? null;
+  if (CITIES[name]) return CITIES[name];
+  // "Cdad. Autónoma de Buenos Aires", "Rosario, Santa Fe"…: la ciudad conocida más larga que aparezca en el texto.
+  const full = norm(city);
+  const hit = Object.keys(CITIES).filter((k) => k.length > 4 && full.includes(k)).sort((a, b) => b.length - a.length)[0];
+  return hit ? CITIES[hit] : /autonoma|caba\b/.test(full) ? CITIES["buenos aires"] : null;
 }
 
 /** Distancia en km entre dos puntos (fórmula de Haversine). */

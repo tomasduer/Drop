@@ -29,6 +29,7 @@ export type ShowEvent = {
   url?: string;
   lat?: number;
   lng?: number;
+  area?: string;
 };
 
 export type DropCard = {

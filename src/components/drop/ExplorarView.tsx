@@ -133,7 +133,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   // Artistas de los drops (sin repetir) + shows de música cerca del fan si compartió su ubicación.
   const dropArtists = useMemo(() => [...new Set(catalog.map((d) => d.artist))].slice(0, 10), [catalog]);
   useEffect(() => {
-    fetchExternalShows({ data: { artists: dropArtists, city: location ? nearestCity(location) : "Buenos Aires", ...(location ? { near: location } : {}) } })
+    fetchExternalShows({ data: { artists: dropArtists, city: location ? nearestCity(location) : "Buenos Aires", near: location ?? cityCoords("Buenos Aires")! } })
       .then(setExternalShows).catch(() => setExternalShows([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, dropArtists.join("|")]);
@@ -155,25 +155,19 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
   const visibleReviews = allReviews
     .filter((r) => reviewFilter === "todas" || r.subject_type === reviewFilter)
     .filter((r) => match(r.subject_title, r.subject_artist, r.author_name, r.text, r.extras?.venue));
-  const NEAR_KM = 150;
+  // Shows reales (Ticketmaster / Eventos de Google) solo de la ciudad del fan: su ubicación o, si no la compartió, Buenos Aires.
+  const CITY_KM = 60;
+  const showsCity = location ? nearestCity(location) : "Buenos Aires";
+  const cityCenter = location ?? cityCoords("Buenos Aires")!;
   const showKm = (s: ShowEvent) => {
-    if (!location) return null;
     const at = s.lat != null && s.lng != null ? { lat: s.lat, lng: s.lng } : cityCoords(s.city);
-    return at ? distanceKm(location, at) : null;
+    return at ? distanceKm(cityCenter, at) : null;
   };
-  const byDate = (a: ShowEvent, b: ShowEvent) => (a.event_date ?? "9").localeCompare(b.event_date ?? "9");
-  const visibleShows = [...externalShows, ...data.shows]
-    .filter((s) => match(s.title, s.artist, s.city, s.venue))
+  const visibleShows = externalShows
     .map((s) => ({ ...s, km: showKm(s) }))
-    // Con ubicación: primero los cercanos (por fecha), después el resto por distancia.
-    .sort((a, b) => {
-      if (!location) return byDate(a, b);
-      const na = a.km != null && a.km <= NEAR_KM, nb = b.km != null && b.km <= NEAR_KM;
-      if (na !== nb) return na ? -1 : 1;
-      if (na) return byDate(a, b);
-      return (a.km ?? 1e9) - (b.km ?? 1e9) || byDate(a, b);
-    });
-  const nearCount = visibleShows.filter((s) => s.km != null && s.km <= NEAR_KM).length;
+    .filter((s) => (s.km != null ? s.km <= CITY_KM : s.area === showsCity))
+    .filter((s) => match(s.title, s.artist, s.city, s.venue))
+    .sort((a, b) => (a.event_date ?? "9").localeCompare(b.event_date ?? "9"));
   const visibleGenres = GENRES.filter((g) => match(g.name, g.detail));
 
   const onSaveDrop = async (drop: DropInfo) => {
@@ -365,13 +359,13 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
         {showsDiag && <pre className="mb-3 whitespace-pre-wrap rounded-xl border border-border bg-card p-3 text-[11px]">{showsDiag.join("\n")}</pre>}
         {location ? (
           <p className="mb-3 text-xs text-muted-foreground">
-            {nearCount > 0 ? `${nearCount} ${nearCount === 1 ? "show" : "shows"} a menos de ${NEAR_KM} km. Después, el resto por distancia.` : `No encontramos shows a menos de ${NEAR_KM} km. Te mostramos los más cercanos.`}{" "}
+            Recitales en {showsCity}.{" "}
             <button className="font-semibold text-primary underline-offset-2 hover:underline" onClick={clearLocation}>Quitar ubicación</button>
           </p>
         ) : (
           <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/60 p-3">
             <p className="text-xs text-muted-foreground">
-              {locationStatus === "denied" ? "No pudimos usar tu ubicación. Activala para DROP en tu navegador." : locationStatus === "unavailable" ? "No pudimos obtener tu ubicación. Probá de nuevo." : "Compartí tu ubicación y te ordenamos los shows por cercanía."}
+              {locationStatus === "denied" ? "No pudimos usar tu ubicación. Activala para DROP en tu navegador." : locationStatus === "unavailable" ? "No pudimos obtener tu ubicación. Probá de nuevo." : "Te mostramos recitales en Buenos Aires. Compartí tu ubicación para ver los de tu ciudad."}
             </p>
             <Button size="sm" variant="outline" className="shrink-0 text-xs" disabled={locationStatus === "loading"} onClick={requestLocation}>
               <MapPin className="h-3.5 w-3.5" />{locationStatus === "loading" ? "Buscando…" : "Usar mi ubicación"}
@@ -380,8 +374,8 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
         )}
         {visibleShows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-5 text-center">
-            <p className="text-sm font-bold">La agenda se está armando</p>
-            <p className="mt-1 text-xs text-muted-foreground">Los recitales, festivales y listening parties confirmados aparecen acá.</p>
+            <p className="text-sm font-bold">No encontramos recitales en {showsCity}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Cuando haya fechas confirmadas en tu ciudad, aparecen acá.</p>
           </div>
         ) : (
           <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2">
@@ -395,7 +389,7 @@ export function ExplorarView({ section = "drops" }: { section?: "drops" | "resen
                     <p className="text-xs text-muted-foreground">{show.artist}</p>
                     <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><CalendarDays className="h-3 w-3" />{show.event_date ? new Date(show.event_date).toLocaleDateString("es-AR") : "Fecha a confirmar"}</p>
                     <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{show.venue}{show.city ? ` · ${show.city}` : ""}</span></p>
-                    {show.km != null && <p className="mt-0.5 text-xs font-semibold text-primary">{show.km < 1 ? "A menos de 1 km" : `A ${Math.round(show.km).toLocaleString("es-AR")} km`}</p>}
+                    {location && show.km != null && <p className="mt-0.5 text-xs font-semibold text-primary">{show.km < 1 ? "A menos de 1 km" : `A ${Math.round(show.km).toLocaleString("es-AR")} km`}</p>}
                     {show.url ? <Button asChild variant="outline" size="sm" className="mt-2 w-full text-xs"><a href={show.url} target="_blank" rel="noreferrer">Ver entradas</a></Button> : <Button
                       variant={attended ? "secondary" : "outline"}
                       size="sm"

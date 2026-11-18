@@ -12,8 +12,21 @@ import laliAuto from "@/assets/lali-auto.png.asset.json";
 import albumCover from "@/assets/album-cover.png.asset.json";
 import fanaticoSingle from "@/assets/fanatico-single.png.asset.json";
 import { PHOTOS, avatarFor } from "@/lib/fan-avatars";
-import airbagBanda from "@/assets/airbag-banda.webp";
-import airbagVivo from "@/assets/airbag-vivo.webp";
+import abChicos from "@/assets/airbag-chicos.webp";
+import abGuitarraRoja from "@/assets/airbag-guitarra-roja.webp";
+import abBesoEscenario from "@/assets/airbag-beso-escenario.webp";
+import abGorraRoja from "@/assets/airbag-gorra-roja.webp";
+import abBufanda from "@/assets/airbag-bufanda.webp";
+import abPeloElectrico from "@/assets/airbag-pelo-electrico.webp";
+import abSelfieDos from "@/assets/airbag-selfie-dos.webp";
+import abGrito from "@/assets/airbag-grito.webp";
+import abLunaPark from "@/assets/airbag-luna-park.webp";
+import abCalaverasJuntas from "@/assets/airbag-calaveras-juntas.webp";
+import abBynGibson from "@/assets/airbag-byn-gibson.webp";
+import abSillon from "@/assets/airbag-sillon.webp";
+import abAbrazoGuitarra from "@/assets/airbag-abrazo-guitarra.webp";
+import abEscenarioTrio from "@/assets/airbag-escenario-trio.webp";
+import abSelfieTrio from "@/assets/airbag-selfie-trio.webp";
 import adelaLengua from "@/assets/adela-lengua.webp";
 import adelaEstrellas from "@/assets/adela-estrellas.webp";
 import adelaGlitter from "@/assets/adela-glitter.webp";
@@ -161,9 +174,21 @@ const OTHER_FEEDS: Record<string, Post[]> = {
   ],
   airbag: [
     { kind: "achievement", user: "sardelli.fan", time: "hace 12 min", achievement: "completó la trivia de El Club de la Pelea 5/5", pts: 200 },
-    { kind: "post", user: "juli.rockea", time: "hace 45 min", text: "Anarquía en Buenos Aires en loop desde que salió. Primera regla del club: no hablar del club 🚬", likes: 287, comments: 36 },
-    { kind: "post", user: "nacho.donto", time: "hace 2 h", text: "Verte de cerca para cerrar el disco es una locura. ¿Cuál es su favorito?", likes: 194, comments: 58 },
-    { kind: "post", user: "mica.airbag", time: "hace 5 h", text: "Ya tengo la entrada, nos vemos en el pogo 🤘", likes: 402, comments: 71 },
+    { kind: "post", user: "juli.rockea", time: "hace 45 min", text: "Anarquía en Buenos Aires en loop desde que salió. Primera regla del club: no hablar del club 🚬", likes: 287, comments: 36, image: abCalaverasJuntas },
+    { kind: "post", user: "nacho.donto", time: "hace 2 h", text: "Verte de cerca para cerrar el disco es una locura. ¿Cuál es su favorito?", likes: 194, comments: 58, image: abGuitarraRoja },
+    { kind: "post", user: "mica.airbag", time: "hace 5 h", text: "Ya tengo la entrada, nos vemos en el pogo 🤘", likes: 402, comments: 71, image: abEscenarioTrio },
+    { kind: "post", user: "tincho.luna", time: "hace 6 h", text: "Los tres en la puerta del Luna Park. Historia pura 🖤", likes: 688, comments: 54, image: abLunaPark },
+    { kind: "post", user: "romi.gibson", time: "hace 8 h", text: "El papelito cayendo y los tres riéndose. La mejor foto del show 🎸", likes: 941, comments: 87, image: abBynGibson },
+    { kind: "post", user: "fede.rock", time: "hace 10 h", text: "Gorra roja y anteojos negros, el uniforme oficial 🧢", likes: 512, comments: 39, image: abGorraRoja },
+    { kind: "post", user: "cande.pogo", time: "hace 12 h", text: "Así abrazados tocando. Se nota que son hermanos 🫂", likes: 1104, comments: 96, image: abAbrazoGuitarra },
+    { kind: "post", user: "lu.club", time: "hace 1 día", text: "Que alguien me explique este pelo en pleno show ⚡", likes: 1520, comments: 211, image: abPeloElectrico },
+    { kind: "post", user: "bruno.bajo", time: "hace 1 día", text: "Dejándolo todo en el escenario. Esa cara lo dice todo 😂", likes: 1310, comments: 178, image: abGrito },
+    { kind: "post", user: "sofi.vintage", time: "hace 2 días", text: "Throwback a cuando eran unos nenes 🥹", likes: 2045, comments: 260, image: abChicos },
+    { kind: "post", user: "maxi.sillon", time: "hace 2 días", text: "La sesión de fotos del disco está buenísima. Este sillón es todo", likes: 433, comments: 31, image: abSillon },
+    { kind: "post", user: "agus.bufanda", time: "hace 3 días", text: "Me lo crucé en la terminal con esta bufanda gigante, el más humilde 🧣", likes: 876, comments: 102, image: abBufanda },
+    { kind: "post", user: "pato.fan", time: "hace 4 días", text: "Los tres en el camarín, nada más que agregar", likes: 597, comments: 44, image: abSelfieTrio },
+    { kind: "post", user: "vale.cejas", time: "hace 5 días", text: "Las caras de estos dos 😂😂", likes: 734, comments: 69, image: abSelfieDos },
+    { kind: "post", user: "joaco.gira", time: "hace 6 días", text: "Ese momento de la noche en que se tiran besos con el público 💋", likes: 359, comments: 27, image: abBesoEscenario },
   ],
   dillom: [
     { kind: "achievement", user: "bauti.correa", time: "hace 2 semanas", achievement: "terminó #1 en el ranking final de Por cesárea", pts: 0 },
@@ -203,8 +228,9 @@ const OTHER_GROUPS: Record<string, typeof groups> = {
     { name: "Los violentos", members: 6520, img: dlCamisaCadenas },
   ],
   airbag: [
-    { name: "El Club", members: 8420, img: airbagBanda },
-    { name: "Pogo en primera fila", members: 2310, img: airbagVivo },
+    { name: "El Club", members: 8420, img: abEscenarioTrio },
+    { name: "Pogo en primera fila", members: 2310, img: abGuitarraRoja },
+    { name: "Calaveras", members: 3150, img: abCalaverasJuntas },
   ],
 };
 

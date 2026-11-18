@@ -267,12 +267,21 @@ const CITY_VENUES: Record<string, string[]> = {
   'Buenos Aires': ['Movistar Arena', 'Estadio Luna Park', 'Teatro Vorterix', 'Niceto Club', 'C Art Media', 'La Trastienda Club', 'Estadio Obras', 'Teatro Gran Rex'],
   'Córdoba': ['Quality Espacio', 'Plaza de la Música Córdoba'],
   'Rosario': ['Teatro Broadway Rosario', 'Distrito Rock Rosario'],
-  'La Plata': ['Estadio Único Diego Armando Maradona', 'Teatro Ópera La Plata'],
+  'La Plata': ['Teatro Ópera La Plata'],
 };
 
 /** Recitales de la ciudad: dos páginas de "Concerts in <ciudad>" (1 día) + la agenda de sus salas (3 días). */
+/** Estadios: los recitales se anuncian con meses de anticipación, así que alcanza con buscar una vez por semana. */
+const CITY_STADIUMS: Record<string, string[]> = {
+  'Buenos Aires': ['Estadio River Plate Mas Monumental', 'Estadio Ferro Carril Oeste', 'Estadio Velez Sarsfield', 'Estadio Huracan Tomas Duco', 'Estadio La Bombonera', 'Hipodromo de Palermo', 'Campo Argentino de Polo', 'Estadio Racing Club'],
+  'Córdoba': ['Estadio Mario Alberto Kempes'],
+  'Rosario': ['Estadio Gigante de Arroyito'],
+  'La Plata': ['Estadio Unico Diego Armando Maradona'],
+};
+
 function cityJobs(city: string): Promise<ExternalShow[]>[] {
   return [
+    ...(CITY_STADIUMS[city] ?? []).map((v) => googleEvents('', 20, city, { query: `Concerts at ${v}`, maxAge: 7 * 86400 })),
     googleEvents('', 20, city),
     googleEvents('', 20, city, { start: 10 }),
     ...(CITY_VENUES[city] ?? []).map((v) => googleEvents('', 20, city, { query: `Concerts at ${v} ${city}`, maxAge: 3 * 86400 })),

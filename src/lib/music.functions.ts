@@ -368,6 +368,8 @@ export const getShowsDiag = createServerFn({ method: 'POST' })
       await ticketDiag('Maria Becerra Pop Tickets'),
       await ticketDiag('Paula Mattheus'),
       await ticketDiag('Easykid'),
+      await ticketRaw('Easykid entradas'),
+      await ticketRaw('Easykid site:allaccess.com.ar'),
       `Artistas de las fichas: ${(await googleEvents('', 20, 'Buenos Aires').catch(() => [])).map((x) => `${x.artist}${x.url ? (x.official ? ' (oficial)' : ' (info)') : ''}`).join(' · ')}`,
       await ticketDiag('Abel Pintos'),
     ];
@@ -402,13 +404,13 @@ async function ticketLinks(artist: string): Promise<{ link: string; text: string
       .filter((r) => isOfficial(hostOf(r.link)) && words.every((w) => r.text.includes(w)))
       .slice(0, 5);
   };
-  // Se guarda también "no encontrado" (3 días) para no gastar búsquedas en cada clic.
-  const hit = await cached(`tix3:${fold(name)}`, async () => {
+  // Se guarda también "no encontrado" (1 día) para no gastar búsquedas en cada clic.
+  const hit = await cached(`tix4:${fold(name)}`, async () => {
     let links = await search(`${name} (${TICKET_SITES.map((d) => `site:${d}`).join(' OR ')})`);
     // Segunda vuelta, más amplia: la búsqueda común de entradas, quedándose con las ticketeras oficiales.
     if (!links.length) links = await search(`${name} entradas`);
     return { links };
-  }, 3 * 86400);
+  }, 86400);
   return hit.links;
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -431,6 +433,22 @@ export const findTicketLink = createServerFn({ method: 'POST' })
   });
 
 /** Para el diagnóstico: qué encuentra la búsqueda de entradas para un artista. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/** Resultados crudos de la búsqueda de entradas (sin caché), para ver qué devuelve Google. */
+async function ticketRaw(q: string): Promise<string> {
+  const key = process.env['SERPAPI_KEY'];
+  if (!key) return 'sin clave';
+  try {
+    const res = await fetch(`https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(q)}&hl=es&gl=ar&google_domain=google.com.ar&num=20&no_cache=true&api_key=${encodeURIComponent(key)}`);
+    const json: any = await res.json().catch(() => ({}));
+    const r: any[] = json?.organic_results ?? [];
+    return `Crudo "${q}": HTTP ${res.status} · error: ${json?.error ?? 'ninguno'} · ${r.length} resultados` + r.slice(0, 8).map((x) => `\n   - ${hostOf(String(x.link ?? ''))} | ${String(x.title ?? '').slice(0, 60)}`).join('');
+  } catch (e) {
+    return `Crudo "${q}": falla (${e instanceof Error ? e.message : String(e)})`;
+  }
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 async function ticketDiag(artist: string): Promise<string> {
   try {
     const links = await ticketLinks(artist);

@@ -11,7 +11,7 @@ const input = z.object({
   origin: z.string().url(),
   lines: z.array(z.object({ dropId: z.string().max(60), itemId: z.string().max(60), qty: z.number().int().min(1).max(10) })).min(1).max(30),
 });
-const ALLOWED_ORIGIN = /^(https:\/\/drop\.duerluli\.workers\.dev|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)$/;
+const ALLOWED_ORIGIN = /^(https:\/\/drop\.(appdrop|duerluli)\.workers\.dev|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)$/;
 
 export type CheckoutStart = { mode: 'demo' } | { mode: 'mp'; url: string };
 
@@ -20,7 +20,7 @@ export const startCheckout = createServerFn({ method: 'POST' })
   .handler(async ({ data }): Promise<CheckoutStart> => {
     const token = process.env['MP_ACCESS_TOKEN'];
     if (!token) return { mode: 'demo' };
-    const origin = ALLOWED_ORIGIN.test(data.origin) ? data.origin : 'https://drop.duerluli.workers.dev';
+    const origin = ALLOWED_ORIGIN.test(data.origin) ? data.origin : 'https://drop.appdrop.workers.dev';
 
     const items = data.lines.map((l) => {
       const drop = DROP_CATALOG.find((d) => d.id === l.dropId);

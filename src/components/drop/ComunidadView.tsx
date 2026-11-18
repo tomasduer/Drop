@@ -38,6 +38,7 @@ import pcCaras from "@/assets/pc-caras.webp";
 import pcGlobosSilla from "@/assets/pc-globos-silla.webp";
 import pcGlobosVuelo from "@/assets/pc-globos-vuelo.webp";
 import dlRosas from "@/assets/dillom-rosas.webp";
+import dlMilanesa from "@/assets/dillom-milanesa.webp";
 import dlBano from "@/assets/dillom-bano.webp";
 import dlGato from "@/assets/dillom-gato.webp";
 import dlFisheye from "@/assets/dillom-fisheye.webp";
@@ -200,6 +201,7 @@ const OTHER_FEEDS: Record<string, Post[]> = {
     { kind: "post", user: "ema.burbujas", time: "hace 4 días", text: ":3", likes: 1890, comments: 240, image: dlBano },
     { kind: "post", user: "mora.alfileres", time: "hace 5 días", text: "El gorro de conejo con alfileres y cruces. Ícono.", likes: 676, comments: 48, image: dlConejo },
     { kind: "post", user: "fan.de.dillom", time: "hace 2 min", text: "te quiero mucho dillom, toma 100 pesos", likes: 1312, comments: 0, pinned: true },
+    { kind: "post", user: "mama.de.dillom", time: "hace 1 min", text: "mamaaaaa dillom quiere otra milanesa", likes: 2047, comments: 0, image: dlMilanesa, pinned: true },
   ],
   airbag: [
     { kind: "achievement", user: "sardelli.fan", time: "hace 12 min", achievement: "completó la trivia de El Club de la Pelea 5/5", pts: 200 },
@@ -308,7 +310,11 @@ export function ComunidadView() {
       fan: { id: p.user_id, name: p.author, avatar: p.avatar, following: p.following },
     })),
     ...dropFeed.map((p, i) => [p, i] as const)
-      .sort(([a], [b]) => Number(b.kind === "post" && !!b.pinned) - Number(a.kind === "post" && !!a.pinned))
+      .sort(([a, ia], [b, ib]) => {
+        const pa = a.kind === "post" && !!a.pinned, pb = b.kind === "post" && !!b.pinned;
+        // Fijados primero, el más nuevo (último agregado) arriba.
+        return pa !== pb ? Number(pb) - Number(pa) : pa ? ib - ia : ia - ib;
+      })
       .map(([p, i]) => {
         if (p.kind === "achievement") return p;
         const st = stats[seedKey(i)];

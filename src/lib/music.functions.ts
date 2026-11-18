@@ -139,6 +139,68 @@ async function ticketmaster(keyword: string, size: number, near?: Geo, radiusKm 
       };
     });
 }
+// Eventos de Google vía SerpApi: cubre Argentina (Ticketek, All Access, Enigma…). Necesita el secreto SERPAPI_KEY.
+// Plan gratis con cupo chico: cada búsqueda se guarda 24 h en la caché del Worker.
+const MONTHS: Record<string, number> = { ene: 0, jan: 0, feb: 1, mar: 2, abr: 3, apr: 3, may: 4, jun: 5, jul: 6, ago: 7, aug: 7, sep: 8, set: 8, oct: 9, nov: 10, dic: 11, dec: 11 };
+function serpDate(when: string | undefined, start: string | undefined): string | null {
+  const txt = `${start ?? ''} ${when ?? ''}`.toLowerCase();
+  let day = 0, mon: number | undefined;
+  for (const m of txt.matchAll(/(\d{1,2})\s+(?:de\s+)?([a-zñ]{3})|([a-z]{3})[a-z]*\.?\s+(\d{1,2})\b/g)) {
+    const [d, mo] = m[1] ? [Number(m[1]), MONTHS[m[2]]] : [Number(m[4]), MONTHS[m[3]]];
+    if (mo != null && d >= 1 && d <= 31) { day = d; mon = mo; break; }
+  }
+  if (mon == null || !day) return null;
+  const time = (when ?? '').match(/(\d{1,2}):(\d{2})/);
+  const now = new Date();
+  let year = now.getUTCFullYear();
+  if (new Date(Date.UTC(year, mon, day + 1)) < now) year += 1;
+  // Hora de Argentina (UTC-3).
+  return new Date(Date.UTC(year, mon, day, time ? Number(time[1]) + 3 : 3, time ? Number(time[2]) : 0)).toISOString();
+}
+
+async function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
+  const cache = (globalThis as any).caches?.default as Cache | undefined;
+  const req = new Request(`https://drop-cache.local/${encodeURIComponent(key)}`);
+  if (cache) {
+    try { const hit = await cache.match(req); if (hit) return (await hit.json()) as T; } catch { /* sin caché */ }
+  }
+  const value = await load();
+  if (cache) {
+    try { await cache.put(req, new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', 'cache-control': 'max-age=86400' } })); } catch { /* sin caché */ }
+  }
+  return value;
+}
+
+async function googleEvents(artist: string, size: number): Promise<ExternalShow[]> {
+  const key = process.env['SERPAPI_KEY'];
+  if (!key) return [];
+  return cached(`serp:${artist.toLowerCase()}`, async () => {
+    const url = `https://serpapi.com/search.json?engine=google_events&q=${encodeURIComponent(`${artist} concierto`)}&hl=es&gl=ar&api_key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, { headers: { accept: 'application/json' } });
+    if (!res.ok) {
+      console.warn(`[shows] SerpApi respondió ${res.status}`);
+      return [];
+    }
+    const json: any = await res.json();
+    const norm = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const k = norm(artist);
+    return (json?.events_results ?? [])
+      .filter((e: any) => norm(`${e.title ?? ''} ${e.description ?? ''}`).includes(k))
+      .map((e: any, i: number): ExternalShow => {
+        const addr: string[] = Array.isArray(e.address) ? e.address : [];
+        return {
+          id: `gg-${k.replace(/\W+/g, '-')}-${i}-${norm(e.title ?? '').replace(/\W+/g, '-').slice(0, 40)}`,
+          title: e.title ?? artist, artist,
+          event_date: serpDate(e.date?.when, e.date?.start_date),
+          venue: e.venue?.name ?? addr[0] ?? '', city: addr[1] ?? addr[0] ?? '',
+          image_url: e.image ?? e.thumbnail ?? null,
+          url: e.ticket_info?.find((t: any) => t.link_type === 'tickets')?.link ?? e.link ?? '',
+        };
+      })
+      .filter((s: ExternalShow) => !s.event_date || s.event_date >= new Date().toISOString())
+      .slice(0, size);
+  });
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 export const getExternalShows = createServerFn({ method: 'POST' })
@@ -151,9 +213,10 @@ export const getExternalShows = createServerFn({ method: 'POST' })
     try {
       const artists = data.artists?.length ? data.artists : DEFAULT_SHOW_ARTISTS;
       const lists = data.q && data.q.length >= 2
-        ? [await ticketmaster(data.q, 10)]
+        ? await Promise.all([ticketmaster(data.q, 10), googleEvents(data.q, 10)])
         : await Promise.all([
             ...artists.map((a) => ticketmaster(a, 4)),
+            ...artists.map((a) => googleEvents(a, 4)),
             // Shows de música cerca del fan, de cualquier artista.
             ...(data.near ? [ticketmaster('', 12, data.near)] : []),
           ]);
